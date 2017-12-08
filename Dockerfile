@@ -34,9 +34,9 @@ COPY h5_utilities.py /usr/local/osiris/h5_utilities.py
 COPY str2keywords.py /usr/local/osiris/str2keywords.py
 RUN chmod -R 711 /usr/local/osiris/osiris-1D.e
 
-USER $NB_USER
 WORKDIR work
 COPY osiris-class osiris-class
 RUN chmod 777 osiris-class
 WORKDIR work/osiris-class
 
+USER $NB_USER
