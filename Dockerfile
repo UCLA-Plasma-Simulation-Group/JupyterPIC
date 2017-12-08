@@ -32,8 +32,8 @@ COPY combine_h5_util_1d.py /usr/local/osiris/combine_h5_util_1d.py
 COPY analysis.py /usr/local/osiris/analysis.py
 COPY h5_utilities.py /usr/local/osiris/h5_utilities.py
 COPY str2keywords.py /usr/local/osiris/str2keywords.py
-WORKDIR work
-COPY osiris-class osiris-class
 RUN chmod -R 711 /usr/local/osiris/osiris-1D.e
 
 USER $NB_USER
+WORKDIR work
+COPY osiris-class osiris-class
