@@ -37,6 +37,13 @@ RUN chmod -R 711 /usr/local/osiris/osiris-1D.e
 WORKDIR work
 COPY osiris-class osiris-class
 RUN chmod 777 osiris-class
-WORKDIR work/osiris-class
+WORKDIR osiris-class
+RUN chmod 777 project-1a
+RUN chmod 777 project-2a
+RUN chmod 777 project-2b
+RUN chmod 777 project-3a
+RUN chmod 777 project-3b
+RUN chmod 777 project-4a
+RUN chmod 777 project-4b
 
 USER $NB_USER
