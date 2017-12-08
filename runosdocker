@@ -1,1 +1,1 @@
-docker run -it -v $PWD:/home/jovyan --rm -p 8888:8888 benjum/class-osiris jupyter notebook
+docker run -it -v $PWD:/home/jovyan --rm -p 8888:8888 class-osiris jupyter notebook
