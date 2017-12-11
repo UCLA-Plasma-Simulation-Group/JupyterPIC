@@ -24,8 +24,8 @@ We welcome contributions and ideas:  please email us at picksc.org@gmail.com
 * Execute `./runosdocker`
 * This will output several lines of text to your terminal, including a web URL
 * Paste the web URL into a web browser to start the Jupyter environment
-* Within Jupyter, navigate to any of the project directories and open the *.ipynb files
-* To quit, "Logout" of the Jupyter notebook, close your browser windows, and (if necessary) type Ctrl-C twice in your terminal window.
+* Within Jupyter, open the *.ipynb files inside any of the "notebooks" directories 
+* To quit, "Logout" of the Jupyter notebook, close your browser windows, and type Ctrl-C twice in your terminal window.
 
 The above commands will write simulation output into the project directories.  If you would like to keep a fresh copy of this original GitHub repository, it is important that you copy this JupyterPIC directory into a separate location on your computer for simulation purposes and personal file modifications.
 
