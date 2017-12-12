@@ -35,15 +35,16 @@ COPY str2keywords.py /usr/local/osiris/str2keywords.py
 RUN chmod -R 711 /usr/local/osiris/osiris-1D.e
 
 WORKDIR work
-COPY osiris-class osiris-class
-RUN chmod 777 osiris-class
-WORKDIR osiris-class
-RUN chmod 777 project-1a
-RUN chmod 777 project-2a
-RUN chmod 777 project-2b
-RUN chmod 777 project-3a
-RUN chmod 777 project-3b
-RUN chmod 777 project-4a
-RUN chmod 777 project-4b
+COPY notebooks notebooks
+RUN chmod 777 notebooks
+WORKDIR notebooks
+RUN chmod 777 electron-plasma-wave-dispersion
+RUN chmod 777 faraday-rotation
+RUN chmod 777 light-wave-dispersion
+RUN chmod 777 light-wave-vacuum-into-plasma
+RUN chmod 777 r-and-l-mode-dispersion
+RUN chmod 777 velocities
+RUN chmod 777 x-and-o-mode-dispersion
+RUN chmod 777 x-mode-propagation
 
 USER $NB_USER
