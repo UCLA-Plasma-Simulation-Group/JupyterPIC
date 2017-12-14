@@ -80,7 +80,7 @@ def field(rundir='',dataset='e1',time=0,space=-1,
         plot_or = 1
         PATH = gen_path(rundir, plot_or)
         hdf5_data = read_hdf(PATH)
-        plt.figure()
+        plt.figure(figsize=(8,5))
         #plotme(hdf5_data.data[:,space], **kwargs)
         plotme(hdf5_data,hdf5_data.data[space,:])
         plt.title('temporal evolution of e' + str(plot_or) + ' at cell ' + str(space))
@@ -471,7 +471,7 @@ def plot_xt(rundir, TITLE='', b0_mag=0.0, w_0 = 1.0, one_0 = 10, one_D= 790, n_p
     x_vals4 = np.full(len(y_vals), x(w_0**2 - b0_mag**2, one_0=one_0, one_D=one_D, n_peak=n_peak))
 
     # create figure
-    plt.figure()
+    plt.figure(figsize=(8,5))
     plotme(hdf5_data, **kwargs)
     plt.title(TITLE + ' x-t space' + ' e' + str(plot_or))
     plt.xlabel('x')
@@ -483,7 +483,7 @@ def plot_xt(rundir, TITLE='', b0_mag=0.0, w_0 = 1.0, one_0 = 10, one_D= 790, n_p
         plt.plot(x_vals2, y_vals, 'b--', label='$\omega_R$ x-cutoff')#R-cutoff
         plt.plot(x_vals3, y_vals, 'r--', label='$\omega_p$')
         plt.plot(x_vals4, y_vals, 'g--', label='$\omega_H$')
-        plt.legend(loc=0)
+        plt.legend(loc=4)
     plt.show()
     
 def plot_tx(rundir, TITLE='', b0_mag=0.0, plot_or=3, show_theory=False,
@@ -512,7 +512,7 @@ def plot_tx(rundir, TITLE='', b0_mag=0.0, plot_or=3, show_theory=False,
     x_vals5 = np.full(len(y_vals), 30.0)
 
     # create figure
-    plt.figure()
+    plt.figure(figsize=(8,5))
     plotmetranspose(hdf5_data, np.transpose(hdf5_data.data), **kwargs)
     plt.title(TITLE + ' t-x space' + ' e' + str(plot_or))
     plt.xlabel('t')
@@ -524,7 +524,7 @@ def plot_tx(rundir, TITLE='', b0_mag=0.0, plot_or=3, show_theory=False,
         plt.plot(y_vals, x_vals2, 'b--', label='$\omega_R$ x-cutoff')#R-cutoff
         plt.plot(y_vals, x_vals3, 'r--', label='$\omega_p$')
         plt.plot(y_vals, x_vals4, 'g--', label='$\omega_H$')
-        plt.legend(loc=0)
+        plt.legend(loc=1)
     if (show_cutoff==True):
         plt.plot(y_vals, x_vals5,'b', label='')
     plt.show()
@@ -544,7 +544,7 @@ def plot_log_xt(PATH, TITLE):
                 hdf5_data.data[i,j] = 0
 
     # create figure
-    plt.figure()
+    plt.figure(figsize=(8,5))
     plotme(hdf5_data)
     plt.title(TITLE + ' x-t space log plot')
     plt.xlabel('x')
@@ -612,7 +612,7 @@ def plot_wk(rundir, TITLE='', vth=0.1, b0_mag=0.0, plot_or=1, show_theory=False,
     kvals_xm = np.sqrt(kvals_xm)
         
     # create figure
-    plt.figure()
+    plt.figure(figsize=(8,5))
     plotme(hdf5_data, **kwargs)
     plt.title(TITLE + ' w-k space' + ' e' + str(plot_or))
     if (debye==True):
@@ -710,7 +710,7 @@ def plot_wk_rl(rundir, TITLE='', vth=0.1, b0_mag=0.0, plot_or=1, show_theory=Fal
     kvals_lm = np.sqrt(kvals_lm)
         
     # create figure
-    plt.figure()
+    plt.figure(figsize=(8,5))
     plotme(hdf5_data, **kwargs)
     plt.title(TITLE + ' w-k space' + ' e' + str(plot_or))
     if (debye==True):
@@ -762,7 +762,7 @@ def plot_wk_iaw(rundir, TITLE, show_theory=False, background=0.0, wlim=3, klim=5
     wvals = kvals * c_s
 
     # create figure
-    plt.figure()
+    plt.figure(figsize=(8,5))
     plotme(hdf5_data)
     if (plot_or !=4):
         plt.title(TITLE + ' w-k space' + ' e' + str(plot_or))

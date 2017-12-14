@@ -17,7 +17,7 @@ coordinates = "cartesian",
 time_step
 {
 dt = 0.195e0,
-ndump = 5,
+ndump = 3,
 }
 restart
 {
