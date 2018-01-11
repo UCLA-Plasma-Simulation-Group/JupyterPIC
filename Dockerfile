@@ -24,15 +24,19 @@ RUN apt-get update && \
 ENV H5_ROOT /usr/lib/x86_64-linux-gnu/hdf5/openmpi/lib
 
 RUN mkdir /usr/local/osiris
-ENV PATH $PATH:/usr/local/osiris
+RUN mkdir /usr/local/beps
+ENV PATH $PATH:/usr/local/osiris:/usr/local/beps
 ENV PYTHONPATH $PYTHONPATH:/usr/local/osiris
 COPY osiris-1D.e /usr/local/osiris/osiris-1D.e
+COPY new_pbeps2_jf.out /usr/local/beps/new_pbeps2_jf.out
 COPY osiris.py /usr/local/osiris/osiris.py
 COPY combine_h5_util_1d.py /usr/local/osiris/combine_h5_util_1d.py
+COPY combine_h5_util_2d.py /usr/local/osiris/combine_h5_util_2d.py
 COPY analysis.py /usr/local/osiris/analysis.py
 COPY h5_utilities.py /usr/local/osiris/h5_utilities.py
 COPY str2keywords.py /usr/local/osiris/str2keywords.py
 RUN chmod -R 711 /usr/local/osiris/osiris-1D.e
+RUN chmod -R 711 /usr/local/beps/new_pbeps2_jf.out
 
 WORKDIR work
 COPY notebooks notebooks
