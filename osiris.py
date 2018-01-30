@@ -5,39 +5,94 @@ import IPython.display
 import h5py
 import numpy as np
 import matplotlib.pyplot as plt
-# from os import listdir
 from ipywidgets import interact
-# %matplotlib inline
 from h5_utilities import *
 from analysis import *
 from scipy.optimize import fsolve
 
-def runosiris(rundir='',inputfile='osiris-input.txt'):
-    
-    def execute(cmd):
-        popen = subprocess.Popen(cmd, stdout=subprocess.PIPE, universal_newlines=True)
-        for stdout_line in iter(popen.stdout.readline, ""):
-            yield stdout_line
-        popen.stdout.close()
-        return_code = popen.wait()
-        if return_code:
-            raise subprocess.CalledProcessError(return_code, cmd)
+def execute(cmd):
 
-    def combine_h5(ex):
+    popen = subprocess.Popen(cmd, stdout=subprocess.PIPE, universal_newlines=True)
+    for stdout_line in iter(popen.stdout.readline, ""):
+        yield stdout_line
+    popen.stdout.close()
+    return_code = popen.wait()
+    if return_code:
+        raise subprocess.CalledProcessError(return_code, cmd)
+        
+        
+def run_upic_es(rundir='',inputfile='pinput2'):
+    
+    def combine_h5_2d(path, ex):
+        in_file = workdir + '/' + path + '/' + ex + '/'
+        out_file = workdir + '/' + ex + '.h5'
+        for path in execute(["python", "/usr/local/osiris/combine_h5_util_2d.py", in_file, out_file]):
+            IPython.display.clear_output(wait=True)
+#            print(path, end='')
+            
+    def combine_h5_iaw_2d():
+        in_file = workdir + '/DIAG/IDen/'
+        out_file = workdir + '/ions.h5'
+        for path in execute(["python", "/usr/local/osiris/combine_h5_util_2d.py", in_file, out_file]):
+            IPython.display.clear_output(wait=True)
+#            print(path, end='')
+    
+    workdir = os.getcwd()
+    workdir += '/' + rundir
+    print(workdir)
+
+    if(not os.path.isdir(workdir)):
+       os.mkdir(workdir)
+    if(rundir != ''):
+        shutil.copyfile(inputfile,workdir+'/pinput2')
+    
+    os.chdir(workdir)
+        
+    # run the upic-es executable    
+    waittick = 0
+    for path in execute(["/usr/local/beps/upic-es.out"]):
+        waittick += 1
+        if(waittick == 100):
+            IPython.display.clear_output(wait=True)
+            waittick = 0
+#            print(path, end='')
+            
+    
+            
+    # run the combine script
+    combine_h5_2d('DIAG', 'Ex')
+    combine_h5_2d('DIAG', 'Ey')
+    combine_h5_2d('DIAG', 'pot')
+
+    print('combine_h5_2d completed normally')
+    
+    # run combine on iaw data if present
+    if (os.path.isdir(workdir + '/DIAG/IDen/')):
+        combine_h5_iaw_2d()
+        print('combine_h5_iaw completed normally')
+        
+#     IPython.display.clear_output(wait=True)
+    print('runbeps completed normally')
+    os.chdir('../')
+    
+    return
+    
+
+def runosiris(rundir='',inputfile='osiris-input.txt'):
+
+    def combine_h5_1d(ex):
         in_file = workdir + '/MS/FLD/' + ex + '/'
         out_file = workdir + '/' + ex + '.h5'
         for path in execute(["python", "/usr/local/osiris/combine_h5_util_1d.py", in_file, out_file]):
-#        for path in execute(["python", "combine_h5_util_1d.py", in_file, out_file]):
             IPython.display.clear_output(wait=True)
-            print(path, end='')
+#            print(path, end='')
 
-    def combine_h5_iaw():
+    def combine_h5_iaw_1d():
         in_file = workdir + '/MS/DENSITY/ions/charge/'
         out_file = workdir + '/ions.h5'
         for path in execute(["python", "/usr/local/osiris/combine_h5_util_1d.py", in_file, out_file]):
-#        for path in execute(["python", "combine_h5_util_1d.py", in_file, out_file]):
             IPython.display.clear_output(wait=True)
-            print(path, end='')
+#            print(path, end='')
 
     workdir = os.getcwd()
     workdir += '/' + rundir
@@ -49,22 +104,22 @@ def runosiris(rundir='',inputfile='osiris-input.txt'):
     if(rundir != ''):
 #        shutil.copyfile('osiris-1D.e',workdir+'/osiris-1D.e')
         shutil.copyfile(inputfile,workdir+'/osiris-input.txt')
-#    for path in execute(["./osiris-1D.e","-w",workdir,"osiris-input.txt"]):
     waittick = 0
     for path in execute(["osiris-1D.e","-w",workdir,"osiris-input.txt"]):
         waittick += 1
         if(waittick == 100):
             IPython.display.clear_output(wait=True)
             waittick = 0
-            print(path, end='')
+#            print(path, end='')
 
-    # run combine_h5_util_1d.py script for e1/, e2/, e3/ (and iaw)
-    combine_h5('e1')
-    combine_h5('e2')
-    combine_h5('e3')
-    #if (iaw==True):
+    # run combine_h5_util_1d.py script for e1/, e2/, e3/ (and iaw if applicable)
+    combine_h5_1d('e1')
+    combine_h5_1d('e2')
+    combine_h5_1d('e3')
+
+    # run combine on iaw data if present
     if (os.path.isdir(workdir+'/MS/DENSITY/ions/charge')):
-        combine_h5_iaw()
+        combine_h5_iaw_1d()
         
     IPython.display.clear_output(wait=True)
     print('runosiris completed normally')
@@ -445,6 +500,38 @@ def gen_path(rundir, plot_or):
         PATH += '/ions.h5'
     return PATH
 
+def plot_xt_arb(rundir, field='Ex',
+            xlim=[None,None], tlim=[None,None]):
+    
+    # initialize values
+    PATH = os.getcwd() + '/' + rundir +'/'+ field + '.h5'
+    hdf5_data = read_hdf(PATH)
+    
+    if(xlim == [None,None]):
+        xlim[0] = hdf5_data.axes[0].axis_min
+        xlim[1] = hdf5_data.axes[0].axis_max
+    if(tlim == [None,None]):
+        tlim[0] = hdf5_data.axes[1].axis_min
+        tlim[1] = hdf5_data.axes[1].axis_max
+
+
+#    y_vals = np.arange(hdf5_data.axes[1].axis_min, hdf5_data.axes[1].axis_max, 1)
+#    x_vals = np.full(len(y_vals), x(n_L, one_0=one_0, one_D=one_D, n_peak=n_peak))
+#    x_vals2 = np.full(len(y_vals), x(n_R, one_0=one_0, one_D=one_D, n_peak=n_peak))
+#    x_vals3 = np.full(len(y_vals), x(w_0*w_0, one_0=one_0, one_D=one_D, n_peak=n_peak))
+#    x_vals4 = np.full(len(y_vals), x(w_0**2 - b0_mag**2, one_0=one_0, one_D=one_D, n_peak=n_peak))
+
+    # create figure
+    plt.figure(figsize=(8,5))
+    plotme(hdf5_data )
+    plt.title(field + ' x-t space' + field )
+    plt.xlabel('x')
+    plt.ylabel('t')
+    plt.xlim(xlim[0],xlim[1])
+    plt.ylim(tlim[0],tlim[1])  
+    
+    plt.show()
+
 
 def plot_xt(rundir, TITLE='', b0_mag=0.0, w_0 = 1.0, one_0 = 10, one_D= 790, n_peak = 2, plot_or=3, show_theory=False,
             xlim=[None,None], tlim=[None,None], **kwargs):
@@ -777,6 +864,35 @@ def plot_wk_iaw(rundir, TITLE, show_theory=False, background=0.0, wlim=3, klim=5
         plt.legend(loc=0)
     plt.show()
     
+def plot_wk_arb(rundir, field, TITLE, background=0.0, wlim=3, klim=5):
+    
+    # initialize values
+    PATH = os.getcwd() + '/' + rundir +'/'+ field + '.h5'
+    hdf5_data = read_hdf(PATH)
+    if (background!=0.0):
+        hdf5_data.data = hdf5_data.data-background
+    hdf5_data = FFT_hdf5(hdf5_data)         # FFT the data (x-t -> w-k)
+
+    c_s = 0.01                              # sound speed
+    w_pi = 0.1                              # plasma ion freq
+
+    N = 100
+    dx = float(klim)/N
+    kvals = np.arange(0, klim+.01, dx)
+    wvals = kvals * c_s
+
+    # create figure
+    plt.figure(figsize=(8,5))
+    plotme(hdf5_data)
+    
+    plt.title(TITLE + ' w-k space' +  TITLE)
+    
+    plt.xlabel('k  [$1/ \Delta x$]')
+    plt.ylabel('$\omega$  [$\omega_{pe}$]')
+    plt.xlim(0,klim)
+    plt.ylim(0,wlim)
+    plt.show()
+    
 
 def get_ratio(PATH1, PATH2):
     #Function gets ratio of hdf52 and hdf51 in w-k space
@@ -802,3 +918,37 @@ def plot_mode_hist(hdf5):
     plt.semilogy(hdf5.data[:,4])
     plt.semilogy(hdf5.data[:,8])
     plt.show()
+    
+def phaseinteract_upic(rundir='',
+   xlim=[-1,-1],ylim=[-1,-1],zlim=[-1,-1],
+   plotdata=[]):
+
+   workdir = os.getcwd()
+   workdir = os.path.join(workdir, rundir)
+
+   odir = os.path.join(workdir, 'DIAG/Vx_x')
+   files = sorted(os.listdir(odir))
+
+   data = []
+   for i in range(len(files)):
+       fhere = h5py.File(os.path.join(odir,files[i]), 'r')
+       data.append([fhere['Phase Space - vx vs. x'][:,:],fhere.attrs['TIME'],fhere.attrs['DT']])
+       xaxis = fhere['AXIS/AXIS1'][:]
+       yaxis = fhere['AXIS/AXIS2'][:]
+
+   def fu(n):
+       plt.figure(figsize=(8, 4))
+       plt.imshow(np.log(np.abs(data[n][0]+0.001)),cmap='OrRd',origin='lower',
+              extent=[xaxis[0], xaxis[1], yaxis[0], yaxis[1]],
+              aspect='auto')
+       plt.title('time = '+str(data[n][1]))
+       plt.colorbar()
+       if(xlim != [-1,-1]):
+           plt.xlim(xlim)
+       if(ylim != [-1,-1]):
+           plt.ylim(ylim)
+       if(zlim != [-1,-1]):
+           plt.clim(zlim)
+       return plt
+
+   interact(fu,n=(0,len(data)-1))
