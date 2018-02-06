@@ -11,6 +11,7 @@ This repository contains educational Jupyter notebooks for plasma physics.  The 
 * R- and L-waves
 * Faraday rotation
 * Velocities:  introduction to phase and group velocity (no simulations)
+* Plasma Wake Field Accelerator (simulated by 3D quasi-static PIC code [QuickPIC](https://github.com/UCLA-Plasma-Simulation-Group/QuickPIC-OpenSource.git))
 
 We welcome contributions and ideas:  please email us at picksc.org@gmail.com
 
