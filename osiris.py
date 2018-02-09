@@ -524,9 +524,9 @@ def plot_xt_arb(rundir, field='Ex',
     # create figure
     plt.figure(figsize=(8,5))
     plotme(hdf5_data )
-    plt.title(field + ' x-t space' + field )
+    plt.title(field + ' [ x-t space ]'  )
     plt.xlabel('x')
-    plt.ylabel('t')
+    plt.ylabel('Time')
     plt.xlim(xlim[0],xlim[1])
     plt.ylim(tlim[0],tlim[1])  
     
@@ -864,7 +864,7 @@ def plot_wk_iaw(rundir, TITLE, show_theory=False, background=0.0, wlim=3, klim=5
         plt.legend(loc=0)
     plt.show()
     
-def plot_wk_arb(rundir, field, TITLE, background=0.0, wlim=3, klim=5):
+def plot_wk_arb(rundir, field, background=0.0, wlim=3, klim=5):
     
     # initialize values
     PATH = os.getcwd() + '/' + rundir +'/'+ field + '.h5'
@@ -885,7 +885,7 @@ def plot_wk_arb(rundir, field, TITLE, background=0.0, wlim=3, klim=5):
     plt.figure(figsize=(8,5))
     plotme(hdf5_data)
     
-    plt.title(TITLE + ' w-k space' +  TITLE)
+    plt.title(field + ' [w-k space]' )
     
     plt.xlabel('k  [$1/ \Delta x$]')
     plt.ylabel('$\omega$  [$\omega_{pe}$]')
