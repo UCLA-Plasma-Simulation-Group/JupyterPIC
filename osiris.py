@@ -9,7 +9,6 @@ from ipywidgets import interact
 from h5_utilities import *
 from analysis import *
 from scipy.optimize import fsolve
-from __future__ import print_function
 
 def execute(cmd):
 
