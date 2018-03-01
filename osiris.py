@@ -501,7 +501,7 @@ def gen_path(rundir, plot_or):
     return PATH
 
 def plot_xt_arb(rundir, field='Ex',
-            xlim=[None,None], tlim=[None,None]):
+            xlim=[None,None], tlim=[None,None],plot_show=True):
     
     # initialize values
     PATH = os.getcwd() + '/' + rundir +'/'+ field + '.h5'
@@ -524,13 +524,18 @@ def plot_xt_arb(rundir, field='Ex',
     # create figure
     plt.figure(figsize=(8,5))
     plotme(hdf5_data )
-    plt.title(field + ' [ x-t space ]'  )
+    plt.title(field + ' x-t space' + field )
     plt.xlabel('x')
-    plt.ylabel('Time')
+    plt.ylabel('t')
     plt.xlim(xlim[0],xlim[1])
     plt.ylim(tlim[0],tlim[1])  
-    
-    plt.show()
+
+# an option not to complete the plot, in case you want to perform the analysis outside
+#
+    if (plot_show):
+        plt.show()
+#
+#
 
 
 def plot_xt(rundir, TITLE='', b0_mag=0.0, w_0 = 1.0, one_0 = 10, one_D= 790, n_peak = 2, plot_or=3, show_theory=False,
@@ -864,7 +869,7 @@ def plot_wk_iaw(rundir, TITLE, show_theory=False, background=0.0, wlim=3, klim=5
         plt.legend(loc=0)
     plt.show()
     
-def plot_wk_arb(rundir, field, background=0.0, wlim=3, klim=5):
+def plot_wk_arb(rundir, field, TITLE, background=0.0, wlim=3, klim=5,plot_show=True):
     
     # initialize values
     PATH = os.getcwd() + '/' + rundir +'/'+ field + '.h5'
@@ -882,17 +887,158 @@ def plot_wk_arb(rundir, field, background=0.0, wlim=3, klim=5):
     wvals = kvals * c_s
 
     # create figure
-    plt.figure(figsize=(8,5))
+    plt.figure(figsize=(10,10))
     plotme(hdf5_data)
     
-    plt.title(field + ' [w-k space]' )
+    plt.title(TITLE + ' w-k space' +  TITLE)
     
     plt.xlabel('k  [$1/ \Delta x$]')
     plt.ylabel('$\omega$  [$\omega_{pe}$]')
     plt.xlim(0,klim)
     plt.ylim(0,wlim)
+    if (plot_show):
+        plt.show()
+    
+def plot_tk_arb(rundir, field, klim=5,tlim=100):
+
+    
+    title_font = {'fontname':'Arial', 'size':'20', 'color':'black', 'weight':'normal',
+              'verticalalignment':'bottom'}
+    axis_font = {'fontname':'Arial', 'size':'34'}
+    # initialize values
+    PATH = os.getcwd() + '/' + rundir +'/'+ field + '.h5'
+    hdf5_data = read_hdf(PATH)
+    
+#    hdf5_data = FFT_hdf5(hdf5_data)         # FFT the data (x-t -> w-k)
+    k_data=np.fft.fft(hdf5_data.data,axis=1)
+    hdf5_data.data=np.abs(k_data)
+    
+    hdf5_data.axes[0].axis_max=2.0*3.1415926
+ 
+
+#    N = 100
+#    dx = float(klim)/N
+#    kvals = np.arange(0, klim+.01, dx)
+#    wvals = kvals * c_s
+
+    # create figure
+    plt.figure(figsize=(10,10))
+    plotme(hdf5_data)
+    
+    plt.title(field + ' t-k space' )
+    
+    plt.xlabel('k  [$1/ \Delta x$]',**axis_font)
+    plt.ylabel(' Time  [$1/ \omega_{pe}$]',**axis_font)
+    plt.xlim(0,klim)
+    plt.ylim(0,tlim)
     plt.show()
     
+
+def plot_tk_2stream(rundir, field, klim=5,tlim=100,v0=1):
+
+    
+    title_font = {'fontname':'Arial', 'size':'20', 'color':'black', 'weight':'normal',
+              'verticalalignment':'bottom'}
+    axis_font = {'fontname':'Arial', 'size':'34'}
+    # initialize values
+    PATH = os.getcwd() + '/' + rundir +'/'+ field + '.h5'
+    hdf5_data = read_hdf(PATH)
+    
+#    hdf5_data = FFT_hdf5(hdf5_data)         # FFT the data (x-t -> w-k)
+    k_data=np.fft.fft(hdf5_data.data,axis=1)
+    hdf5_data.data=np.abs(k_data)
+    
+    hdf5_data.axes[0].axis_max=2.0*3.1415926*v0
+ 
+
+#    N = 100
+#    dx = float(klim)/N
+#    kvals = np.arange(0, klim+.01, dx)
+#    wvals = kvals * c_s
+    N=100
+    dt = float(tlim)/N
+    tvals=np.arange(0,tlim,dt)
+    kvals=np.zeros(N)
+    for i in range(0,N):
+        kvals[i]=np.sqrt(2)
+        
+   
+    # create figure
+    plt.figure(figsize=(10,10))
+    plotme(hdf5_data)
+    plt.plot(kvals,tvals,'r')
+    
+    plt.title(field + ' t-k space' )
+    
+    plt.xlabel(' α ',**axis_font)
+    plt.ylabel(' Time  [$1/ \omega_{pe}$]',**axis_font)
+    plt.xlim(0,klim)
+    plt.ylim(0,tlim)
+    plt.show()
+    
+def plot_tk_2stream_theory(rundir, field, modemin=1,modemax=5,tlim=100,v0=1,init_amplitude=1e-5):
+
+    
+    
+    
+    title_font = {'fontname':'Arial', 'size':'20', 'color':'black', 'weight':'normal',
+              'verticalalignment':'bottom'}
+    axis_font = {'fontname':'Arial', 'size':'34'}
+    # initialize values
+    PATH = os.getcwd() + '/' + rundir +'/'+ field + '.h5'
+    hdf5_data = read_hdf(PATH)
+    
+#    hdf5_data = FFT_hdf5(hdf5_data)         # FFT the data (x-t -> w-k)
+    k_data=np.fft.fft(hdf5_data.data,axis=1)
+    hdf5_data.data=np.abs(k_data)
+
+    nx=hdf5_data.data.shape[1]
+    nt=hdf5_data.data.shape[0]
+    taxis=np.linspace(0,hdf5_data.axes[1].axis_max,nt)
+    deltak=2.0*3.1415926/nx
+    hdf5_data.axes[0].axis_max=2.0*3.1415926*v0
+ 
+    nplots=modemax-modemin+1
+    
+#    N = 100
+#    dx = float(klim)/N
+#    kvals = np.arange(0, klim+.01, dx)
+#    wvals = kvals * c_s
+    N=100
+#    dt = float(tlim)/N
+#    tvals=np.arange(0,tlim,dt)
+#    kvals=np.zeros(N)
+#    for i in range(0,N):
+#        kvals[i]=np.sqrt(2)
+        
+   
+    # create figure
+    plt.figure(figsize=(10,3*nplots))
+#    plotme(hdf5_data)
+    
+#    plt.title(field + ' t-k space' )
+    for imode in range(modemin,modemax+1):
+        plt.subplot(nplots,1,imode)
+        stream_theory=np.zeros(nt)
+        growth_rate=tstream_root_minus_i(deltak*imode,v0,1.0)
+        for it in range(0,nt):
+            stream_theory[it]=init_amplitude*np.exp(growth_rate*taxis[it])
+
+#plt.figure(figsize=(12,8))
+        plt.semilogy(taxis,hdf5_data.data[:,imode],label='PIC simulation, mode ='+repr(imode))
+        plt.semilogy(taxis,stream_theory,'r',label='theory, growth rate ='+repr(growth_rate))
+        plt.ylabel('mode'+repr(imode))
+        plt.xlabel('Time [$1/ \omega_{p}$]')
+        plt.legend()
+        plt.xlim(0,tlim)
+
+
+        
+#    plt.xlabel(' α ',**axis_font)
+#    plt.ylabel(' Time  [$1/ \omega_{pe}$]',**axis_font)
+#    plt.xlim(0,klim)
+#    plt.ylim(0,tlim)
+    plt.show()
 
 def get_ratio(PATH1, PATH2):
     #Function gets ratio of hdf52 and hdf51 in w-k space
@@ -952,3 +1098,33 @@ def phaseinteract_upic(rundir='',
        return plt
 
    interact(fu,n=(0,len(data)-1))
+    
+    
+################################################################
+##  the functions below are for the streaming instability demos
+##  f.s. tsung & k. miller
+##  (c) 2018 Regents of The University of California
+#################################################################
+
+def tstream_root_plus(k,v0,omegap):
+    alpha=k*v0/omegap
+    result = omegap*np.sqrt(1+alpha*alpha+np.sqrt(1+4*alpha*alpha))
+    return result
+
+def tstream_root_minus_r( k, v0, omegap):
+    alpha=k*v0/omegap
+    if (alpha > np.sqrt(2)):
+        result = omegap*np.sqrt(1+alpha*alpha-np.sqrt(1+4*alpha*alpha))
+    else:
+        result = 0
+    return result
+
+def tstream_root_minus_i(k, v0, omegap):
+    alpha=k*v0/omegap
+    if (alpha < np.sqrt(2)):
+        result = omegap*np.sqrt(np.sqrt(1+4*alpha*alpha)-1-alpha*alpha)
+    else:
+        result = 0
+    return result
+
+

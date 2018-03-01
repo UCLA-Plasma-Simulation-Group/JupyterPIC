@@ -31,7 +31,7 @@
  VZI0 = 0.000, 
  NPXBI = 0, 
  NPYBI = 0, 
- TEND = 300.0, 
+ TEND = 60.0, 
  DT = 0.200, 
  INORDER = 2, 
  AX = 0.866667, 
