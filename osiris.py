@@ -937,9 +937,9 @@ def plot_tk_arb(rundir, field, klim=5,tlim=100):
 def plot_tk_2stream(rundir, field, klim=5,tlim=100,v0=1):
 
     
-    title_font = {'fontname':'Arial', 'size':'20', 'color':'black', 'weight':'normal',
+    title_font = { 'size':'20', 'color':'black', 'weight':'normal',
               'verticalalignment':'bottom'}
-    axis_font = {'fontname':'Arial', 'size':'34'}
+    axis_font = { 'size':'34'}
     # initialize values
     PATH = os.getcwd() + '/' + rundir +'/'+ field + '.h5'
     hdf5_data = read_hdf(PATH)
@@ -959,14 +959,17 @@ def plot_tk_2stream(rundir, field, klim=5,tlim=100,v0=1):
     dt = float(tlim)/N
     tvals=np.arange(0,tlim,dt)
     kvals=np.zeros(N)
+    kpeak_vals=np.zeros(N)
     for i in range(0,N):
         kvals[i]=np.sqrt(2)
+        kpeak_vals[i]=0.85
         
    
     # create figure
     plt.figure(figsize=(10,10))
     plotme(hdf5_data)
-    plt.plot(kvals,tvals,'r')
+    plt.plot(kvals,tvals,'b--',label='Instability Boundary')
+    plt.plot(kpeak_vals,tvals,'r--',label='Peak Location')
     
     plt.title(field + ' t-k space' )
     
@@ -974,6 +977,7 @@ def plot_tk_2stream(rundir, field, klim=5,tlim=100,v0=1):
     plt.ylabel(' Time  [$1/ \omega_{pe}$]',**axis_font)
     plt.xlim(0,klim)
     plt.ylim(0,tlim)
+    plt.legend()
     plt.show()
     
 def plot_tk_2stream_theory(rundir, field, modemin=1,modemax=5,tlim=100,v0=1,init_amplitude=1e-5):

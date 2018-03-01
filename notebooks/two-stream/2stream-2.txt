@@ -31,7 +31,7 @@
  VZI0 = 0.000, 
  NPXBI = 0, 
  NPYBI = 0, 
- TEND = 50.0, 
+ TEND = 80.0, 
  DT = 0.200, 
  INORDER = 2, 
  AX = 0.05, 
@@ -66,7 +66,7 @@
 
 &pinput2_jf
   ntfield=3,
-  fvxmax=30., fvymax=30. ,
+  fvxmax=40., fvymax=40. ,
   nphbx=150,nphby=150,
   nphxx=20,nphyx=20, 
   nphxy=20,nphyy=20,
