@@ -55,23 +55,19 @@ def run_upic_es(rundir='',inputfile='pinput2'):
         if(waittick == 100):
             IPython.display.clear_output(wait=True)
             waittick = 0
-            print(path, end='')
+#            print(path, end='')
             
     
             
     # run the combine script
-    print('combining Ex files')
     combine_h5_2d('DIAG', 'Ex')
-    print('combining Ey files')
     combine_h5_2d('DIAG', 'Ey')
-    print('combining pot files')
     combine_h5_2d('DIAG', 'pot')
 
     print('combine_h5_2d completed normally')
     
     # run combine on iaw data if present
     if (os.path.isdir(workdir + '/DIAG/IDen/')):
-        print('combining IAW files')
         combine_h5_iaw_2d()
         print('combine_h5_iaw completed normally')
         
@@ -114,19 +110,15 @@ def runosiris(rundir='',inputfile='osiris-input.txt'):
         if(waittick == 100):
             IPython.display.clear_output(wait=True)
             waittick = 0
-            print(path, end='')
+#            print(path, end='')
 
     # run combine_h5_util_1d.py script for e1/, e2/, e3/ (and iaw if applicable)
-    print('combining E1 files')
     combine_h5_1d('e1')
-    print('combining E2 files')
     combine_h5_1d('e2')
-    print('combining E3 files')
     combine_h5_1d('e3')
 
     # run combine on iaw data if present
     if (os.path.isdir(workdir+'/MS/DENSITY/ions/charge')):
-        print('combining IAW files')
         combine_h5_iaw_1d()
         
     IPython.display.clear_output(wait=True)
