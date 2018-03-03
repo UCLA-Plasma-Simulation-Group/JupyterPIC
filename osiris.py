@@ -1193,6 +1193,45 @@ def tstream_plot_theory(v0,nx,kmin,kmax):
     plt.legend()
 
     plt.show()
+
+    
+################################################################
+##  the functions below are for the buneman instability notebooks
+##  f.s. tsung & k. g. miller
+##  (c) 2018 Regents of The University of California
+#################################################################
+
+def buneman_growth_rate(alphaarray,rmass):
+    
+    nalpha=alphaarray.shape[0]
+    
+    alphamin=alphaarray[0]
+    alphamax=alphaarray[nalpha-1]
+    
+    prev_root=complex(0,0)
+    
+    growth_rate=np.zeros(nalpha)
+    
+    def buneman_disp(x):
+        return (x**-(-rmass+x**2)*(x-alphaarray[0])**2)
+    new_root=mpmath.findroot(buneman_disp,prev_root,solver='newton')
+    growth_rate[0]=new_root.imag
+    prev_root=complex(new_root.real,new_root.imag)
+#    print(repr(prev_root))
+    
+    for i in range(1,nalpha):
+        # print(repr(i))
+        def buneman_disp2(x):    
+            return (x**2-(-rmass+x**2)*(x-alphaarray[i])**2)
+    
+        new_root =  mpmath.findroot(buneman_disp2, prev_root,solver='muller')
+        growth_rate[i]=new_root.imag
+        prev_root=complex(new_root.real,new_root.imag)
+    
+    return growth_rate
+
+
+    
     
 
 ################################################################
