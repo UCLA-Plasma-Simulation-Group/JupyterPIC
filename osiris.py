@@ -10,6 +10,16 @@ from h5_utilities import *
 from analysis import *
 from scipy.optimize import fsolve
 
+###  for the plasma dispersion function 
+from scipy import special
+import cmath
+### 
+
+###  root finder
+import mpmath
+###
+
+
 def execute(cmd):
 
     popen = subprocess.Popen(cmd, stdout=subprocess.PIPE, universal_newlines=True)
@@ -1131,4 +1141,121 @@ def tstream_root_minus_i(k, v0, omegap):
         result = 0
     return result
 
+
+def tstream_plot_theory(v0,nx,kmin,kmax):
+    
+    # first let's define the k-axis
+
+################################################################
+################################################################
+## need the simulation size to make the simulation curve
+################################################################
+################################################################
+
+    nk=100
+    karray=np.linspace(kmin,kmax,num=nk)
+    k_pic_array=np.arange(kmin,kmax,2*3.1415926/nx)
+    nmodes=k_pic_array.shape[0]
+    omega_pic=np.zeros(nmodes)
+    
+    omega_plus=np.zeros(nk)
+    omega_minus_r=np.zeros(nk)
+    omega_minus_i=np.zeros(nk)
+
+    # nk=karray.shape[0]
+    #
+    # using UPIC-ES normalization
+    #
+    omegap=1.0
+    
+    
+    for i in range(0,nk):
+       
+        alpha=v0*karray[i]/omegap
+        omega_plus[i]=omegap*np.sqrt(1+alpha*alpha+np.sqrt(1+4*alpha*alpha))
+        omega_minus_r[i]=tstream_root_minus_r(karray[i],v0,omegap)
+        omega_minus_i[i]=tstream_root_minus_i(karray[i],v0,omegap)
+        
+    for i in range(0,nmodes):
+        omega_pic[i]=tstream_root_minus_i(k_pic_array[i],v0,omegap)
+        
+    plt.figure(figsize=(10,10))
+    plt.plot(karray,omega_plus,'b-.',label = 'real root +')
+    plt.plot(karray,omega_minus_i,'r',label = 'growth rate')
+    plt.plot(karray,omega_minus_r,'b-.',label = 'real root - ')
+
+    plt.plot(k_pic_array,omega_pic,'co',label='PIC Modes',markersize=15)
+    plt.xlabel('wave number $[1/\Delta x]$')
+    plt.ylabel('frequency $[\omega_{pe}]$')
+    plt.title('Two Stream Theory in Simulation Units')
+    plt.xlim((kmin,kmax))
+    plt.ylim((0,3))
+    plt.legend()
+
+    plt.show()
+    
+
+################################################################
+##  plasma dispersion functions
+##  f.s. tsung 
+##  (c) 2018 Regents of The University of California
+#################################################################
+
+
+def zfunc(z):
+    a = special.wofz(z)
+    a *= np.sqrt(np.pi)*complex(0,1)
+    return a
+
+
+def zprime(z):
+
+## the line below is needed for the root finder, which uses MP (multi-precision) variables 
+## instead of real and/or complex, so the first step is to convert the variable "z" from 
+## of a type 
+    
+    arg= complex(z.real,z.imag)
+    value= zfunc(arg)
+    return(-2*(1+z*value))
+
+
+def landau(karray):
+    
+    nk=karray.shape[0]
+    
+    results=np.zeros(nk)
+    
+    kmin=karray[0]
+    kmax=karray[nk-1]
+    
+    if (kmin!=0.0):
+        root_trial=complex(1,0)
+        
+        for k_val in np.arange(0.01,kmin,0.01):
+            def epsilon(omega):
+                return 1-0.5*((1.0/k_val)**2)*zprime(omega/(np.sqrt(2)*k_val))
+            newroot=mpmath.findroot(epsilon,root_trial,solver='muller')
+            root_trial=newroot
+        
+        results[0]=newroot.imag
+    else:
+        results[0]=0.0
+        newroot=complex(1,0)
+        root_trial=complex(1,0)
+    
+        
+    for i_mode in range(1,nk):
+        k_val=karray[i_mode]
+        def epsilon(omega):
+            return 1-0.5*((1.0/k_val)**2)*zprime(omega/(np.sqrt(2)*k_val))
+        newroot=mpmath.findroot(epsilon,root_trial,solver='muller')
+        root_trial=newroot
+        results[i_mode]=newroot.imag
+        
+    return results
+
+            
+            
+            
+    
 
