@@ -10,6 +10,16 @@ from h5_utilities import *
 from analysis import *
 from scipy.optimize import fsolve
 
+###  for the plasma dispersion function 
+from scipy import special
+import cmath
+### 
+
+###  root finder
+import mpmath
+###
+
+
 def execute(cmd):
 
     popen = subprocess.Popen(cmd, stdout=subprocess.PIPE, universal_newlines=True)
@@ -55,23 +65,19 @@ def run_upic_es(rundir='',inputfile='pinput2'):
         if(waittick == 100):
             IPython.display.clear_output(wait=True)
             waittick = 0
-            print(path, end='')
+#            print(path, end='')
             
     
             
     # run the combine script
-    print('combining Ex files')
     combine_h5_2d('DIAG', 'Ex')
-    print('combining Ey files')
     combine_h5_2d('DIAG', 'Ey')
-    print('combining pot files')
     combine_h5_2d('DIAG', 'pot')
 
     print('combine_h5_2d completed normally')
     
     # run combine on iaw data if present
     if (os.path.isdir(workdir + '/DIAG/IDen/')):
-        print('combining IAW files')
         combine_h5_iaw_2d()
         print('combine_h5_iaw completed normally')
         
@@ -114,19 +120,15 @@ def runosiris(rundir='',inputfile='osiris-input.txt'):
         if(waittick == 100):
             IPython.display.clear_output(wait=True)
             waittick = 0
-            print(path, end='')
+#            print(path, end='')
 
     # run combine_h5_util_1d.py script for e1/, e2/, e3/ (and iaw if applicable)
-    print('combining E1 files')
     combine_h5_1d('e1')
-    print('combining E2 files')
     combine_h5_1d('e2')
-    print('combining E3 files')
     combine_h5_1d('e3')
 
     # run combine on iaw data if present
     if (os.path.isdir(workdir+'/MS/DENSITY/ions/charge')):
-        print('combining IAW files')
         combine_h5_iaw_1d()
         
     IPython.display.clear_output(wait=True)
@@ -509,7 +511,7 @@ def gen_path(rundir, plot_or):
     return PATH
 
 def plot_xt_arb(rundir, field='Ex',
-            xlim=[None,None], tlim=[None,None]):
+            xlim=[None,None], tlim=[None,None],plot_show=True):
     
     # initialize values
     PATH = os.getcwd() + '/' + rundir +'/'+ field + '.h5'
@@ -537,8 +539,13 @@ def plot_xt_arb(rundir, field='Ex',
     plt.ylabel('t')
     plt.xlim(xlim[0],xlim[1])
     plt.ylim(tlim[0],tlim[1])  
-    
-    plt.show()
+
+# an option not to complete the plot, in case you want to perform the analysis outside
+#
+    if (plot_show):
+        plt.show()
+#
+#
 
 
 def plot_xt(rundir, TITLE='', b0_mag=0.0, w_0 = 1.0, one_0 = 10, one_D= 790, n_peak = 2, plot_or=3, show_theory=False,
@@ -872,7 +879,7 @@ def plot_wk_iaw(rundir, TITLE, show_theory=False, background=0.0, wlim=3, klim=5
         plt.legend(loc=0)
     plt.show()
     
-def plot_wk_arb(rundir, field, TITLE, background=0.0, wlim=3, klim=5):
+def plot_wk_arb(rundir, field, TITLE, background=0.0, wlim=3, klim=5,plot_show=True):
     
     # initialize values
     PATH = os.getcwd() + '/' + rundir +'/'+ field + '.h5'
@@ -890,7 +897,7 @@ def plot_wk_arb(rundir, field, TITLE, background=0.0, wlim=3, klim=5):
     wvals = kvals * c_s
 
     # create figure
-    plt.figure(figsize=(8,5))
+    plt.figure(figsize=(10,10))
     plotme(hdf5_data)
     
     plt.title(TITLE + ' w-k space' +  TITLE)
@@ -899,8 +906,153 @@ def plot_wk_arb(rundir, field, TITLE, background=0.0, wlim=3, klim=5):
     plt.ylabel('$\omega$  [$\omega_{pe}$]')
     plt.xlim(0,klim)
     plt.ylim(0,wlim)
+    if (plot_show):
+        plt.show()
+    
+def plot_tk_arb(rundir, field, klim=5,tlim=100):
+
+    
+    title_font = {'fontname':'Arial', 'size':'20', 'color':'black', 'weight':'normal',
+              'verticalalignment':'bottom'}
+    axis_font = {'fontname':'Arial', 'size':'34'}
+    # initialize values
+    PATH = os.getcwd() + '/' + rundir +'/'+ field + '.h5'
+    hdf5_data = read_hdf(PATH)
+    
+#    hdf5_data = FFT_hdf5(hdf5_data)         # FFT the data (x-t -> w-k)
+    k_data=np.fft.fft(hdf5_data.data,axis=1)
+    hdf5_data.data=np.abs(k_data)
+    
+    hdf5_data.axes[0].axis_max=2.0*3.1415926
+ 
+
+#    N = 100
+#    dx = float(klim)/N
+#    kvals = np.arange(0, klim+.01, dx)
+#    wvals = kvals * c_s
+
+    # create figure
+    plt.figure(figsize=(10,10))
+    plotme(hdf5_data)
+    
+    plt.title(field + ' t-k space' )
+    
+    plt.xlabel('k  [$1/ \Delta x$]',**axis_font)
+    plt.ylabel(' Time  [$1/ \omega_{pe}$]',**axis_font)
+    plt.xlim(0,klim)
+    plt.ylim(0,tlim)
     plt.show()
     
+
+def plot_tk_2stream(rundir, field, klim=5,tlim=100,v0=1):
+
+    
+    title_font = { 'size':'20', 'color':'black', 'weight':'normal',
+              'verticalalignment':'bottom'}
+    axis_font = { 'size':'34'}
+    # initialize values
+    PATH = os.getcwd() + '/' + rundir +'/'+ field + '.h5'
+    hdf5_data = read_hdf(PATH)
+    
+#    hdf5_data = FFT_hdf5(hdf5_data)         # FFT the data (x-t -> w-k)
+    k_data=np.fft.fft(hdf5_data.data,axis=1)
+    hdf5_data.data=np.abs(k_data)
+    
+    hdf5_data.axes[0].axis_max=2.0*3.1415926*v0
+ 
+
+#    N = 100
+#    dx = float(klim)/N
+#    kvals = np.arange(0, klim+.01, dx)
+#    wvals = kvals * c_s
+    N=100
+    dt = float(tlim)/N
+    tvals=np.arange(0,tlim,dt)
+    kvals=np.zeros(N)
+    kpeak_vals=np.zeros(N)
+    for i in range(0,N):
+        kvals[i]=np.sqrt(2)
+        kpeak_vals[i]=0.85
+        
+   
+    # create figure
+    plt.figure(figsize=(10,10))
+    plotme(hdf5_data)
+    plt.plot(kvals,tvals,'b--',label='Instability Boundary')
+    plt.plot(kpeak_vals,tvals,'r--',label='Peak Location')
+    
+    plt.title(field + ' t-k space' )
+    
+    plt.xlabel(' α ',**axis_font)
+    plt.ylabel(' Time  [$1/ \omega_{pe}$]',**axis_font)
+    plt.xlim(0,klim)
+    plt.ylim(0,tlim)
+    plt.legend()
+    plt.show()
+    
+def plot_tk_2stream_theory(rundir, field, modemin=1,modemax=5,tlim=100,v0=1,init_amplitude=1e-5):
+
+    
+    
+    
+    title_font = {'fontname':'Arial', 'size':'20', 'color':'black', 'weight':'normal',
+              'verticalalignment':'bottom'}
+    axis_font = {'fontname':'Arial', 'size':'34'}
+    # initialize values
+    PATH = os.getcwd() + '/' + rundir +'/'+ field + '.h5'
+    hdf5_data = read_hdf(PATH)
+    
+#    hdf5_data = FFT_hdf5(hdf5_data)         # FFT the data (x-t -> w-k)
+    k_data=np.fft.fft(hdf5_data.data,axis=1)
+    hdf5_data.data=np.abs(k_data)
+
+    nx=hdf5_data.data.shape[1]
+    nt=hdf5_data.data.shape[0]
+    taxis=np.linspace(0,hdf5_data.axes[1].axis_max,nt)
+    deltak=2.0*3.1415926/nx
+    hdf5_data.axes[0].axis_max=2.0*3.1415926*v0
+ 
+    nplots=modemax-modemin+1
+    
+#    N = 100
+#    dx = float(klim)/N
+#    kvals = np.arange(0, klim+.01, dx)
+#    wvals = kvals * c_s
+    N=100
+#    dt = float(tlim)/N
+#    tvals=np.arange(0,tlim,dt)
+#    kvals=np.zeros(N)
+#    for i in range(0,N):
+#        kvals[i]=np.sqrt(2)
+        
+   
+    # create figure
+    plt.figure(figsize=(10,3*nplots))
+#    plotme(hdf5_data)
+    
+#    plt.title(field + ' t-k space' )
+    for imode in range(modemin,modemax+1):
+        plt.subplot(nplots,1,imode)
+        stream_theory=np.zeros(nt)
+        growth_rate=tstream_root_minus_i(deltak*imode,v0,1.0)
+        for it in range(0,nt):
+            stream_theory[it]=init_amplitude*np.exp(growth_rate*taxis[it])
+
+#plt.figure(figsize=(12,8))
+        plt.semilogy(taxis,hdf5_data.data[:,imode],label='PIC simulation, mode ='+repr(imode))
+        plt.semilogy(taxis,stream_theory,'r',label='theory, growth rate ='+repr(growth_rate))
+        plt.ylabel('mode'+repr(imode))
+        plt.xlabel('Time [$1/ \omega_{p}$]')
+        plt.legend()
+        plt.xlim(0,tlim)
+
+
+        
+#    plt.xlabel(' α ',**axis_font)
+#    plt.ylabel(' Time  [$1/ \omega_{pe}$]',**axis_font)
+#    plt.xlim(0,klim)
+#    plt.ylim(0,tlim)
+    plt.show()
 
 def get_ratio(PATH1, PATH2):
     #Function gets ratio of hdf52 and hdf51 in w-k space
@@ -960,3 +1112,189 @@ def phaseinteract_upic(rundir='',
        return plt
 
    interact(fu,n=(0,len(data)-1))
+    
+    
+################################################################
+##  the functions below are for the streaming instability demos
+##  f.s. tsung & k. miller
+##  (c) 2018 Regents of The University of California
+#################################################################
+
+def tstream_root_plus(k,v0,omegap):
+    alpha=k*v0/omegap
+    result = omegap*np.sqrt(1+alpha*alpha+np.sqrt(1+4*alpha*alpha))
+    return result
+
+def tstream_root_minus_r( k, v0, omegap):
+    alpha=k*v0/omegap
+    if (alpha > np.sqrt(2)):
+        result = omegap*np.sqrt(1+alpha*alpha-np.sqrt(1+4*alpha*alpha))
+    else:
+        result = 0
+    return result
+
+def tstream_root_minus_i(k, v0, omegap):
+    alpha=k*v0/omegap
+    if (alpha < np.sqrt(2)):
+        result = omegap*np.sqrt(np.sqrt(1+4*alpha*alpha)-1-alpha*alpha)
+    else:
+        result = 0
+    return result
+
+
+def tstream_plot_theory(v0,nx,kmin,kmax):
+    
+    # first let's define the k-axis
+
+################################################################
+################################################################
+## need the simulation size to make the simulation curve
+################################################################
+################################################################
+
+    nk=100
+    karray=np.linspace(kmin,kmax,num=nk)
+    k_pic_array=np.arange(kmin,kmax,2*3.1415926/nx)
+    nmodes=k_pic_array.shape[0]
+    omega_pic=np.zeros(nmodes)
+    
+    omega_plus=np.zeros(nk)
+    omega_minus_r=np.zeros(nk)
+    omega_minus_i=np.zeros(nk)
+
+    # nk=karray.shape[0]
+    #
+    # using UPIC-ES normalization
+    #
+    omegap=1.0
+    
+    
+    for i in range(0,nk):
+       
+        alpha=v0*karray[i]/omegap
+        omega_plus[i]=omegap*np.sqrt(1+alpha*alpha+np.sqrt(1+4*alpha*alpha))
+        omega_minus_r[i]=tstream_root_minus_r(karray[i],v0,omegap)
+        omega_minus_i[i]=tstream_root_minus_i(karray[i],v0,omegap)
+        
+    for i in range(0,nmodes):
+        omega_pic[i]=tstream_root_minus_i(k_pic_array[i],v0,omegap)
+        
+    plt.figure(figsize=(10,10))
+    plt.plot(karray,omega_plus,'b-.',label = 'real root +')
+    plt.plot(karray,omega_minus_i,'r',label = 'growth rate')
+    plt.plot(karray,omega_minus_r,'b-.',label = 'real root - ')
+
+    plt.plot(k_pic_array,omega_pic,'co',label='PIC Modes',markersize=15)
+    plt.xlabel('wave number $[1/\Delta x]$')
+    plt.ylabel('frequency $[\omega_{pe}]$')
+    plt.title('Two Stream Theory in Simulation Units')
+    plt.xlim((kmin,kmax))
+    plt.ylim((0,3))
+    plt.legend()
+
+    plt.show()
+
+    
+################################################################
+##  the functions below are for the buneman instability notebooks
+##  f.s. tsung & k. g. miller
+##  (c) 2018 Regents of The University of California
+#################################################################
+
+def buneman_growth_rate(alphaarray,rmass):
+    
+    nalpha=alphaarray.shape[0]
+    
+    alphamin=alphaarray[0]
+    alphamax=alphaarray[nalpha-1]
+    
+    prev_root=complex(0,0)
+    
+    growth_rate=np.zeros(nalpha)
+    
+    def buneman_disp(x):
+        return (x**-(-rmass+x**2)*(x-alphaarray[0])**2)
+    new_root=mpmath.findroot(buneman_disp,prev_root,solver='newton')
+    growth_rate[0]=new_root.imag
+    prev_root=complex(new_root.real,new_root.imag)
+#    print(repr(prev_root))
+    
+    for i in range(1,nalpha):
+        # print(repr(i))
+        def buneman_disp2(x):    
+            return (x**2-(-rmass+x**2)*(x-alphaarray[i])**2)
+    
+        new_root =  mpmath.findroot(buneman_disp2, prev_root,solver='muller')
+        growth_rate[i]=new_root.imag
+        prev_root=complex(new_root.real,new_root.imag)
+    
+    return growth_rate
+
+
+    
+    
+
+################################################################
+##  plasma dispersion functions
+##  f.s. tsung 
+##  (c) 2018 Regents of The University of California
+#################################################################
+
+
+def zfunc(z):
+    a = special.wofz(z)
+    a *= np.sqrt(np.pi)*complex(0,1)
+    return a
+
+
+def zprime(z):
+
+## the line below is needed for the root finder, which uses MP (multi-precision) variables 
+## instead of real and/or complex, so the first step is to convert the variable "z" from 
+## of a type 
+    
+    arg= complex(z.real,z.imag)
+    value= zfunc(arg)
+    return(-2*(1+z*value))
+
+
+def landau(karray):
+    
+    nk=karray.shape[0]
+    
+    results=np.zeros(nk)
+    
+    kmin=karray[0]
+    kmax=karray[nk-1]
+    
+    if (kmin!=0.0):
+        root_trial=complex(1,0)
+        
+        for k_val in np.arange(0.01,kmin,0.01):
+            def epsilon(omega):
+                return 1-0.5*((1.0/k_val)**2)*zprime(omega/(np.sqrt(2)*k_val))
+            newroot=mpmath.findroot(epsilon,root_trial,solver='muller')
+            root_trial=newroot
+        
+        results[0]=newroot.imag
+    else:
+        results[0]=0.0
+        newroot=complex(1,0)
+        root_trial=complex(1,0)
+    
+        
+    for i_mode in range(1,nk):
+        k_val=karray[i_mode]
+        def epsilon(omega):
+            return 1-0.5*((1.0/k_val)**2)*zprime(omega/(np.sqrt(2)*k_val))
+        newroot=mpmath.findroot(epsilon,root_trial,solver='muller')
+        root_trial=newroot
+        results[i_mode]=newroot.imag
+        
+    return results
+
+            
+            
+            
+    
+
