@@ -839,7 +839,7 @@ def plot_wk_rl(rundir, TITLE='', vth=0.1, b0_mag=0.0, plot_or=1, show_theory=Fal
     plt.show()
 
     
-def plot_wk_iaw(rundir, TITLE, show_theory=False, background=0.0, wlim=3, klim=5):
+def plot_wk_iaw(rundir, TITLE='', show_theory=False, background=0.0, wlim=3, klim=5):
     
     # initialize values
     PATH = os.getcwd() + '/' + rundir + '/ions.h5'
@@ -872,10 +872,10 @@ def plot_wk_iaw(rundir, TITLE, show_theory=False, background=0.0, wlim=3, klim=5
         plt.legend(loc=0)
     plt.show()
     
-def plot_wk_arb(rundir, field, TITLE, background=0.0, wlim=3, klim=5):
+def plot_wk_arb(rundir, field, TITLE='', background=0.0, wlim=3, klim=5):
     
     # initialize values
-    PATH = os.getcwd() + '/' + rundir +'/'+ field + '.h5'
+    PATH = os.getcwd() + '/' + rundir + '/' + field + '.h5'
     hdf5_data = read_hdf(PATH)
     if (background!=0.0):
         hdf5_data.data = hdf5_data.data-background
@@ -900,7 +900,45 @@ def plot_wk_arb(rundir, field, TITLE, background=0.0, wlim=3, klim=5):
     plt.xlim(0,klim)
     plt.ylim(0,wlim)
     plt.show()
+
+def wk_upic_iaw(rundir, field, TITLE='', background=0.0, wlim=3, klim=5):
     
+    # initialize values
+    PATH = os.getcwd() + '/' + rundir + '/' + field + '.h5'
+    hdf5_data = read_hdf(PATH)
+    if (background!=0.0):
+        hdf5_data.data = hdf5_data.data-background
+    hdf5_data = FFT_hdf5(hdf5_data)         # FFT the data (x-t -> w-k)
+
+    c_s = 0.01                              # sound speed
+    w_pi = 0.1                              # plasma ion freq
+
+    N = 100
+    dx = float(klim)/N
+    kvals = np.arange(0, klim+.01, dx)
+    wvals = kvals * c_s
+
+    # create fluid theory disp. relation
+    def w(k):
+        # c_s = 1
+        # k_DE = 1
+        # w = k*c_s/np.sqrt(1+(k/k_DE)**2)
+        w = k/np.sqrt(1+k**2)
+        return w
+    ks = np.linspace(0,3,100)
+    ws = w(ks)
+
+    # create figure
+    plt.figure(figsize=(8,5))
+    plotme(hdf5_data)
+    plt.title(TITLE + ' w-k space' +  TITLE)
+    plt.xlabel('k  [$1/ \Delta x$]')
+    plt.ylabel('$\omega$  [$\omega_{pe}$]')
+    plt.xlim(0,klim)
+    plt.ylim(0,wlim)
+    plt.plot(ks,ws)
+    plt.show()
+
 
 def get_ratio(PATH1, PATH2):
     #Function gets ratio of hdf52 and hdf51 in w-k space
