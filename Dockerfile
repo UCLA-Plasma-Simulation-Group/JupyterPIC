@@ -1,4 +1,4 @@
-FROM jupyter/datascience-notebook
+FROM jupyter/scipy-notebook
 
 MAINTAINER Benjamin J. Winjum <bwinjum@ucla.edu>
 #With grateful acknowledgements to the Jupyter Project <jupyter@googlegroups.com> for Jupyter
