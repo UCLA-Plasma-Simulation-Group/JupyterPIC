@@ -3,7 +3,7 @@
  INDX = 8, INDY = 1
  NPX = 131072, NPY = 2
  NPXB = 0, NPYB = 0
- VTX = 1.0, VTY = 1.0
+ VTX = 2.0, VTY = 2.0
  VX0 = 0.0, VY0 = 0.0
  SORTIME = 100, SORTIMI = 250
  INORDER = 2
