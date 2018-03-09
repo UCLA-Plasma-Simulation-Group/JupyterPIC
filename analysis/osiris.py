@@ -57,8 +57,6 @@ def run_upic_es(rundir='',inputfile='pinput2'):
             waittick = 0
             print(path, end='')
             
-    
-            
     # run the combine script
     print('combining Ex files')
     combine_h5_2d('DIAG', 'Ex')
@@ -901,7 +899,8 @@ def plot_wk_arb(rundir, field, TITLE='', background=0.0, wlim=3, klim=5):
     plt.ylim(0,wlim)
     plt.show()
 
-def wk_upic_iaw(rundir, field, TITLE='', background=0.0, wlim=3, klim=5):
+def wk_upic_iaw(rundir, field, TITLE='', background=0.0, wlim=[None,None], 
+        klim=[None,None], **kwargs):
     
     # initialize values
     PATH = os.getcwd() + '/' + rundir + '/' + field + '.h5'
@@ -910,23 +909,27 @@ def wk_upic_iaw(rundir, field, TITLE='', background=0.0, wlim=3, klim=5):
         hdf5_data.data = hdf5_data.data-background
     hdf5_data = FFT_hdf5(hdf5_data)         # FFT the data (x-t -> w-k)
 
-    c_s = 0.01                              # sound speed
-    w_pi = 0.1                              # plasma ion freq
-
-    N = 100
-    dx = float(klim)/N
-    kvals = np.arange(0, klim+.01, dx)
-    wvals = kvals * c_s
+    if(wlim == [None,None]):
+        #nt = hdf5_data.shape[0]
+        #dt = hdf5_data.axes[1].axis_max/(hdf5_data.shape[0]-1)
+        #waxis = np.fft.fftfreq(nt, d=dt) * 2*np.pi
+        wlim[0] = hdf5_data.axes[1].axis_min
+        wlim[1] = hdf5_data.axes[1].axis_max
+    if(klim == [None,None]):
+        #nx = hdf5_data.shape[0]
+        #dx = hdf5_data.axes[0].axis_max/hdf5_data.shape[1]
+        #kaxis = np.fft.fftfreq(nx, d=dx) * 2*np.pi
+        klim[0] = hdf5_data.axes[0].axis_min
+        klim[1] = hdf5_data.axes[0].axis_max
 
     # create fluid theory disp. relation
-    def w(k):
-        # c_s = 1
-        # k_DE = 1
-        # w = k*c_s/np.sqrt(1+(k/k_DE)**2)
-        w = k/np.sqrt(1+k**2)
+    def w(k, c_s):
+        #  c_s = 0.2  # VTX/sqrt(RMASS) in input deck
+        k_DE = 1
+        w = k*c_s/np.sqrt(1+(k/k_DE)**2)
         return w
-    ks = np.linspace(0,3,100)
-    ws = w(ks)
+    ks = np.linspace(klim[0],klim[1],100*(klim[1]-klim[0]))
+    ws = w(ks, **kwargs)
 
     # create figure
     plt.figure(figsize=(8,5))
@@ -934,8 +937,8 @@ def wk_upic_iaw(rundir, field, TITLE='', background=0.0, wlim=3, klim=5):
     plt.title(TITLE + ' w-k space' +  TITLE)
     plt.xlabel('k  [$1/ \Delta x$]')
     plt.ylabel('$\omega$  [$\omega_{pe}$]')
-    plt.xlim(0,klim)
-    plt.ylim(0,wlim)
+    plt.xlim(klim[0],klim[1])
+    plt.ylim(wlim[0],wlim[1])
     plt.plot(ks,ws)
     plt.show()
 
