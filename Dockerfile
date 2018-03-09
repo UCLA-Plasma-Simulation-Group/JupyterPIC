@@ -1,4 +1,4 @@
-FROM jupyter/datascience-notebook
+FROM jupyter/scipy-notebook
 
 MAINTAINER Benjamin J. Winjum <bwinjum@ucla.edu>
 #With grateful acknowledgements to the Jupyter Project <jupyter@googlegroups.com> for Jupyter
@@ -51,6 +51,7 @@ RUN chmod 777 faraday-rotation
 RUN chmod 777 light-wave-dispersion
 RUN chmod 777 light-wave-vacuum-into-plasma
 RUN chmod 777 r-and-l-mode-dispersion
+RUN chmod 777 two-stream
 RUN chmod 777 velocities
 RUN chmod 777 x-and-o-mode-dispersion
 RUN chmod 777 x-mode-propagation
