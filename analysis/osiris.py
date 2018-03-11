@@ -951,7 +951,7 @@ def plot_tk_arb(rundir, field, klim=5,tlim=100):
 
 
 def wk_upic_iaw(rundir, field, TITLE='', background=0.0, wlim=[None,None], 
-        klim=[None,None], **kwargs):
+        klim=[None,None], vth = 1.0, rmass = 100,  **kwargs):
     
     # initialize values
     PATH = os.getcwd() + '/' + rundir + '/' + field + '.h5'
@@ -976,7 +976,11 @@ def wk_upic_iaw(rundir, field, TITLE='', background=0.0, wlim=[None,None],
     # create fluid theory disp. relation
     def w(k, c_s):
         #  c_s = 0.2  # VTX/sqrt(RMASS) in input deck
-        k_DE = 1
+        c_s = vth/np.sqrt(rmass)
+        # k_de is omega_pe / vth, but omega_pe is 1 in UPIC by default
+        #
+        k_DE = 1/ vth 
+        
         w = k*c_s/np.sqrt(1+(k/k_DE)**2)
         return w
     ks = np.linspace(klim[0],klim[1],100*(klim[1]-klim[0]))
