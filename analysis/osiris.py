@@ -66,7 +66,7 @@ def run_upic_es(rundir='',inputfile='pinput2'):
             IPython.display.clear_output(wait=True)
             waittick = 0
             print(path, end='')
-            
+
     # run the combine script
     print('combining Ex files')
     combine_h5_2d('DIAG', 'Ex')
@@ -950,9 +950,9 @@ def plot_tk_arb(rundir, field, klim=5,tlim=100):
     plt.show()
 
 
-def wk_upic_iaw(rundir, field, TITLE='', background=0.0, wlim=[None,None], 
-        klim=[None,None], **kwargs):
-    
+def wk_upic_iaw(rundir, field, TITLE='', background=0.0, wlim=[None,None],
+                klim=[None,None], show_theory=True, **kwargs):
+
     # initialize values
     PATH = os.getcwd() + '/' + rundir + '/' + field + '.h5'
     hdf5_data = read_hdf(PATH)
@@ -961,37 +961,33 @@ def wk_upic_iaw(rundir, field, TITLE='', background=0.0, wlim=[None,None],
     hdf5_data = FFT_hdf5(hdf5_data)         # FFT the data (x-t -> w-k)
 
     if(wlim == [None,None]):
-        #nt = hdf5_data.shape[0]
-        #dt = hdf5_data.axes[1].axis_max/(hdf5_data.shape[0]-1)
-        #waxis = np.fft.fftfreq(nt, d=dt) * 2*np.pi
         wlim[0] = hdf5_data.axes[1].axis_min
         wlim[1] = hdf5_data.axes[1].axis_max
     if(klim == [None,None]):
-        #nx = hdf5_data.shape[0]
-        #dx = hdf5_data.axes[0].axis_max/hdf5_data.shape[1]
-        #kaxis = np.fft.fftfreq(nx, d=dx) * 2*np.pi
         klim[0] = hdf5_data.axes[0].axis_min
         klim[1] = hdf5_data.axes[0].axis_max
 
-    # create fluid theory disp. relation
-    def w(k, c_s):
-        #  c_s = 0.2  # VTX/sqrt(RMASS) in input deck
-        k_DE = 1
+    # create fluid theory dispersion relation
+    def w(k, vtx=1.0, rmass=100.0):
+        c_s = vtx/np.sqrt(rmass)  # VTX/sqrt(RMASS) in input deck
+        k_DE = 1/vtx
         w = k*c_s/np.sqrt(1+(k/k_DE)**2)
         return w
+
     ks = np.linspace(klim[0],klim[1],100*(klim[1]-klim[0]))
     ws = w(ks, **kwargs)
 
     # create figure
     plt.figure(figsize=(8,5))
     plotme(hdf5_data)
-    plt.title(TITLE + ' w-k space' +  TITLE)
+    plt.title(TITLE + ' $\omega$-k space' +  TITLE)
     plt.xlabel('k  [$1/ \Delta x$]')
     plt.ylabel('$\omega$  [$\omega_{pe}$]')
     plt.xlim(klim[0],klim[1])
     plt.ylim(wlim[0],wlim[1])
-    plt.plot(ks,ws)
-    plt.show()
+    if (show_theory==True):
+        plt.plot(ks,ws)
+        plt.show()
 
 
 def plot_tk_2stream(rundir, field, klim=5,tlim=100,v0=1):
