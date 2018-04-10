@@ -8,7 +8,7 @@
  SORTIME = 100, SORTIMI = 250
  INORDER = 2
  AX = 0.0, AY = 0.0
- RTEMPXI = 100.0, RTEMPYI = 100.0
+ RTEMPXI = 20.0, RTEMPYI = 20.0
  NPXI = 131072, NPYI = 2
  NPXBI = 0, NPYBI = 0
  MOVION = 1
@@ -20,10 +20,11 @@
  /
 
 &pinput2_jf
-  ntfield=3,
+  ntfield=0,
   fvxmax=25., fvymax=25. ,
   fvxmax_ion=10., fvymax_ion=10. ,
   nphbx=100,nphby=100,
-  nphxx=20,nphyx=20, 
+  nphxx=20,nphyx=20,
   nphxy=20,nphyy=20,
+  ntden = 20,
 /
