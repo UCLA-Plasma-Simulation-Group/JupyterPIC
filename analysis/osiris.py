@@ -9,15 +9,9 @@ from ipywidgets import interact
 from h5_utilities import *
 from analysis import *
 from scipy.optimize import fsolve
-
-###  for the plasma dispersion function
 from scipy import special
 import cmath
-###
-
-###  root finder
 import mpmath
-###
 
 
 def execute(cmd):
@@ -38,14 +32,14 @@ def run_upic_es(rundir='',inputfile='pinput2'):
         out_file = workdir + '/' + ex + '.h5'
         for path in execute(["python", "/usr/local/osiris/combine_h5_util_2d.py", in_file, out_file]):
             IPython.display.clear_output(wait=True)
-#            print(path, end='')
+            print(path, end='')
 
     def combine_h5_iaw_2d():
         in_file = workdir + '/DIAG/IDen/'
         out_file = workdir + '/ions.h5'
         for path in execute(["python", "/usr/local/osiris/combine_h5_util_2d.py", in_file, out_file]):
+            print(path, end='')
             IPython.display.clear_output(wait=True)
-#            print(path, end='')
 
     workdir = os.getcwd()
     workdir += '/' + rundir
@@ -60,22 +54,20 @@ def run_upic_es(rundir='',inputfile='pinput2'):
 
     # run the upic-es executable
     waittick = 0
+    print("running upic-es.out ...")
     for path in execute(["/usr/local/beps/upic-es.out"]):
-        waittick += 1
-        if(waittick == 100):
-            IPython.display.clear_output(wait=True)
-            waittick = 0
-            print(path, end='')
+    # for path in execute(["../upic-es.out"]):
+        pass
+    IPython.display.clear_output(wait=True)
 
-    # run the combine script
-    print('combining Ex files')
-    combine_h5_2d('DIAG', 'Ex')
-    print('combining Ey files')
-    combine_h5_2d('DIAG', 'Ey')
-    print('combining pot files')
-    combine_h5_2d('DIAG', 'pot')
-
-    print('combine_h5_2d completed normally')
+    #  # run the combine script on electric field data
+    #  print('combining Ex files')
+    #  combine_h5_2d('DIAG', 'Ex')
+    #  print('combining Ey files')
+    #  combine_h5_2d('DIAG', 'Ey')
+    #  print('combining pot files')
+    #  combine_h5_2d('DIAG', 'pot')
+    #  print('combine_h5_2d completed normally')
 
     # run combine on iaw data if present
     if (os.path.isdir(workdir + '/DIAG/IDen/')):
@@ -83,8 +75,9 @@ def run_upic_es(rundir='',inputfile='pinput2'):
         combine_h5_iaw_2d()
         print('combine_h5_iaw completed normally')
 
-#     IPython.display.clear_output(wait=True)
-    print('runbeps completed normally')
+    IPython.display.clear_output(wait=True)
+    print('run_upic_es completed normally')
+
     os.chdir('../')
 
     return
