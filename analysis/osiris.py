@@ -53,21 +53,19 @@ def run_upic_es(rundir='',inputfile='pinput2'):
     os.chdir(workdir)
 
     # run the upic-es executable
-    waittick = 0
-    print("running upic-es.out ...")
-    for path in execute(["/usr/local/beps/upic-es.out"]):
-    # for path in execute(["../upic-es.out"]):
+    print('running upic-es.out ...')
+    for path in execute(['/usr/local/beps/upic-es.out']):
         pass
     IPython.display.clear_output(wait=True)
 
-    #  # run the combine script on electric field data
-    #  print('combining Ex files')
-    #  combine_h5_2d('DIAG', 'Ex')
-    #  print('combining Ey files')
-    #  combine_h5_2d('DIAG', 'Ey')
-    #  print('combining pot files')
-    #  combine_h5_2d('DIAG', 'pot')
-    #  print('combine_h5_2d completed normally')
+    # run the combine script on electric field data
+    print('combining Ex files')
+    combine_h5_2d('DIAG', 'Ex')
+    print('combining Ey files')
+    combine_h5_2d('DIAG', 'Ey')
+    print('combining pot files')
+    combine_h5_2d('DIAG', 'pot')
+    print('combine_h5_2d completed normally')
 
     # run combine on iaw data if present
     if (os.path.isdir(workdir + '/DIAG/IDen/')):
