@@ -56,4 +56,4 @@ RUN chmod 777 velocities
 RUN chmod 777 x-and-o-mode-dispersion
 RUN chmod 777 x-mode-propagation
 
-USER $NB_USER
+USER $NB_USER 
