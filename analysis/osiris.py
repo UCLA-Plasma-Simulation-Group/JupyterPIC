@@ -10,10 +10,10 @@ from h5_utilities import *
 from analysis import *
 from scipy.optimize import fsolve
 
-###  for the plasma dispersion function
+###  for the plasma dispersion function 
 from scipy import special
 import cmath
-###
+### 
 
 ###  root finder
 import mpmath
@@ -29,24 +29,24 @@ def execute(cmd):
     return_code = popen.wait()
     if return_code:
         raise subprocess.CalledProcessError(return_code, cmd)
-
-
+        
+        
 def run_upic_es(rundir='',inputfile='pinput2'):
-
+    
     def combine_h5_2d(path, ex):
         in_file = workdir + '/' + path + '/' + ex + '/'
         out_file = workdir + '/' + ex + '.h5'
         for path in execute(["python", "/usr/local/osiris/combine_h5_util_2d.py", in_file, out_file]):
             IPython.display.clear_output(wait=True)
 #            print(path, end='')
-
+            
     def combine_h5_iaw_2d():
         in_file = workdir + '/DIAG/IDen/'
         out_file = workdir + '/ions.h5'
         for path in execute(["python", "/usr/local/osiris/combine_h5_util_2d.py", in_file, out_file]):
             IPython.display.clear_output(wait=True)
 #            print(path, end='')
-
+    
     workdir = os.getcwd()
     workdir += '/' + rundir
     print(workdir)
@@ -55,42 +55,38 @@ def run_upic_es(rundir='',inputfile='pinput2'):
        os.mkdir(workdir)
     if(rundir != ''):
         shutil.copyfile(inputfile,workdir+'/pinput2')
-
+    
     os.chdir(workdir)
-
-    # run the upic-es executable
+        
+    # run the upic-es executable    
     waittick = 0
     for path in execute(["/usr/local/beps/upic-es.out"]):
         waittick += 1
         if(waittick == 100):
             IPython.display.clear_output(wait=True)
             waittick = 0
-            print(path, end='')
+#            print(path, end='')
             
     
             
     # run the combine script
-    print('combining Ex files')
     combine_h5_2d('DIAG', 'Ex')
-    print('combining Ey files')
     combine_h5_2d('DIAG', 'Ey')
-    print('combining pot files')
     combine_h5_2d('DIAG', 'pot')
 
     print('combine_h5_2d completed normally')
-
+    
     # run combine on iaw data if present
     if (os.path.isdir(workdir + '/DIAG/IDen/')):
-        print('combining IAW files')
         combine_h5_iaw_2d()
         print('combine_h5_iaw completed normally')
-
+        
 #     IPython.display.clear_output(wait=True)
     print('runbeps completed normally')
     os.chdir('../')
-
+    
     return
-
+    
 
 def runosiris(rundir='',inputfile='osiris-input.txt'):
 
@@ -124,21 +120,17 @@ def runosiris(rundir='',inputfile='osiris-input.txt'):
         if(waittick == 100):
             IPython.display.clear_output(wait=True)
             waittick = 0
-            print(path, end='')
+#            print(path, end='')
 
     # run combine_h5_util_1d.py script for e1/, e2/, e3/ (and iaw if applicable)
-    print('combining E1 files')
     combine_h5_1d('e1')
-    print('combining E2 files')
     combine_h5_1d('e2')
-    print('combining E3 files')
     combine_h5_1d('e3')
 
     # run combine on iaw data if present
     if (os.path.isdir(workdir+'/MS/DENSITY/ions/charge')):
-        print('combining IAW files')
         combine_h5_iaw_1d()
-
+        
     IPython.display.clear_output(wait=True)
     print('runosiris completed normally')
 
@@ -499,10 +491,10 @@ def k_xm(w):
     w_p = 1.0                         # plamsa frequency
     w_c = 0.7                      # cyclotron freq
     w_0 = 1.0
-#     k = np.sqrt((w_p**2/c**2) * ( (w/w_p)**2 - ((w/w_p)**2 - 1)
+#     k = np.sqrt((w_p**2/c**2) * ( (w/w_p)**2 - ((w/w_p)**2 - 1) 
 #                  / ((w/w_p)**2 - (1 + (w_c/w_p)**2) ) ))
     w_H = np.sqrt(w_p**2 + w_c**2)
-
+    
     k = w**2/c**2 * (1 - (w_p**2/w**2) * (w**2 - w_p**2) / (w**2 - w_H**2) )
     return k
 
@@ -520,11 +512,11 @@ def gen_path(rundir, plot_or):
 
 def plot_xt_arb(rundir, field='Ex',
             xlim=[None,None], tlim=[None,None],plot_show=True):
-
+    
     # initialize values
     PATH = os.getcwd() + '/' + rundir +'/'+ field + '.h5'
     hdf5_data = read_hdf(PATH)
-
+    
     if(xlim == [None,None]):
         xlim[0] = hdf5_data.axes[0].axis_min
         xlim[1] = hdf5_data.axes[0].axis_max
@@ -546,7 +538,7 @@ def plot_xt_arb(rundir, field='Ex',
     plt.xlabel('x')
     plt.ylabel('t')
     plt.xlim(xlim[0],xlim[1])
-    plt.ylim(tlim[0],tlim[1])
+    plt.ylim(tlim[0],tlim[1])  
 
 # an option not to complete the plot, in case you want to perform the analysis outside
 #
@@ -558,11 +550,11 @@ def plot_xt_arb(rundir, field='Ex',
 
 def plot_xt(rundir, TITLE='', b0_mag=0.0, w_0 = 1.0, one_0 = 10, one_D= 790, n_peak = 2, plot_or=3, show_theory=False,
             xlim=[None,None], tlim=[None,None], **kwargs):
-
+    
     # initialize values
     PATH = gen_path(rundir, plot_or)
     hdf5_data = read_hdf(PATH)
-
+    
     if(xlim == [None,None]):
         xlim[0] = hdf5_data.axes[0].axis_min
         xlim[1] = hdf5_data.axes[0].axis_max
@@ -587,7 +579,7 @@ def plot_xt(rundir, TITLE='', b0_mag=0.0, w_0 = 1.0, one_0 = 10, one_D= 790, n_p
     plt.xlabel('x')
     plt.ylabel('t')
     plt.xlim(xlim[0],xlim[1])
-    plt.ylim(tlim[0],tlim[1])
+    plt.ylim(tlim[0],tlim[1])  
     if (show_theory==True):
         plt.plot(x_vals, y_vals, 'c--', label='$\omega_L$ x-cutoff') #L-cutoff
         plt.plot(x_vals2, y_vals, 'b--', label='$\omega_R$ x-cutoff')#R-cutoff
@@ -595,7 +587,7 @@ def plot_xt(rundir, TITLE='', b0_mag=0.0, w_0 = 1.0, one_0 = 10, one_D= 790, n_p
         plt.plot(x_vals4, y_vals, 'g--', label='$\omega_H$')
         plt.legend(loc=4)
     plt.show()
-
+    
 def plot_tx(rundir, TITLE='', b0_mag=0.0, plot_or=3, show_theory=False,
             xlim=[None,None], tlim=[None,None], show_cutoff=False, w_0 = 1.0, one_0 = 10, one_D= 790, n_peak = 2, **kwargs):
 
@@ -638,7 +630,7 @@ def plot_tx(rundir, TITLE='', b0_mag=0.0, plot_or=3, show_theory=False,
     if (show_cutoff==True):
         plt.plot(y_vals, x_vals5,'b', label='')
     plt.show()
-
+    
 
 def plot_log_xt(PATH, TITLE):
     # initialize values
@@ -662,10 +654,10 @@ def plot_log_xt(PATH, TITLE):
     # plt.legend(loc=0)
     plt.show()
 
-
-def plot_wk(rundir, TITLE='', vth=0.1, b0_mag=0.0, plot_or=1, show_theory=False,
+    
+def plot_wk(rundir, TITLE='', vth=0.1, b0_mag=0.0, plot_or=1, show_theory=False, 
             wlim=[None,None], klim=[None,None], debye=False, **kwargs):
-
+  
     # initialize values
     PATH = gen_path(rundir, plot_or)
     hdf5_data = read_hdf(PATH)
@@ -686,7 +678,7 @@ def plot_wk(rundir, TITLE='', vth=0.1, b0_mag=0.0, plot_or=1, show_theory=False,
         #kaxis = np.fft.fftfreq(nx, d=dx) * 2*np.pi
         klim[0] = hdf5_data.axes[0].axis_min
         klim[1] = hdf5_data.axes[0].axis_max
-
+        
     w_p = 1.0                         # plamsa frequency
     w_c = b0_mag                      # cyclotron freq
     w_0 = 1.0
@@ -714,13 +706,13 @@ def plot_wk(rundir, TITLE='', vth=0.1, b0_mag=0.0, plot_or=1, show_theory=False,
     w_H_vals = np.array([w_H for i in np.arange(len(kvals))])            # hybrid frequency
     w_p_vals = np.array([w_p for i in np.arange(len(kvals))])
     w_cvals = np.array([w_c for i in np.arange(len(kvals))])
-
+    
     #arrays for xmode theory curve
     wvals_xm = np.arange(0.1, 5, dx/100.0)
     kvals_xm = (wvals_xm**2 * (1 - (w_p**2/wvals_xm**2) * (wvals_xm**2 - w_p**2) / (wvals_xm**2 - w_H**2) ))
     kvals_xm = np.where(kvals_xm > 0, kvals_xm, 0)
     kvals_xm = np.sqrt(kvals_xm)
-
+        
     # create figure
     plt.figure(figsize=(8,5))
     plotme(hdf5_data, **kwargs)
@@ -731,7 +723,7 @@ def plot_wk(rundir, TITLE='', vth=0.1, b0_mag=0.0, plot_or=1, show_theory=False,
         plt.xlabel('k  [$\omega_{pe}$/c]')
     plt.ylabel('$\omega$  [$\omega_{pe}$]')
     plt.xlim(klim[0],klim[1])
-    plt.ylim(wlim[0],wlim[1])
+    plt.ylim(wlim[0],wlim[1])   
     if (show_theory==True):
         if (b0_mag!=0):
             # for i in range(1,10):
@@ -740,23 +732,23 @@ def plot_wk(rundir, TITLE='', vth=0.1, b0_mag=0.0, plot_or=1, show_theory=False,
                 # xmode
                 plt.plot(kvals_xm, wvals_xm, 'fuchsia', label='x-wave dispersion relation')
                 plt.plot(kvals, wR, 'r--', label='$\omega_R$ cutoff')
-                plt.plot(kvals, wL, 'w--', label='$\omega_L$ cutoff')
-                plt.plot(kvals, w_p_vals, 'r:', label='$\omega_p$')
+                plt.plot(kvals, wL, 'w--', label='$\omega_L$ cutoff') 
+                plt.plot(kvals, w_p_vals, 'r:', label='$\omega_p$') 
                 plt.plot(kvals, w_H_vals, 'w:', label='$\omega_H$, hybrid frequency')
             elif (plot_or==3):
                 # omode
                 plt.plot(kvals, wvals,'fuchsia', label='o-wave dispersion relation')
 #                 plt.plot(kvals, wR, 'r--', label='$\omega_R$, right-handed cutoff')
-#                 plt.plot(kvals, wL, 'w--', label='$\omega_L$, left-handed cutoff')
+#                 plt.plot(kvals, wL, 'w--', label='$\omega_L$, left-handed cutoff') 
             plt.legend(loc=0)
         else:
-            plt.plot(kvals,wvals,'red')
+            plt.plot(kvals,wvals,'red')   
     plt.show()
+    
 
-
-def plot_wk_rl(rundir, TITLE='', vth=0.1, b0_mag=0.0, plot_or=1, show_theory=False,
+def plot_wk_rl(rundir, TITLE='', vth=0.1, b0_mag=0.0, plot_or=1, show_theory=False, 
             wlim=[None,None], klim=[None,None], debye=False, **kwargs):
-
+  
     # initialize values
     PATH = gen_path(rundir, plot_or)
     hdf5_data = read_hdf(PATH)
@@ -777,7 +769,7 @@ def plot_wk_rl(rundir, TITLE='', vth=0.1, b0_mag=0.0, plot_or=1, show_theory=Fal
         #kaxis = np.fft.fftfreq(nx, d=dx) * 2*np.pi
         klim[0] = hdf5_data.axes[0].axis_min
         klim[1] = hdf5_data.axes[0].axis_max
-
+        
     w_p = 1.0                         # plamsa frequency
     w_c = b0_mag                      # cyclotron freq
 #    w_0 = 1.0
@@ -805,7 +797,7 @@ def plot_wk_rl(rundir, TITLE='', vth=0.1, b0_mag=0.0, plot_or=1, show_theory=Fal
     w_H_vals = np.array([w_H for i in np.arange(len(kvals))])            # hybrid frequency
     w_p_vals = np.array([w_p for i in np.arange(len(kvals))])
     w_cvals = np.array([w_c for i in np.arange(len(kvals))])
-
+    
     #arrays for rmode theory curve
     wvals_rm = np.arange(0.1, 5, dx/100.0)
     #kvals_xm = (wvals_xm**2 * (1 - (w_p**2/wvals_xm**2) * (wvals_xm**2 - w_p**2) / (wvals_xm**2 - w_H**2) ))
@@ -818,7 +810,7 @@ def plot_wk_rl(rundir, TITLE='', vth=0.1, b0_mag=0.0, plot_or=1, show_theory=Fal
     kvals_lm = (wvals_rm**2 * (1 - (w_p**2/wvals_lm**2) / (1 + w_c / wvals_lm) ))
     kvals_lm = np.where(kvals_lm > 0, kvals_lm, 0)
     kvals_lm = np.sqrt(kvals_lm)
-
+        
     # create figure
     plt.figure(figsize=(8,5))
     plotme(hdf5_data, **kwargs)
@@ -829,7 +821,7 @@ def plot_wk_rl(rundir, TITLE='', vth=0.1, b0_mag=0.0, plot_or=1, show_theory=Fal
         plt.xlabel('k  [$\omega_{pe}$/c]')
     plt.ylabel('$\omega$  [$\omega_{pe}$]')
     plt.xlim(klim[0],klim[1])
-    plt.ylim(wlim[0],wlim[1])
+    plt.ylim(wlim[0],wlim[1])   
     if (show_theory==True):
         if (b0_mag!=0):
             # for i in range(1,10):
@@ -839,23 +831,23 @@ def plot_wk_rl(rundir, TITLE='', vth=0.1, b0_mag=0.0, plot_or=1, show_theory=Fal
                 plt.plot(kvals_rm, wvals_rm, 'white', label='R-wave dispersion relation')
                 plt.plot(kvals_lm, wvals_lm, 'red', label='L-wave dispersion relation')
                 plt.plot(kvals, wR, 'w--', label='$\omega_R$ cutoff')
-                plt.plot(kvals, wL, 'r--', label='$\omega_L$ cutoff')
-                plt.plot(kvals, w_cvals, 'blue', label='$\omega_c$')
-                #plt.plot(kvals, w_p_vals, 'r:', label='$\omega_p$')
+                plt.plot(kvals, wL, 'r--', label='$\omega_L$ cutoff') 
+                plt.plot(kvals, w_cvals, 'blue', label='$\omega_c$') 
+                #plt.plot(kvals, w_p_vals, 'r:', label='$\omega_p$') 
                 #plt.plot(kvals, w_H_vals, 'w:', label='$\omega_H$, hybrid frequency')
             elif (plot_or==1):
                 # omode
                 wvals = w_p + 0 * kvals
                 plt.plot(kvals, wvals,'red', label='$\omega_p$')
 #                 plt.plot(kvals, wR, 'r--', label='$\omega_R$, right-handed cutoff')
-#                 plt.plot(kvals, wL, 'w--', label='$\omega_L$, left-handed cutoff')
+#                 plt.plot(kvals, wL, 'w--', label='$\omega_L$, left-handed cutoff') 
             plt.legend(loc=0)
-
+            
     plt.show()
 
-
-def plot_wk_iaw(rundir, TITLE='', show_theory=False, background=0.0, wlim=3, klim=5):
-
+    
+def plot_wk_iaw(rundir, TITLE, show_theory=False, background=0.0, wlim=3, klim=5):
+    
     # initialize values
     PATH = os.getcwd() + '/' + rundir + '/ions.h5'
     hdf5_data = read_hdf(PATH)
@@ -886,11 +878,11 @@ def plot_wk_iaw(rundir, TITLE='', show_theory=False, background=0.0, wlim=3, kli
         plt.plot(kvals, wvals,'b', label='')
         plt.legend(loc=0)
     plt.show()
-
+    
 def plot_wk_arb(rundir, field, TITLE, background=0.0, wlim=3, klim=5,plot_show=True):
-
+    
     # initialize values
-    PATH = os.getcwd() + '/' + rundir + '/' + field + '.h5'
+    PATH = os.getcwd() + '/' + rundir +'/'+ field + '.h5'
     hdf5_data = read_hdf(PATH)
     if (background!=0.0):
         hdf5_data.data = hdf5_data.data-background
@@ -907,32 +899,32 @@ def plot_wk_arb(rundir, field, TITLE, background=0.0, wlim=3, klim=5,plot_show=T
     # create figure
     plt.figure(figsize=(10,10))
     plotme(hdf5_data)
-
+    
     plt.title(TITLE + ' w-k space' +  TITLE)
-
+    
     plt.xlabel('k  [$1/ \Delta x$]')
     plt.ylabel('$\omega$  [$\omega_{pe}$]')
     plt.xlim(0,klim)
     plt.ylim(0,wlim)
     if (plot_show):
         plt.show()
+    
+def plot_tk_arb(rundir, field, title='potential', klim=5,tlim=100):
 
-def plot_tk_arb(rundir, field, klim=5,tlim=100):
-
-
+    
     title_font = {'fontname':'Arial', 'size':'20', 'color':'black', 'weight':'normal',
               'verticalalignment':'bottom'}
     axis_font = {'fontname':'Arial', 'size':'34'}
     # initialize values
     PATH = os.getcwd() + '/' + rundir +'/'+ field + '.h5'
     hdf5_data = read_hdf(PATH)
-
+    
 #    hdf5_data = FFT_hdf5(hdf5_data)         # FFT the data (x-t -> w-k)
     k_data=np.fft.fft(hdf5_data.data,axis=1)
     hdf5_data.data=np.abs(k_data)
-
+    
     hdf5_data.axes[0].axis_max=2.0*3.1415926
-
+ 
 
 #    N = 100
 #    dx = float(klim)/N
@@ -942,70 +934,32 @@ def plot_tk_arb(rundir, field, klim=5,tlim=100):
     # create figure
     plt.figure(figsize=(10,10))
     plotme(hdf5_data)
-
-    plt.title(field + ' t-k space' )
-
+    
+    plt.title(title + ' t-k space' )
+    
     plt.xlabel('k  [$1/ \Delta x$]',**axis_font)
     plt.ylabel(' Time  [$1/ \omega_{pe}$]',**axis_font)
     plt.xlim(0,klim)
     plt.ylim(0,tlim)
     plt.show()
-
-def wk_upic_iaw(rundir, field, TITLE='', background=0.0, wlim=3, klim=5):
-
-    # initialize values
-    PATH = os.getcwd() + '/' + rundir + '/' + field + '.h5'
-    hdf5_data = read_hdf(PATH)
-    if (background!=0.0):
-        hdf5_data.data = hdf5_data.data-background
-    hdf5_data = FFT_hdf5(hdf5_data)         # FFT the data (x-t -> w-k)
-
-    c_s = 0.01                              # sound speed
-    w_pi = 0.1                              # plasma ion freq
-
-    N = 100
-    dx = float(klim)/N
-    kvals = np.arange(0, klim+.01, dx)
-    wvals = kvals * c_s
-
-    # create fluid theory disp. relation
-    def w(k):
-        # c_s = 1
-        # k_DE = 1
-        # w = k*c_s/np.sqrt(1+(k/k_DE)**2)
-        w = k/np.sqrt(1+k**2)
-        return w
-    ks = np.linspace(0,3,100)
-    ws = w(ks)
-
-    # create figure
-    plt.figure(figsize=(8,5))
-    plotme(hdf5_data)
-    plt.title(TITLE + ' w-k space' +  TITLE)
-    plt.xlabel('k  [$1/ \Delta x$]')
-    plt.ylabel('$\omega$  [$\omega_{pe}$]')
-    plt.xlim(0,klim)
-    plt.ylim(0,wlim)
-    plt.plot(ks,ws)
-    plt.show()
-
+    
 
 def plot_tk_2stream(rundir, field, klim=5,tlim=100,v0=1):
 
-
+    
     title_font = { 'size':'20', 'color':'black', 'weight':'normal',
               'verticalalignment':'bottom'}
     axis_font = { 'size':'34'}
     # initialize values
     PATH = os.getcwd() + '/' + rundir +'/'+ field + '.h5'
     hdf5_data = read_hdf(PATH)
-
+    
 #    hdf5_data = FFT_hdf5(hdf5_data)         # FFT the data (x-t -> w-k)
     k_data=np.fft.fft(hdf5_data.data,axis=1)
     hdf5_data.data=np.abs(k_data)
-
+    
     hdf5_data.axes[0].axis_max=2.0*3.1415926*v0
-
+ 
 
 #    N = 100
 #    dx = float(klim)/N
@@ -1019,35 +973,36 @@ def plot_tk_2stream(rundir, field, klim=5,tlim=100,v0=1):
     for i in range(0,N):
         kvals[i]=np.sqrt(2)
         kpeak_vals[i]=0.85
-
-
+        
+   
     # create figure
     plt.figure(figsize=(10,10))
     plotme(hdf5_data)
     plt.plot(kvals,tvals,'b--',label='Instability Boundary')
     plt.plot(kpeak_vals,tvals,'r--',label='Peak Location')
-
+    
     plt.title(field + ' t-k space' )
-
+    
     plt.xlabel(' α ',**axis_font)
     plt.ylabel(' Time  [$1/ \omega_{pe}$]',**axis_font)
     plt.xlim(0,klim)
     plt.ylim(0,tlim)
     plt.legend()
     plt.show()
+ 
 
-def plot_tk_2stream_theory(rundir, field, modemin=1,modemax=5,tlim=100,v0=1,init_amplitude=1e-5):
+def plot_tk_landau_theory(rundir, field, modeno=22,tlim=100, theory1=0.01, theory2=0.01,init_amplitude=1e-5):
 
-
-
-
+    
+    
+    
     title_font = {'fontname':'Arial', 'size':'20', 'color':'black', 'weight':'normal',
               'verticalalignment':'bottom'}
     axis_font = {'fontname':'Arial', 'size':'34'}
     # initialize values
     PATH = os.getcwd() + '/' + rundir +'/'+ field + '.h5'
     hdf5_data = read_hdf(PATH)
-
+    
 #    hdf5_data = FFT_hdf5(hdf5_data)         # FFT the data (x-t -> w-k)
     k_data=np.fft.fft(hdf5_data.data,axis=1)
     hdf5_data.data=np.abs(k_data)
@@ -1056,10 +1011,8 @@ def plot_tk_2stream_theory(rundir, field, modemin=1,modemax=5,tlim=100,v0=1,init
     nt=hdf5_data.data.shape[0]
     taxis=np.linspace(0,hdf5_data.axes[1].axis_max,nt)
     deltak=2.0*3.1415926/nx
-    hdf5_data.axes[0].axis_max=2.0*3.1415926*v0
-
-    nplots=modemax-modemin+1
-
+ 
+    
 #    N = 100
 #    dx = float(klim)/N
 #    kvals = np.arange(0, klim+.01, dx)
@@ -1070,12 +1023,90 @@ def plot_tk_2stream_theory(rundir, field, modemin=1,modemax=5,tlim=100,v0=1,init
 #    kvals=np.zeros(N)
 #    for i in range(0,N):
 #        kvals[i]=np.sqrt(2)
+        
+   
+    # create figure
+    plt.figure(figsize=(8,6))
+    
+    SMALL_SIZE = 20
+    MEDIUM_SIZE = 24
+    BIGGER_SIZE = 32
+    plt.rc('font', size=SMALL_SIZE)          # controls default text sizes
+    plt.rc('axes', titlesize=SMALL_SIZE)     # fontsize of the axes title
+    plt.rc('axes', labelsize=MEDIUM_SIZE)    # fontsize of the x and y labels
+    plt.rc('xtick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
+    plt.rc('ytick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
+    plt.rc('legend', fontsize=SMALL_SIZE)    # legend fontsize
+    plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title   
+
+    # plt.subplot(nplots,1,imode)
+    landau_theory1=np.zeros(nt)
+    landau_theory2=np.zeros(nt)
+    # growth_rate=tstream_root_minus_i(deltak*imode,v0,1.0)
+    for it in range(0,nt):
+        landau_theory1[it]=init_amplitude*np.exp(-theory1*taxis[it])
+        landau_theory2[it]=init_amplitude*np.exp(-theory2*taxis[it])
+
+#plt.figure(figsize=(12,8))
+    plt.semilogy(taxis,hdf5_data.data[:,modeno],label='PIC simulation, mode ='+repr(modeno))
+    label1='Exact Root, Damping = {0:.3f} '.format(float(theory1))
+    label2='df/dv estimate, Damping = {0:.3f} '.format(float(theory2))
+    plt.semilogy(taxis,landau_theory1,'r',label=label1)
+    plt.semilogy(taxis,landau_theory2,'g',label=label2)
+    plt.ylabel('mode'+repr(modeno))
+    plt.xlabel('Time [$1/ \omega_{p}$]')
+    plt.legend()
+    plt.xlim(0,tlim)
 
 
+        
+#    plt.xlabel(' α ',**axis_font)
+#    plt.ylabel(' Time  [$1/ \omega_{pe}$]',**axis_font)
+#    plt.xlim(0,klim)
+#    plt.ylim(0,tlim)
+    plt.show()
+    
+    
+def plot_tk_2stream_theory(rundir, field, modemin=1,modemax=5,tlim=100,v0=1,init_amplitude=1e-5):
+
+    
+    
+    
+    title_font = {'fontname':'Arial', 'size':'20', 'color':'black', 'weight':'normal',
+              'verticalalignment':'bottom'}
+    axis_font = {'fontname':'Arial', 'size':'34'}
+    # initialize values
+    PATH = os.getcwd() + '/' + rundir +'/'+ field + '.h5'
+    hdf5_data = read_hdf(PATH)
+    
+#    hdf5_data = FFT_hdf5(hdf5_data)         # FFT the data (x-t -> w-k)
+    k_data=np.fft.fft(hdf5_data.data,axis=1)
+    hdf5_data.data=np.abs(k_data)
+
+    nx=hdf5_data.data.shape[1]
+    nt=hdf5_data.data.shape[0]
+    taxis=np.linspace(0,hdf5_data.axes[1].axis_max,nt)
+    deltak=2.0*3.1415926/nx
+    hdf5_data.axes[0].axis_max=2.0*3.1415926*v0
+ 
+    nplots=modemax-modemin+1
+    
+#    N = 100
+#    dx = float(klim)/N
+#    kvals = np.arange(0, klim+.01, dx)
+#    wvals = kvals * c_s
+    N=100
+#    dt = float(tlim)/N
+#    tvals=np.arange(0,tlim,dt)
+#    kvals=np.zeros(N)
+#    for i in range(0,N):
+#        kvals[i]=np.sqrt(2)
+        
+   
     # create figure
     plt.figure(figsize=(10,3*nplots))
 #    plotme(hdf5_data)
-
+    
 #    plt.title(field + ' t-k space' )
     for imode in range(modemin,modemax+1):
         plt.subplot(nplots,1,imode)
@@ -1093,7 +1124,7 @@ def plot_tk_2stream_theory(rundir, field, modemin=1,modemax=5,tlim=100,v0=1,init
         plt.xlim(0,tlim)
 
 
-
+        
 #    plt.xlabel(' α ',**axis_font)
 #    plt.ylabel(' Time  [$1/ \omega_{pe}$]',**axis_font)
 #    plt.xlim(0,klim)
@@ -1124,7 +1155,7 @@ def plot_mode_hist(hdf5):
     plt.semilogy(hdf5.data[:,4])
     plt.semilogy(hdf5.data[:,8])
     plt.show()
-
+    
 def phaseinteract_upic(rundir='',
    xlim=[-1,-1],ylim=[-1,-1],zlim=[-1,-1],
    plotdata=[]):
@@ -1158,8 +1189,8 @@ def phaseinteract_upic(rundir='',
        return plt
 
    interact(fu,n=(0,len(data)-1))
-
-
+    
+    
 ################################################################
 ##  the functions below are for the streaming instability demos
 ##  f.s. tsung & k. miller
@@ -1189,7 +1220,7 @@ def tstream_root_minus_i(k, v0, omegap):
 
 
 def tstream_plot_theory(v0,nx,kmin,kmax):
-
+    
     # first let's define the k-axis
 
 ################################################################
@@ -1203,7 +1234,7 @@ def tstream_plot_theory(v0,nx,kmin,kmax):
     k_pic_array=np.arange(kmin,kmax,2*3.1415926/nx)
     nmodes=k_pic_array.shape[0]
     omega_pic=np.zeros(nmodes)
-
+    
     omega_plus=np.zeros(nk)
     omega_minus_r=np.zeros(nk)
     omega_minus_i=np.zeros(nk)
@@ -1213,18 +1244,18 @@ def tstream_plot_theory(v0,nx,kmin,kmax):
     # using UPIC-ES normalization
     #
     omegap=1.0
-
-
+    
+    
     for i in range(0,nk):
-
+       
         alpha=v0*karray[i]/omegap
         omega_plus[i]=omegap*np.sqrt(1+alpha*alpha+np.sqrt(1+4*alpha*alpha))
         omega_minus_r[i]=tstream_root_minus_r(karray[i],v0,omegap)
         omega_minus_i[i]=tstream_root_minus_i(karray[i],v0,omegap)
-
+        
     for i in range(0,nmodes):
         omega_pic[i]=tstream_root_minus_i(k_pic_array[i],v0,omegap)
-
+        
     plt.figure(figsize=(10,10))
     plt.plot(karray,omega_plus,'b-.',label = 'real root +')
     plt.plot(karray,omega_minus_i,'r',label = 'growth rate')
@@ -1240,7 +1271,7 @@ def tstream_plot_theory(v0,nx,kmin,kmax):
 
     plt.show()
 
-
+    
 ################################################################
 ##  the functions below are for the buneman instability notebooks
 ##  f.s. tsung & k. g. miller
@@ -1248,41 +1279,41 @@ def tstream_plot_theory(v0,nx,kmin,kmax):
 #################################################################
 
 def buneman_growth_rate(alphaarray,rmass):
-
+    
     nalpha=alphaarray.shape[0]
-
+    
     alphamin=alphaarray[0]
     alphamax=alphaarray[nalpha-1]
-
+    
     prev_root=complex(0,0)
-
+    
     growth_rate=np.zeros(nalpha)
-
+    
     def buneman_disp(x):
         return (x**-(-rmass+x**2)*(x-alphaarray[0])**2)
     new_root=mpmath.findroot(buneman_disp,prev_root,solver='newton')
     growth_rate[0]=new_root.imag
     prev_root=complex(new_root.real,new_root.imag)
 #    print(repr(prev_root))
-
+    
     for i in range(1,nalpha):
         # print(repr(i))
-        def buneman_disp2(x):
+        def buneman_disp2(x):    
             return (x**2-(-rmass+x**2)*(x-alphaarray[i])**2)
-
+    
         new_root =  mpmath.findroot(buneman_disp2, prev_root,solver='muller')
         growth_rate[i]=new_root.imag
         prev_root=complex(new_root.real,new_root.imag)
-
+    
     return growth_rate
 
 
-
-
+    
+    
 
 ################################################################
 ##  plasma dispersion functions
-##  f.s. tsung
+##  f.s. tsung 
 ##  (c) 2018 Regents of The University of California
 #################################################################
 
@@ -1295,40 +1326,41 @@ def zfunc(z):
 
 def zprime(z):
 
-## the line below is needed for the root finder, which uses MP (multi-precision) variables
-## instead of real and/or complex, so the first step is to convert the variable "z" from
-## of a type
-
+## the line below is needed for the root finder, which uses MP (multi-precision) variables 
+## instead of real and/or complex, so the first step is to convert the variable "z" from 
+## of a type 
+    
     arg= complex(z.real,z.imag)
     value= zfunc(arg)
     return(-2*(1+z*value))
 
 
 def landau(karray):
-
+    
     nk=karray.shape[0]
-
+    
     results=np.zeros(nk)
-
+    results_r = np.zeros(nk)
+    
     kmin=karray[0]
     kmax=karray[nk-1]
-
+    
     if (kmin!=0.0):
         root_trial=complex(1,0)
-
+        
         for k_val in np.arange(0.01,kmin,0.01):
             def epsilon(omega):
                 return 1-0.5*((1.0/k_val)**2)*zprime(omega/(np.sqrt(2)*k_val))
             newroot=mpmath.findroot(epsilon,root_trial,solver='muller')
             root_trial=newroot
-
+        
         results[0]=newroot.imag
     else:
         results[0]=0.0
         newroot=complex(1,0)
         root_trial=complex(1,0)
-
-
+    
+        
     for i_mode in range(1,nk):
         k_val=karray[i_mode]
         def epsilon(omega):
@@ -1336,5 +1368,7 @@ def landau(karray):
         newroot=mpmath.findroot(epsilon,root_trial,solver='muller')
         root_trial=newroot
         results[i_mode]=newroot.imag
+        results_r[i_mode] = newroot.real
+        
+    return results, results_r
 
-    return results
