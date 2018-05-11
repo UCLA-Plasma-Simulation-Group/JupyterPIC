@@ -1296,30 +1296,31 @@ def zprime(z):
 
 
 def landau(karray):
-
+    
     nk=karray.shape[0]
-
+    
     results=np.zeros(nk)
-
+    results_r = np.zeros(nk)
+    
     kmin=karray[0]
     kmax=karray[nk-1]
-
+    
     if (kmin!=0.0):
         root_trial=complex(1,0)
-
+        
         for k_val in np.arange(0.01,kmin,0.01):
             def epsilon(omega):
                 return 1-0.5*((1.0/k_val)**2)*zprime(omega/(np.sqrt(2)*k_val))
             newroot=mpmath.findroot(epsilon,root_trial,solver='muller')
             root_trial=newroot
-
+        
         results[0]=newroot.imag
     else:
         results[0]=0.0
         newroot=complex(1,0)
         root_trial=complex(1,0)
-
-
+    
+        
     for i_mode in range(1,nk):
         k_val=karray[i_mode]
         def epsilon(omega):
@@ -1327,5 +1328,7 @@ def landau(karray):
         newroot=mpmath.findroot(epsilon,root_trial,solver='muller')
         root_trial=newroot
         results[i_mode]=newroot.imag
+        results_r[i_mode] = newroot.real
+        
+    return results, results_r
 
-    return results
