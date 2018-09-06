@@ -30,6 +30,7 @@ RUN mkdir /usr/local/quickpic
 ENV PATH $PATH:/usr/local/osiris:/usr/local/beps:/usr/local/quickpic
 ENV PYTHONPATH $PYTHONPATH:/usr/local/osiris:/usr/local/quickpic
 COPY bin/osiris-1D.e /usr/local/osiris/osiris-1D.e
+COPY bin/osiris-2D.e /usr/local/osiris/osiris-2D.e
 COPY bin/upic-es.out /usr/local/beps/upic-es.out
 COPY bin/qpic.e /usr/local/quickpic/qpic.e
 COPY analysis/osiris.py /usr/local/osiris/osiris.py
@@ -40,6 +41,7 @@ COPY analysis/h5_utilities.py /usr/local/osiris/h5_utilities.py
 COPY analysis/str2keywords.py /usr/local/osiris/str2keywords.py
 COPY analysis/quickpic.py /usr/local/quickpic/quickpic.py
 RUN chmod -R 711 /usr/local/osiris/osiris-1D.e
+RUN chmod -R 711 /usr/local/osiris/osiris-2D.e
 RUN chmod -R 711 /usr/local/beps/upic-es.out
 RUN chmod -R 711 /usr/local/quickpic/qpic.e
 
