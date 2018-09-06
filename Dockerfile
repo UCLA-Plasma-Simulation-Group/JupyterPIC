@@ -11,6 +11,7 @@ USER root
 #
 RUN apt-get update && \
     apt-get install -yq --no-install-recommends \
+    openssh-client \
     libopenmpi-dev \
     libhdf5-openmpi-dev \
     gfortran \
