@@ -36,6 +36,7 @@ COPY bin/qpic.e /usr/local/quickpic/qpic.e
 COPY analysis/osiris.py /usr/local/osiris/osiris.py
 COPY analysis/combine_h5_util_1d.py /usr/local/osiris/combine_h5_util_1d.py
 COPY analysis/combine_h5_util_2d.py /usr/local/osiris/combine_h5_util_2d.py
+COPY analysis/combine_h5_util_2d_true.py /usr/local/osiris/combine_h5_util_2d_true.py
 COPY analysis/analysis.py /usr/local/osiris/analysis.py
 COPY analysis/h5_utilities.py /usr/local/osiris/h5_utilities.py
 COPY analysis/str2keywords.py /usr/local/osiris/str2keywords.py
