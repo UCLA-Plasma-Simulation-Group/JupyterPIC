@@ -5,6 +5,7 @@ import IPython.display
 import h5py
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.colors import LogNorm
 from ipywidgets import interact
 from h5_utilities import *
 from analysis import *
@@ -127,6 +128,65 @@ def runosiris(rundir='',inputfile='osiris-input.txt'):
     if (os.path.isdir(workdir+'/MS/DENSITY/ions/charge')):
         print('combining IAW files')
         combine_h5_iaw_1d()
+
+    IPython.display.clear_output(wait=True)
+    print('runosiris completed normally')
+
+    return
+
+
+def runosiris_2d(rundir='',inputfile='osiris-input.txt'):
+
+    def combine_h5_2d(ex):
+        in_file = workdir + '/MS/FLD/' + ex + '/'
+        out_file = workdir + '/' + ex + '.h5'
+        for path in execute(["python", "/usr/local/osiris/combine_h5_util_2d_true.py", in_file, out_file]):
+            IPython.display.clear_output(wait=True)
+#            print(path, end='')
+
+    def combine_h5_iaw_2d():
+        in_file = workdir + '/MS/DENSITY/ions/charge/'
+        out_file = workdir + '/ions.h5'
+        for path in execute(["python", "/usr/local/osiris/combine_h5_util_2d_true.py", in_file, out_file]):
+            IPython.display.clear_output(wait=True)
+#            print(path, end='')
+
+    workdir = os.getcwd()
+    workdir += '/' + rundir
+    print(workdir)
+
+    # run osiris-2D.e executable
+    if(not os.path.isdir(workdir)):
+       os.mkdir(workdir)
+    if(rundir != ''):
+#        shutil.copyfile('osiris-2D.e',workdir+'/osiris-2D.e')
+        shutil.copyfile(inputfile,workdir+'/osiris-input.txt')
+    waittick = 0
+    for path in execute(["osiris-2D.e","-w",workdir,"osiris-input.txt"]):
+        waittick += 1
+        if(waittick == 100):
+            IPython.display.clear_output(wait=True)
+            waittick = 0
+            print(path, end='')
+
+    # run combine_h5_util_1d.py script for e1/, e2/, e3/ (and iaw if applicable)
+    print('combining E1 files')
+    combine_h5_2d('e1')
+    print('combining E2 files')
+    combine_h5_2d('e2')
+    print('combining E3 files')
+    combine_h5_2d('e3')
+    print('combining B1 files')
+    combine_h5_2d('b1')
+    print('combining B2 files')
+    combine_h5_2d('b2')
+    print('combining B3 files')
+    combine_h5_2d('b3')
+
+    # run combine on iaw data if present
+    if (os.path.isdir(workdir+'/MS/DENSITY/ions/charge')):
+        print('combining IAW files')
+        combine_h5_iaw_2d()
 
     IPython.display.clear_output(wait=True)
     print('runosiris completed normally')
@@ -1331,4 +1391,238 @@ def landau(karray):
         results_r[i_mode] = newroot.real
         
     return results, results_r
+
+
+
+################################################################
+##  Kyle's 2D functions
+##  K.G. Miller
+##  (c) 2018 Regents of The University of California
+#################################################################
+
+def field_2d(rundir='',dataset='e1',time=0,space=-1,
+    xlim=[-1,-1],ylim=[-1,-1],zlim=[-1,-1],
+    plotdata=[], **kwargs):
+
+    if(space != -1):
+        plot_or = 1
+        PATH = gen_path(rundir, plot_or)
+        hdf5_data = read_hdf(PATH)
+        plt.figure(figsize=(8,5))
+        #plotme(hdf5_data.data[:,space], **kwargs)
+        plotme(hdf5_data,hdf5_data.data[space,:])
+        plt.title('temporal evolution of e' + str(plot_or) + ' at cell ' + str(space))
+        plt.xlabel('t')
+        plt.show()
+        return
+
+
+    workdir = os.getcwd()
+    workdir = os.path.join(workdir, rundir)
+
+    odir = os.path.join(workdir, 'MS', 'FLD', dataset)
+    files = sorted(os.listdir(odir))
+
+    i = 0
+    for j in range(len(files)):
+        fhere = h5py.File(os.path.join(odir,files[j]), 'r')
+        if(fhere.attrs['TIME'] >= time):
+            i = j
+            break
+
+    fhere = h5py.File(os.path.join(odir,files[i]), 'r')
+
+    plt.figure(figsize=(6, 3.2))
+    plt.title(dataset+' at t = '+str(fhere.attrs['TIME'][0]))
+    plt.xlabel('$x_1 [c/\omega_p]$')
+    plt.ylabel('$x_2 [c/\omega_p]$')
+
+    xaxismin = fhere['AXIS']['AXIS1'][0]
+    xaxismax = fhere['AXIS']['AXIS1'][1]
+    yaxismin = fhere['AXIS']['AXIS2'][0]
+    yaxismax = fhere['AXIS']['AXIS2'][1]
+
+    plt.imshow(fhere[dataset][:,:],
+               aspect='auto',
+               extent=[xaxismin, xaxismax, yaxismin, yaxismax])
+    c=plt.colorbar(orientation='vertical')
+    c.set_label(dataset)
+
+    if(xlim != [-1,-1]):
+        plt.xlim(xlim)
+    if(ylim != [-1,-1]):
+        plt.ylim(ylim)
+    if(zlim != [-1,-1]):
+        plt.clim(zlim)
+
+    plt.show()
+
+
+def phasespace_2d(rundir='',dataset='p1x1',species='electrons',time=0,
+    xlim=[-1,-1],ylim=[-1,-1],zlim=[-1,-1],
+    plotdata=[]):
+
+    workdir = os.getcwd()
+    workdir = os.path.join(workdir, rundir)
+
+    odir = os.path.join(workdir, 'MS', 'PHA', dataset, species)
+    files = sorted(os.listdir(odir))
+
+    i = 0
+    for j in range(len(files)):
+        fhere = h5py.File(os.path.join(odir,files[j]), 'r')
+        if(fhere.attrs['TIME'] >= time):
+            i = j
+            break
+
+    fhere = h5py.File(os.path.join(odir,files[i]), 'r')
+    enc = "utf-8"
+
+    plt.figure(figsize=(6, 3.2))
+    plt.title(dataset+' phasespace at t = '+str(fhere.attrs['TIME'][0]))
+    plt.xlabel('$'+str(fhere['AXIS/AXIS1'].attrs['LONG_NAME'][0],enc)+' ['+ \
+        str(fhere['AXIS/AXIS1'].attrs['UNITS'][0],enc)+']$')
+    plt.ylabel('$'+str(fhere['AXIS/AXIS2'].attrs['LONG_NAME'][0],enc)+' ['+ \
+        str(fhere['AXIS/AXIS2'].attrs['UNITS'][0],enc)+']$')
+
+    xaxismin = fhere['AXIS/AXIS1'][0]
+    xaxismax = fhere['AXIS/AXIS1'][1]
+    yaxismin = fhere['AXIS/AXIS2'][0]
+    yaxismax = fhere['AXIS/AXIS2'][1]
+
+    if(zlim != [-1,-1]):
+        norm = LogNorm(zlim[0],zlim[1])
+        offset = 0
+    else:
+        offset = 1e-12
+        norm = LogNorm(offset,np.max(np.abs(fhere[dataset][:,:])))
+
+    plt.imshow(np.abs(fhere[dataset][:,:])+offset,
+               aspect='auto',
+               extent=[xaxismin, xaxismax, yaxismin, yaxismax],
+               norm=norm)
+    c=plt.colorbar(orientation='vertical')
+    c.set_label(str(fhere[dataset].attrs['UNITS'][0],enc))
+
+
+    if(xlim != [-1,-1]):
+        plt.xlim(xlim)
+    if(ylim != [-1,-1]):
+        plt.ylim(ylim)
+
+    plt.show()
+
+
+def fieldinteract_2d(rundir='',dataset='e1',
+    xlim=[-1,-1],ylim=[-1,-1],zlim=[-1,-1],
+    plotdata=[],const_clim=True):
+
+    workdir = os.getcwd()
+    workdir = os.path.join(workdir, rundir)
+
+    odir = os.path.join(workdir, 'MS', 'FLD', dataset)
+    files = sorted(os.listdir(odir))
+    enc = "utf-8"
+
+    data = []
+    axes_lim = []
+    norm = []
+    for i in range(len(files)):
+        fhere = h5py.File(os.path.join(odir,files[i]), 'r')
+        data.append([fhere[dataset][:,:],fhere.attrs['TIME'][0],fhere.attrs['DT']])
+        axes_lim.append(np.array([fhere['AXIS/AXIS1'][:],fhere['AXIS/AXIS2'][:]]).flatten())
+        xlabel = '$'+str(fhere['AXIS/AXIS1'].attrs['LONG_NAME'][0],enc)+' ['+ \
+                 str(fhere['AXIS/AXIS1'].attrs['UNITS'][0],enc)+']$'
+        ylabel = '$'+str(fhere['AXIS/AXIS2'].attrs['LONG_NAME'][0],enc)+' ['+ \
+                 str(fhere['AXIS/AXIS2'].attrs['UNITS'][0],enc)+']$'
+        clabel = '$'+str(fhere[dataset].attrs['LONG_NAME'][0],enc)+' ['+ \
+                 str(fhere[dataset].attrs['UNITS'][0],enc)+']$'
+
+    if(zlim == [-1,-1]):
+        if(const_clim):
+            min_val = np.min([ np.min(x[0]) for x in data])
+            max_val = np.max([ np.max(x[0]) for x in data])
+
+    def fu(n):
+        plt.figure(figsize=(8, 4))
+        plt.xlabel(xlabel)
+        plt.ylabel(ylabel)
+        plt.imshow(data[n][0],
+               extent=axes_lim[n],
+               aspect='auto',)
+        plt.title('time = '+str(data[n][1]))
+        c=plt.colorbar()
+        c.set_label(clabel)
+        if(xlim != [-1,-1]):
+            plt.xlim(xlim)
+        if(ylim != [-1,-1]):
+            plt.ylim(ylim)
+        if(zlim != [-1,-1]):
+            plt.clim(zlim)
+        else:
+            if(const_clim):
+                plt.clim([min_val,max_val])
+        return plt
+
+    interact(fu,n=(0,len(data)-1))
+
+
+def phaseinteract_2d(rundir='',dataset='p1x1',species='electrons',
+    xlim=[-1,-1],ylim=[-1,-1],zlim=[-1,-1],
+    plotdata=[],const_clim=True):
+
+    workdir = os.getcwd()
+    workdir = os.path.join(workdir, rundir)
+
+    odir = os.path.join(workdir, 'MS', 'PHA', dataset, species)
+    files = sorted(os.listdir(odir))
+    enc = "utf-8"
+    if(zlim != [-1,-1]):
+        offset = 0
+    else:
+        offset = 1e-12
+
+    data = []
+    axes_lim = []
+    norm = []
+    for i in range(len(files)):
+        fhere = h5py.File(os.path.join(odir,files[i]), 'r')
+        data.append([np.abs(fhere[dataset][:,:])+offset,fhere.attrs['TIME'][0],fhere.attrs['DT']])
+        axes_lim.append(np.array([fhere['AXIS/AXIS1'][:],fhere['AXIS/AXIS2'][:]]).flatten())
+        xlabel = '$'+str(fhere['AXIS/AXIS1'].attrs['LONG_NAME'][0],enc)+' ['+ \
+                 str(fhere['AXIS/AXIS1'].attrs['UNITS'][0],enc)+']$'
+        ylabel = '$'+str(fhere['AXIS/AXIS2'].attrs['LONG_NAME'][0],enc)+' ['+ \
+                 str(fhere['AXIS/AXIS2'].attrs['UNITS'][0],enc)+']$'
+        clabel = '$'+str(fhere[dataset].attrs['LONG_NAME'][0],enc)+' ['+ \
+                 str(fhere[dataset].attrs['UNITS'][0],enc)+']$'
+        if(zlim != [-1,-1]):
+            norm.append(LogNorm(zlim[0],zlim[1]))
+        else:
+            norm.append(LogNorm(offset,np.max(data[-1][0])))
+
+    if(zlim == [-1,-1]):
+        if(const_clim):
+            norm=[]
+            max_val = np.max([ np.max(x[0]) for x in data])
+            for i in range(len(files)):
+                norm.append(LogNorm(offset,max_val))
+
+    def fu(n):
+        plt.figure(figsize=(8, 4))
+        plt.xlabel(xlabel)
+        plt.ylabel(ylabel)
+        plt.imshow(data[n][0],
+               extent=axes_lim[n],
+               aspect='auto',
+               norm=norm[n])
+        plt.title('time = '+str(data[n][1]))
+        c=plt.colorbar()
+        c.set_label(clabel)
+        if(xlim != [-1,-1]):
+            plt.xlim(xlim)
+        if(ylim != [-1,-1]):
+            plt.ylim(ylim)
+        return plt
+
+    interact(fu,n=(0,len(data)-1))
 
