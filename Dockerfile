@@ -66,4 +66,19 @@ RUN chmod 777 velocities
 RUN chmod 777 x-and-o-mode-dispersion
 RUN chmod 777 x-mode-propagation
 
+WORKDIR ..
+COPY dev dev
+RUN chmod 777 dev
+WORKDIR dev
+RUN chmod 777 Landau-Damping
+RUN chmod 777 buneman
+RUN chmod 777 driven_waves
+RUN chmod 777 heatflow_oshun
+RUN chmod 777 iaw-fluid-theory
+RUN chmod 777 interactive-theory
+RUN chmod 777 quickpic_pwfa
+RUN chmod 777 weibel
+
+WORKDIR ..
+
 USER $NB_USER 
