@@ -28,3 +28,16 @@ We welcome contributions and ideas:  please email us at picksc.org@gmail.com
 
 The above commands will write simulation output into the project directories.  If you would like to keep a fresh copy of this original GitHub repository, it is important that you copy this JupyterPIC directory into a separate location on your computer for simulation purposes and personal file modifications.
 
+## Running notebooks under Windows:
+
+The docker environment also works under windows if you can install Docker on your Windows system.  Installing docker requires very recent versions of Windows 10 (2018 or later), but if you have a newer (i.e., purchased after 2017) computer you should be able install and run the Docker container needed to run these notebooks.  Then, you must enable disk sharing on the directory where this GitHub repo is located.  (i.e., C:, D: or G:)  To start the Docker container, first download it from the Dockerhub
+
+docker pull picksc/jupyterpic
+
+Then open PowerShell in Windows, and launch the docker container.
+
+docker run -v ${PWD}:/home/jovyan -p 8888:8888 picksc/jupyterpic
+
+
+
+docker run 
