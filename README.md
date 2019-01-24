@@ -38,6 +38,3 @@ Then open PowerShell in Windows, and launch the docker container.
 
 docker run -v ${PWD}:/home/jovyan -p 8888:8888 picksc/jupyterpic
 
-
-
-docker run 
