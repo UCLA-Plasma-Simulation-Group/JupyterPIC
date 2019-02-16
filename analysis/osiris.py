@@ -14,6 +14,19 @@ from scipy import special
 import cmath
 import mpmath
 
+# FEB 2019
+# Now using Han Wen's library for I/O, Feb 2019
+import osh5io
+import osh5def
+import osh5vis
+
+import osh5utils
+
+import matplotlib.colors as colors
+import ipywidgets as widgets
+#
+
+
 
 def execute(cmd):
 
@@ -1626,3 +1639,83 @@ def phaseinteract_2d(rundir='',dataset='p1x1',species='electrons',
 
     interact(fu,n=(0,len(data)-1))
 
+
+
+
+SMALL_SIZE = 20
+MEDIUM_SIZE = 24
+BIGGER_SIZE = 28
+
+plt.rc('font',size=SMALL_SIZE)
+plt.rc('axes',titlesize=SMALL_SIZE)
+plt.rc('axes',labelsize=MEDIUM_SIZE)
+plt.rc('xtick',labelsize=SMALL_SIZE)
+plt.rc('ytick',labelsize=SMALL_SIZE)
+plt.rc('legend',fontsize=SMALL_SIZE)
+plt.rc('figure',titlesize=BIGGER_SIZE)
+
+def phasespace_movie(dirname):
+#2345
+    import os
+    
+    
+    def something(dirname,file_no):
+        
+        my_path=os.getcwd()
+        #print(my_path)
+        working_dir=my_path+'/'+dirname
+        #print(working_dir)
+        efield_dir=working_dir+'/DIAG/Ex/'
+        phase_space_dir=working_dir+'\\DIAG\\Vx_x\\'
+        ex_prefix='Ex-0_'
+        phase_prefix='vx_x_'
+        plt.figure(figsize=(12,6))
+        
+        filename1=phase_space_dir+phase_prefix+repr(file_no).zfill(6)+'.h5'
+        filename2=efield_dir+ex_prefix+repr(file_no).zfill(6)+'.h5'
+        
+        #print(filename1)
+        #print(filename2)
+        
+        phase_space=np.abs(osh5io.read_h5(filename1))
+        # print(repr(phase_space))
+        ex=osh5io.read_h5(filename2)
+        
+        phase_plot=plt.subplot(121)
+        #print(repr(phase_space.axes[0].min))
+        #print(repr(phase_space.axes[1].min))
+        title=phase_space.data_attrs['LONG_NAME']
+        time=phase_space.run_attrs['TIME'][0]
+        ext_stuff=[phase_space.axes[1].min,phase_space.axes[1].max,phase_space.axes[0].min,phase_space.axes[0].max]
+        phase_contour=plt.contourf(phase_space,levels=[0.1,1,2,3,5,10,100,1000,100000],extent=ext_stuff,cmap='Spectral',vmin=1e-1,vmax=100000,
+                    norm=colors.LogNorm(vmin=0.1,vmax=100000))
+        phase_plot.set_title('Phase Space' +' , t='+repr(time)+' $\omega_{pe}^{-1}$')
+        phase_plot.set_xlabel('Position [$\Delta x$]')
+        phase_plot.set_ylabel('Velocity [$\omega_{pe} \Delta x$]')
+        #plt.colorbar()
+        #osh5vis.oscontour(phase_space,levels=[10**-5,10**-3,10**-1,1,10,100],colors='black',linestyles='dashed',vmin=1e-5,vmax=1000)
+        plt.contour(phase_space,levels=[0.1,1,2,3,5,10,100,1000,100000],extent=ext_stuff,colors='black',linestyles='dashed')
+        plt.colorbar(phase_contour)
+        ex_plot = plt.subplot(122)
+        
+        plt.plot(ex[0,:])
+        plt.ylim([-2,2])
+        ex_plot.set_xlabel('Position [$\Delta x$]')
+        ex_plot.set_ylabel('Electric Field')
+        plt.tight_layout()
+        plt.show()
+#2345        
+    my_path=os.getcwd()
+    working_dir=my_path+'/'+dirname    
+    phase_space_dir=working_dir+'/DIAG/Vx_x/'
+    files=sorted(os.listdir(phase_space_dir))
+    start=files[1].find('_x_')+3
+    end=files[1].find('.')
+    print(files[1][start:end])
+    file_interval=int(files[1][start:end])
+    file_max=(len(files)-1)*file_interval
+    
+    interact(something,dirname=fixed(dirname),file_no=widgets.IntSlider(min=0,max=file_max,step=file_interval,value=0))
+    #something(dirname=dirname,file_no=20)
+
+    

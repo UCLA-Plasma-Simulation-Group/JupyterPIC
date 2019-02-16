@@ -58,7 +58,7 @@
  VDZI = 0.000, 
  NPLOT = 0, 
  NTW = 50, 
- NTP = 3, 
+ NTP = 4, 
  NTA = 0, 
  NTV = 0, 
  NTS = 0, 

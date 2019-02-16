@@ -65,7 +65,7 @@
 /
 
 &pinput2_jf
-  ntfield=3,
+  ntfield=2,
   fvxmax=25., fvymax=25. ,
   fvxmax_ion=10., fvymax_ion=10. ,
   nphbx=100,nphby=100,
