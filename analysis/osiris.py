@@ -23,6 +23,8 @@ import osh5vis
 import osh5utils
 
 import matplotlib.colors as colors
+import ipywidgets
+
 import ipywidgets as widgets
 #
 
@@ -1666,7 +1668,7 @@ def phasespace_movie(dirname):
         working_dir=my_path+'/'+dirname
         #print(working_dir)
         efield_dir=working_dir+'/DIAG/Ex/'
-        phase_space_dir=working_dir+'\\DIAG\\Vx_x\\'
+        phase_space_dir=working_dir+'/DIAG/Vx_x/'
         ex_prefix='Ex-0_'
         phase_prefix='vx_x_'
         plt.figure(figsize=(12,6))
