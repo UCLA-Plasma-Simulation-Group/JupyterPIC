@@ -46,6 +46,13 @@ COPY analysis/str2keywords.py /usr/local/osiris/str2keywords.py
 COPY analysis/quickpic.py /usr/local/quickpic/quickpic.py
 COPY analysis/oshunroutines.py /usr/local/oshun/oshunroutines.py
 COPY analysis/heatflowroutines.py /usr/local/oshun/heatflowroutines.py
+COPY analysis/osh5def.py /usr/local/oshun/osh5def.py
+COPY analysis/osh5gui.py /usr/local/oshun/osh5gui.py
+COPY analysis/osh5io.py /usr/local/oshun/osh5io.py
+COPY analysis/osh5io_dummy.py /usr/local/oshun/osh5io_dummy.py
+COPY analysis/osh5utils.py /usr/local/oshun/osh5utils.py
+COPY analysis/osh5vis.py /usr/local/oshun/osh5vis.py
+COPY analysis/osh5visipy.py /usr/local/oshun/osh5visipy.py
 RUN chmod -R 711 /usr/local/osiris/osiris-1D.e
 RUN chmod -R 711 /usr/local/osiris/osiris-2D.e
 RUN chmod -R 711 /usr/local/beps/upic-es.out

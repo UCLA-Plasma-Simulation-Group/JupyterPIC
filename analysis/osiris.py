@@ -6,7 +6,7 @@ import h5py
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm
-from ipywidgets import interact
+from ipywidgets import interact, fixed
 from h5_utilities import *
 from analysis import *
 from scipy.optimize import fsolve
@@ -1656,16 +1656,16 @@ plt.rc('ytick',labelsize=SMALL_SIZE)
 plt.rc('legend',fontsize=SMALL_SIZE)
 plt.rc('figure',titlesize=BIGGER_SIZE)
 
-def phasespace_movie(dirname):
+def phasespace_movie(rundir):
 #2345
     import os
     
     
-    def something(dirname,file_no):
+    def something(rundir,file_no):
         
         my_path=os.getcwd()
         #print(my_path)
-        working_dir=my_path+'/'+dirname
+        working_dir=my_path+'/'+rundir
         #print(working_dir)
         efield_dir=working_dir+'/DIAG/Ex/'
         phase_space_dir=working_dir+'/DIAG/Vx_x/'
@@ -1708,7 +1708,7 @@ def phasespace_movie(dirname):
         plt.show()
 #2345        
     my_path=os.getcwd()
-    working_dir=my_path+'/'+dirname    
+    working_dir=my_path+'/'+rundir    
     phase_space_dir=working_dir+'/DIAG/Vx_x/'
     files=sorted(os.listdir(phase_space_dir))
     start=files[1].find('_x_')+3
@@ -1717,7 +1717,7 @@ def phasespace_movie(dirname):
     file_interval=int(files[1][start:end])
     file_max=(len(files)-1)*file_interval
     
-    interact(something,dirname=fixed(dirname),file_no=widgets.IntSlider(min=0,max=file_max,step=file_interval,value=0))
-    #something(dirname=dirname,file_no=20)
+    interact(something,rundir=fixed(rundir),file_no=widgets.IntSlider(min=0,max=file_max,step=file_interval,value=0))
+    #something(rundir=rundir,file_no=20)
 
     
