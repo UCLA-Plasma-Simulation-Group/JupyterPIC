@@ -58,6 +58,8 @@ def run_upic_es(rundir='',inputfile='pinput2'):
             IPython.display.clear_output(wait=True)
 
     workdir = os.getcwd()
+    localexec = os.path.isfile(workdir+'/upic-es.out')
+    sysexec = '/usr/local/beps/upic-es.out'
     workdir += '/' + rundir
     print(workdir)
 
@@ -70,8 +72,12 @@ def run_upic_es(rundir='',inputfile='pinput2'):
 
     # run the upic-es executable
     print('running upic-es.out ...')
-    for path in execute(['/usr/local/beps/upic-es.out']):
-        pass
+    if localexec:
+        for path in execute([localexec]):
+            pass
+    else:
+        for path in execute([sysexec]):
+            pass
     IPython.display.clear_output(wait=True)
 
     # run the combine script on electric field data
@@ -114,6 +120,8 @@ def runosiris(rundir='',inputfile='osiris-input.txt'):
 #            print(path, end='')
 
     workdir = os.getcwd()
+    localexec = os.path.isfile(workdir+'/osiris-1D.e')
+    sysexec = '/usr/local/osiris/osiris-1D.e'
     workdir += '/' + rundir
     print(workdir)
 
@@ -124,12 +132,20 @@ def runosiris(rundir='',inputfile='osiris-input.txt'):
 #        shutil.copyfile('osiris-1D.e',workdir+'/osiris-1D.e')
         shutil.copyfile(inputfile,workdir+'/osiris-input.txt')
     waittick = 0
-    for path in execute(["osiris-1D.e","-w",workdir,"osiris-input.txt"]):
-        waittick += 1
-        if(waittick == 100):
-            IPython.display.clear_output(wait=True)
-            waittick = 0
-            print(path, end='')
+    if localexec:
+        for path in execute([localexec,"-w",workdir,"osiris-input.txt"]):
+            waittick += 1
+            if(waittick == 100):
+                IPython.display.clear_output(wait=True)
+                waittick = 0
+                print(path, end='')
+    else:
+        for path in execute([sysexec,"-w",workdir,"osiris-input.txt"]):
+            waittick += 1
+            if(waittick == 100):
+                IPython.display.clear_output(wait=True)
+                waittick = 0
+                print(path, end='')
 
     # run combine_h5_util_1d.py script for e1/, e2/, e3/ (and iaw if applicable)
     print('combining E1 files')
@@ -167,6 +183,8 @@ def runosiris_2d(rundir='',inputfile='osiris-input.txt'):
 #            print(path, end='')
 
     workdir = os.getcwd()
+    localexec = os.path.isfile(workdir+'/osiris-2D.e')
+    sysexec = '/usr/local/osiris/osiris-2D.e'
     workdir += '/' + rundir
     print(workdir)
 
@@ -177,12 +195,20 @@ def runosiris_2d(rundir='',inputfile='osiris-input.txt'):
 #        shutil.copyfile('osiris-2D.e',workdir+'/osiris-2D.e')
         shutil.copyfile(inputfile,workdir+'/osiris-input.txt')
     waittick = 0
-    for path in execute(["osiris-2D.e","-w",workdir,"osiris-input.txt"]):
-        waittick += 1
-        if(waittick == 100):
-            IPython.display.clear_output(wait=True)
-            waittick = 0
-            print(path, end='')
+    if localexec:
+        for path in execute([localexec,"-w",workdir,"osiris-input.txt"]):
+            waittick += 1
+            if(waittick == 100):
+                IPython.display.clear_output(wait=True)
+                waittick = 0
+                print(path, end='')
+    else:
+        for path in execute([sysexec,"-w",workdir,"osiris-input.txt"]):
+            waittick += 1
+            if(waittick == 100):
+                IPython.display.clear_output(wait=True)
+                waittick = 0
+                print(path, end='')
 
     # run combine_h5_util_1d.py script for e1/, e2/, e3/ (and iaw if applicable)
     print('combining E1 files')
