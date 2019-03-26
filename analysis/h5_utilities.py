@@ -407,14 +407,14 @@ def write_hdf(data, filename, dataset_name = None, write_data = True):
     file.attrs['TIME'] = 0.0
     file.attrs['TIME UNITS'] = ''
     file.attrs['TYPE'] = 'grid'
-    file.attrs['XMIN'] = [0.0, 0.0, 0.0]
-    file.attrs['XMAX'] = [1.0, 1.0, 1.0]
+    file.attrs['XMIN'] = [0.0, 0.0, 0.0, 0.0]
+    file.attrs['XMAX'] = [1.0, 1.0, 1.0, 1.0]
     # now make defaults/copy over the attributes in the root of the hdf5
     for key,value in data_object.run_attributes.items():
         file.attrs[key] = value
     # in order to fill in XMIN/XMAX, let's use the values we have in the axes objects.
-    xmin = [0.0,0.0,0.0]
-    xmax = [1.0,1.0,0.0]
+    xmin = [0.0,0.0,0.0,0.0]
+    xmax = [1.0,1.0,1.0,1.0]
     #TODO: find out if x,y,z have semantic meaning or is it just the order of the axes in the list.
     for i,axis in enumerate(data_object.axes):
         xmin[i] =  data_object.axes[i].axis_min

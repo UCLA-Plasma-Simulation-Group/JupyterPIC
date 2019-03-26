@@ -5,19 +5,30 @@ import IPython.display
 import h5py
 import numpy as np
 import matplotlib.pyplot as plt
-from ipywidgets import interact
+from matplotlib.colors import LogNorm
+from ipywidgets import interact, fixed
 from h5_utilities import *
 from analysis import *
 from scipy.optimize import fsolve
 
-###  for the plasma dispersion function 
 from scipy import special
 import cmath
-### 
-
-###  root finder
 import mpmath
-###
+
+# FEB 2019
+# Now using Han Wen's library for I/O, Feb 2019
+import osh5io
+import osh5def
+import osh5vis
+
+import osh5utils
+
+import matplotlib.colors as colors
+import ipywidgets
+
+import ipywidgets as widgets
+#
+
 
 
 def execute(cmd):
@@ -38,16 +49,18 @@ def run_upic_es(rundir='',inputfile='pinput2'):
         out_file = workdir + '/' + ex + '.h5'
         for path in execute(["python", "/usr/local/osiris/combine_h5_util_2d.py", in_file, out_file]):
             IPython.display.clear_output(wait=True)
-#            print(path, end='')
-            
+            print(path, end='')
+
     def combine_h5_iaw_2d():
         in_file = workdir + '/DIAG/IDen/'
         out_file = workdir + '/ions.h5'
         for path in execute(["python", "/usr/local/osiris/combine_h5_util_2d.py", in_file, out_file]):
+            print(path, end='')
             IPython.display.clear_output(wait=True)
-#            print(path, end='')
-    
+
     workdir = os.getcwd()
+    localexec = os.path.isfile(workdir+'/upic-es.out')
+    sysexec = '/usr/local/beps/upic-es.out'
     workdir += '/' + rundir
     print(workdir)
 
@@ -57,32 +70,34 @@ def run_upic_es(rundir='',inputfile='pinput2'):
         shutil.copyfile(inputfile,workdir+'/pinput2')
     
     os.chdir(workdir)
-        
-    # run the upic-es executable    
-    waittick = 0
-    for path in execute(["/usr/local/beps/upic-es.out"]):
-        waittick += 1
-        if(waittick == 100):
-            IPython.display.clear_output(wait=True)
-            waittick = 0
-#            print(path, end='')
-            
-    
-            
-    # run the combine script
+
+
+    # run the upic-es executable
+    print('running upic-es.out ...')
+    if localexec:
+        for path in execute([localexec]):
+            pass
+    else:
+        for path in execute([sysexec]):
+            pass
+    IPython.display.clear_output(wait=True)
+
+    # run the combine script on electric field data
+    print('combining Ex files')
     combine_h5_2d('DIAG', 'Ex')
     combine_h5_2d('DIAG', 'Ey')
     combine_h5_2d('DIAG', 'pot')
-
     print('combine_h5_2d completed normally')
     
     # run combine on iaw data if present
     if (os.path.isdir(workdir + '/DIAG/IDen/')):
         combine_h5_iaw_2d()
         print('combine_h5_iaw completed normally')
-        
-#     IPython.display.clear_output(wait=True)
-    print('runbeps completed normally')
+
+
+    IPython.display.clear_output(wait=True)
+    print('run_upic_es completed normally')
+
     os.chdir('../')
     
     return
@@ -105,6 +120,8 @@ def runosiris(rundir='',inputfile='osiris-input.txt'):
 #            print(path, end='')
 
     workdir = os.getcwd()
+    localexec = os.path.isfile(workdir+'/osiris-1D.e')
+    sysexec = '/usr/local/osiris/osiris-1D.e'
     workdir += '/' + rundir
     print(workdir)
 
@@ -115,12 +132,21 @@ def runosiris(rundir='',inputfile='osiris-input.txt'):
 #        shutil.copyfile('osiris-1D.e',workdir+'/osiris-1D.e')
         shutil.copyfile(inputfile,workdir+'/osiris-input.txt')
     waittick = 0
-    for path in execute(["osiris-1D.e","-w",workdir,"osiris-input.txt"]):
-        waittick += 1
-        if(waittick == 100):
-            IPython.display.clear_output(wait=True)
-            waittick = 0
-#            print(path, end='')
+
+    if localexec:
+        for path in execute([localexec,"-w",workdir,"osiris-input.txt"]):
+            waittick += 1
+            if(waittick == 100):
+                IPython.display.clear_output(wait=True)
+                waittick = 0
+                print(path, end='')
+    else:
+        for path in execute([sysexec,"-w",workdir,"osiris-input.txt"]):
+            waittick += 1
+            if(waittick == 100):
+                IPython.display.clear_output(wait=True)
+                waittick = 0
+                print(path, end='')
 
     # run combine_h5_util_1d.py script for e1/, e2/, e3/ (and iaw if applicable)
     combine_h5_1d('e1')
@@ -131,6 +157,75 @@ def runosiris(rundir='',inputfile='osiris-input.txt'):
     if (os.path.isdir(workdir+'/MS/DENSITY/ions/charge')):
         combine_h5_iaw_1d()
         
+    IPython.display.clear_output(wait=True)
+    print('runosiris completed normally')
+
+    return
+
+
+def runosiris_2d(rundir='',inputfile='osiris-input.txt'):
+
+    def combine_h5_2d(ex):
+        in_file = workdir + '/MS/FLD/' + ex + '/'
+        out_file = workdir + '/' + ex + '.h5'
+        for path in execute(["python", "/usr/local/osiris/combine_h5_util_2d_true.py", in_file, out_file]):
+            IPython.display.clear_output(wait=True)
+#            print(path, end='')
+
+    def combine_h5_iaw_2d():
+        in_file = workdir + '/MS/DENSITY/ions/charge/'
+        out_file = workdir + '/ions.h5'
+        for path in execute(["python", "/usr/local/osiris/combine_h5_util_2d_true.py", in_file, out_file]):
+            IPython.display.clear_output(wait=True)
+#            print(path, end='')
+
+    workdir = os.getcwd()
+    localexec = os.path.isfile(workdir+'/osiris-2D.e')
+    sysexec = '/usr/local/osiris/osiris-2D.e'
+    workdir += '/' + rundir
+    print(workdir)
+
+    # run osiris-2D.e executable
+    if(not os.path.isdir(workdir)):
+       os.mkdir(workdir)
+    if(rundir != ''):
+#        shutil.copyfile('osiris-2D.e',workdir+'/osiris-2D.e')
+        shutil.copyfile(inputfile,workdir+'/osiris-input.txt')
+    waittick = 0
+    if localexec:
+        for path in execute([localexec,"-w",workdir,"osiris-input.txt"]):
+            waittick += 1
+            if(waittick == 100):
+                IPython.display.clear_output(wait=True)
+                waittick = 0
+                print(path, end='')
+    else:
+        for path in execute([sysexec,"-w",workdir,"osiris-input.txt"]):
+            waittick += 1
+            if(waittick == 100):
+                IPython.display.clear_output(wait=True)
+                waittick = 0
+                print(path, end='')
+
+    # run combine_h5_util_1d.py script for e1/, e2/, e3/ (and iaw if applicable)
+    print('combining E1 files')
+    combine_h5_2d('e1')
+    print('combining E2 files')
+    combine_h5_2d('e2')
+    print('combining E3 files')
+    combine_h5_2d('e3')
+    print('combining B1 files')
+    combine_h5_2d('b1')
+    print('combining B2 files')
+    combine_h5_2d('b2')
+    print('combining B3 files')
+    combine_h5_2d('b3')
+
+    # run combine on iaw data if present
+    if (os.path.isdir(workdir+'/MS/DENSITY/ions/charge')):
+        print('combining IAW files')
+        combine_h5_iaw_2d()
+
     IPython.display.clear_output(wait=True)
     print('runosiris completed normally')
 
@@ -942,7 +1037,46 @@ def plot_tk_arb(rundir, field, title='potential', klim=5,tlim=100):
     plt.xlim(0,klim)
     plt.ylim(0,tlim)
     plt.show()
-    
+
+def wk_upic_iaw(rundir, field, TITLE='', background=0.0, wlim=[None,None],
+                klim=[None,None], show_theory=True, **kwargs):
+
+    # initialize values
+    PATH = os.getcwd() + '/' + rundir + '/' + field + '.h5'
+    hdf5_data = read_hdf(PATH)
+    if (background!=0.0):
+        hdf5_data.data = hdf5_data.data-background
+    hdf5_data = FFT_hdf5(hdf5_data)         # FFT the data (x-t -> w-k)
+
+    if(wlim == [None,None]):
+        wlim[0] = hdf5_data.axes[1].axis_min
+        wlim[1] = hdf5_data.axes[1].axis_max
+    if(klim == [None,None]):
+        klim[0] = hdf5_data.axes[0].axis_min
+        klim[1] = hdf5_data.axes[0].axis_max
+
+    # create fluid theory dispersion relation
+    def w(k, vtx=1.0, rmass=100.0):
+        c_s = vtx/np.sqrt(rmass)  # VTX/sqrt(RMASS) in input deck
+        k_DE = 1/vtx
+        w = k*c_s/np.sqrt(1+(k/k_DE)**2)
+        return w
+
+    ks = np.linspace(klim[0],klim[1],100*(klim[1]-klim[0]))
+    ws = w(ks, **kwargs)
+
+    # create figure
+    plt.figure(figsize=(8,5))
+    plotme(hdf5_data)
+    plt.title(TITLE + ' $\omega$-k space' +  TITLE)
+    plt.xlabel('k  [$1/ \Delta x$]')
+    plt.ylabel('$\omega$  [$\omega_{pe}$]')
+    plt.xlim(klim[0],klim[1])
+    plt.ylim(wlim[0],wlim[1])
+    if (show_theory==True):
+        plt.plot(ks,ws)
+        plt.show()
+
 
 def plot_tk_2stream(rundir, field, klim=5,tlim=100,v0=1):
 
@@ -1372,3 +1506,317 @@ def landau(karray):
         
     return results, results_r
 
+
+
+################################################################
+##  Kyle's 2D functions
+##  K.G. Miller
+##  (c) 2018 Regents of The University of California
+#################################################################
+
+def field_2d(rundir='',dataset='e1',time=0,space=-1,
+    xlim=[-1,-1],ylim=[-1,-1],zlim=[-1,-1],
+    plotdata=[], **kwargs):
+
+    if(space != -1):
+        plot_or = 1
+        PATH = gen_path(rundir, plot_or)
+        hdf5_data = read_hdf(PATH)
+        plt.figure(figsize=(8,5))
+        #plotme(hdf5_data.data[:,space], **kwargs)
+        plotme(hdf5_data,hdf5_data.data[space,:])
+        plt.title('temporal evolution of e' + str(plot_or) + ' at cell ' + str(space))
+        plt.xlabel('t')
+        plt.show()
+        return
+
+
+    workdir = os.getcwd()
+    workdir = os.path.join(workdir, rundir)
+
+    odir = os.path.join(workdir, 'MS', 'FLD', dataset)
+    files = sorted(os.listdir(odir))
+
+    i = 0
+    for j in range(len(files)):
+        fhere = h5py.File(os.path.join(odir,files[j]), 'r')
+        if(fhere.attrs['TIME'] >= time):
+            i = j
+            break
+
+    fhere = h5py.File(os.path.join(odir,files[i]), 'r')
+
+    plt.figure(figsize=(6, 3.2))
+    plt.title(dataset+' at t = '+str(fhere.attrs['TIME'][0]))
+    plt.xlabel('$x_1 [c/\omega_p]$')
+    plt.ylabel('$x_2 [c/\omega_p]$')
+
+    xaxismin = fhere['AXIS']['AXIS1'][0]
+    xaxismax = fhere['AXIS']['AXIS1'][1]
+    yaxismin = fhere['AXIS']['AXIS2'][0]
+    yaxismax = fhere['AXIS']['AXIS2'][1]
+
+    plt.imshow(fhere[dataset][:,:],
+               aspect='auto',
+               extent=[xaxismin, xaxismax, yaxismin, yaxismax])
+    c=plt.colorbar(orientation='vertical')
+    c.set_label(dataset)
+
+    if(xlim != [-1,-1]):
+        plt.xlim(xlim)
+    if(ylim != [-1,-1]):
+        plt.ylim(ylim)
+    if(zlim != [-1,-1]):
+        plt.clim(zlim)
+
+    plt.show()
+
+
+def phasespace_2d(rundir='',dataset='p1x1',species='electrons',time=0,
+    xlim=[-1,-1],ylim=[-1,-1],zlim=[-1,-1],
+    plotdata=[]):
+
+    workdir = os.getcwd()
+    workdir = os.path.join(workdir, rundir)
+
+    odir = os.path.join(workdir, 'MS', 'PHA', dataset, species)
+    files = sorted(os.listdir(odir))
+
+    i = 0
+    for j in range(len(files)):
+        fhere = h5py.File(os.path.join(odir,files[j]), 'r')
+        if(fhere.attrs['TIME'] >= time):
+            i = j
+            break
+
+    fhere = h5py.File(os.path.join(odir,files[i]), 'r')
+    enc = "utf-8"
+
+    plt.figure(figsize=(6, 3.2))
+    plt.title(dataset+' phasespace at t = '+str(fhere.attrs['TIME'][0]))
+    plt.xlabel('$'+str(fhere['AXIS/AXIS1'].attrs['LONG_NAME'][0],enc)+' ['+ \
+        str(fhere['AXIS/AXIS1'].attrs['UNITS'][0],enc)+']$')
+    plt.ylabel('$'+str(fhere['AXIS/AXIS2'].attrs['LONG_NAME'][0],enc)+' ['+ \
+        str(fhere['AXIS/AXIS2'].attrs['UNITS'][0],enc)+']$')
+
+    xaxismin = fhere['AXIS/AXIS1'][0]
+    xaxismax = fhere['AXIS/AXIS1'][1]
+    yaxismin = fhere['AXIS/AXIS2'][0]
+    yaxismax = fhere['AXIS/AXIS2'][1]
+
+    if(zlim != [-1,-1]):
+        norm = LogNorm(zlim[0],zlim[1])
+        offset = 0
+    else:
+        offset = 1e-12
+        norm = LogNorm(offset,np.max(np.abs(fhere[dataset][:,:])))
+
+    plt.imshow(np.abs(fhere[dataset][:,:])+offset,
+               aspect='auto',
+               extent=[xaxismin, xaxismax, yaxismin, yaxismax],
+               norm=norm)
+    c=plt.colorbar(orientation='vertical')
+    c.set_label(str(fhere[dataset].attrs['UNITS'][0],enc))
+
+
+    if(xlim != [-1,-1]):
+        plt.xlim(xlim)
+    if(ylim != [-1,-1]):
+        plt.ylim(ylim)
+
+    plt.show()
+
+
+def fieldinteract_2d(rundir='',dataset='e1',
+    xlim=[-1,-1],ylim=[-1,-1],zlim=[-1,-1],
+    plotdata=[],const_clim=True):
+
+    workdir = os.getcwd()
+    workdir = os.path.join(workdir, rundir)
+
+    odir = os.path.join(workdir, 'MS', 'FLD', dataset)
+    files = sorted(os.listdir(odir))
+    enc = "utf-8"
+
+    data = []
+    axes_lim = []
+    norm = []
+    for i in range(len(files)):
+        fhere = h5py.File(os.path.join(odir,files[i]), 'r')
+        data.append([fhere[dataset][:,:],fhere.attrs['TIME'][0],fhere.attrs['DT']])
+        axes_lim.append(np.array([fhere['AXIS/AXIS1'][:],fhere['AXIS/AXIS2'][:]]).flatten())
+        xlabel = '$'+str(fhere['AXIS/AXIS1'].attrs['LONG_NAME'][0],enc)+' ['+ \
+                 str(fhere['AXIS/AXIS1'].attrs['UNITS'][0],enc)+']$'
+        ylabel = '$'+str(fhere['AXIS/AXIS2'].attrs['LONG_NAME'][0],enc)+' ['+ \
+                 str(fhere['AXIS/AXIS2'].attrs['UNITS'][0],enc)+']$'
+        clabel = '$'+str(fhere[dataset].attrs['LONG_NAME'][0],enc)+' ['+ \
+                 str(fhere[dataset].attrs['UNITS'][0],enc)+']$'
+
+    if(zlim == [-1,-1]):
+        if(const_clim):
+            min_val = np.min([ np.min(x[0]) for x in data])
+            max_val = np.max([ np.max(x[0]) for x in data])
+
+    def fu(n):
+        plt.figure(figsize=(8, 4))
+        plt.xlabel(xlabel)
+        plt.ylabel(ylabel)
+        plt.imshow(data[n][0],
+               extent=axes_lim[n],
+               aspect='auto',)
+        plt.title('time = '+str(data[n][1]))
+        c=plt.colorbar()
+        c.set_label(clabel)
+        if(xlim != [-1,-1]):
+            plt.xlim(xlim)
+        if(ylim != [-1,-1]):
+            plt.ylim(ylim)
+        if(zlim != [-1,-1]):
+            plt.clim(zlim)
+        else:
+            if(const_clim):
+                plt.clim([min_val,max_val])
+        return plt
+
+    interact(fu,n=(0,len(data)-1))
+
+
+def phaseinteract_2d(rundir='',dataset='p1x1',species='electrons',
+    xlim=[-1,-1],ylim=[-1,-1],zlim=[-1,-1],
+    plotdata=[],const_clim=True):
+
+    workdir = os.getcwd()
+    workdir = os.path.join(workdir, rundir)
+
+    odir = os.path.join(workdir, 'MS', 'PHA', dataset, species)
+    files = sorted(os.listdir(odir))
+    enc = "utf-8"
+    if(zlim != [-1,-1]):
+        offset = 0
+    else:
+        offset = 1e-12
+
+    data = []
+    axes_lim = []
+    norm = []
+    for i in range(len(files)):
+        fhere = h5py.File(os.path.join(odir,files[i]), 'r')
+        data.append([np.abs(fhere[dataset][:,:])+offset,fhere.attrs['TIME'][0],fhere.attrs['DT']])
+        axes_lim.append(np.array([fhere['AXIS/AXIS1'][:],fhere['AXIS/AXIS2'][:]]).flatten())
+        xlabel = '$'+str(fhere['AXIS/AXIS1'].attrs['LONG_NAME'][0],enc)+' ['+ \
+                 str(fhere['AXIS/AXIS1'].attrs['UNITS'][0],enc)+']$'
+        ylabel = '$'+str(fhere['AXIS/AXIS2'].attrs['LONG_NAME'][0],enc)+' ['+ \
+                 str(fhere['AXIS/AXIS2'].attrs['UNITS'][0],enc)+']$'
+        clabel = '$'+str(fhere[dataset].attrs['LONG_NAME'][0],enc)+' ['+ \
+                 str(fhere[dataset].attrs['UNITS'][0],enc)+']$'
+        if(zlim != [-1,-1]):
+            norm.append(LogNorm(zlim[0],zlim[1]))
+        else:
+            norm.append(LogNorm(offset,np.max(data[-1][0])))
+
+    if(zlim == [-1,-1]):
+        if(const_clim):
+            norm=[]
+            max_val = np.max([ np.max(x[0]) for x in data])
+            for i in range(len(files)):
+                norm.append(LogNorm(offset,max_val))
+
+    def fu(n):
+        plt.figure(figsize=(8, 4))
+        plt.xlabel(xlabel)
+        plt.ylabel(ylabel)
+        plt.imshow(data[n][0],
+               extent=axes_lim[n],
+               aspect='auto',
+               norm=norm[n])
+        plt.title('time = '+str(data[n][1]))
+        c=plt.colorbar()
+        c.set_label(clabel)
+        if(xlim != [-1,-1]):
+            plt.xlim(xlim)
+        if(ylim != [-1,-1]):
+            plt.ylim(ylim)
+        return plt
+
+    interact(fu,n=(0,len(data)-1))
+
+
+
+
+SMALL_SIZE = 20
+MEDIUM_SIZE = 24
+BIGGER_SIZE = 28
+
+plt.rc('font',size=SMALL_SIZE)
+plt.rc('axes',titlesize=SMALL_SIZE)
+plt.rc('axes',labelsize=MEDIUM_SIZE)
+plt.rc('xtick',labelsize=SMALL_SIZE)
+plt.rc('ytick',labelsize=SMALL_SIZE)
+plt.rc('legend',fontsize=SMALL_SIZE)
+plt.rc('figure',titlesize=BIGGER_SIZE)
+
+def phasespace_movie(rundir):
+#2345
+    import os
+    
+    
+    def something(rundir,file_no):
+        
+        my_path=os.getcwd()
+        #print(my_path)
+        working_dir=my_path+'/'+rundir
+        #print(working_dir)
+        efield_dir=working_dir+'/DIAG/Ex/'
+        phase_space_dir=working_dir+'/DIAG/Vx_x/'
+        ex_prefix='Ex-0_'
+        phase_prefix='vx_x_'
+        plt.figure(figsize=(12,6))
+        
+        filename1=phase_space_dir+phase_prefix+repr(file_no).zfill(6)+'.h5'
+        filename2=efield_dir+ex_prefix+repr(file_no).zfill(6)+'.h5'
+        
+        #print(filename1)
+        #print(filename2)
+        
+        phase_space=np.abs(osh5io.read_h5(filename1))
+        # print(repr(phase_space))
+        ex=osh5io.read_h5(filename2)
+        
+        phase_plot=plt.subplot(121)
+        #print(repr(phase_space.axes[0].min))
+        #print(repr(phase_space.axes[1].min))
+        title=phase_space.data_attrs['LONG_NAME']
+        time=phase_space.run_attrs['TIME'][0]
+        ext_stuff=[phase_space.axes[1].min,phase_space.axes[1].max,phase_space.axes[0].min,phase_space.axes[0].max]
+        phase_contour=plt.contourf(phase_space,levels=[0.1,1,2,3,5,10,100,1000,100000],extent=ext_stuff,cmap='Spectral',vmin=1e-1,vmax=100000,
+                    norm=colors.LogNorm(vmin=0.1,vmax=100000))
+        phase_plot.set_title('Phase Space' +' , t='+repr(time)+' $\omega_{pe}^{-1}$')
+        phase_plot.set_xlabel('Position [$\Delta x$]')
+        phase_plot.set_ylabel('Velocity [$\omega_{pe} \Delta x$]')
+        #plt.colorbar()
+        #osh5vis.oscontour(phase_space,levels=[10**-5,10**-3,10**-1,1,10,100],colors='black',linestyles='dashed',vmin=1e-5,vmax=1000)
+        plt.contour(phase_space,levels=[0.1,1,2,3,5,10,100,1000,100000],extent=ext_stuff,colors='black',linestyles='dashed')
+        plt.colorbar(phase_contour)
+        ex_plot = plt.subplot(122)
+        
+        plt.plot(ex[0,:])
+        plt.ylim([-2,2])
+        ex_plot.set_xlabel('Position [$\Delta x$]')
+        ex_plot.set_ylabel('Electric Field')
+        plt.tight_layout()
+        plt.show()
+#2345        
+    my_path=os.getcwd()
+    working_dir=my_path+'/'+rundir    
+    phase_space_dir=working_dir+'/DIAG/Vx_x/'
+    files=sorted(os.listdir(phase_space_dir))
+    start=files[1].find('_x_')+3
+    end=files[1].find('.')
+    print(files[1][start:end])
+    file_interval=int(files[1][start:end])
+    file_max=(len(files)-1)*file_interval
+    
+    interact(something,rundir=fixed(rundir),file_no=widgets.IntSlider(min=0,max=file_max,step=file_interval,value=0))
+    #something(rundir=rundir,file_no=20)
+
+    

@@ -58,15 +58,15 @@
  VDZI = 0.000, 
  NPLOT = 0, 
  NTW = 50, 
- NTP = 3, 
+ NTP = 4, 
  NTA = 0, 
  NTV = 0, 
  NTS = 0, 
 /
 
 &pinput2_jf
-  ntfield=3,
-  fvxmax=25., fvymax=25. ,
+  ntfield=4,
+  fvxmax=20., fvymax=25. ,
   fvxmax_ion=10., fvymax_ion=10. ,
   nphbx=100,nphby=100,
   nphxx=20,nphyx=20, 
