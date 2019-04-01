@@ -58,7 +58,10 @@ def run_upic_es(rundir='',inputfile='pinput2'):
             IPython.display.clear_output(wait=True)
 
     workdir = os.getcwd()
-    localexec = os.path.isfile(workdir+'/upic-es.out')
+    if os.path.isfile(workdir+'/upic-es.out'):
+        localexec = workdir+'/upic-es.out'
+    else:
+        localexec = False
     sysexec = '/usr/local/beps/upic-es.out'
     workdir += '/' + rundir
     print(workdir)
@@ -122,7 +125,10 @@ def runosiris(rundir='',inputfile='osiris-input.txt',print='yes',combine='yes'):
 #            print(path, end='')
 
     workdir = os.getcwd()
-    localexec = os.path.isfile(workdir+'/osiris-1D.e')
+    if os.path.isfile(workdir+'/osiris-1D.e'):
+        localexec = workdir+'/osiris-1D.e'
+    else:
+        localexec = False
     sysexec = '/usr/local/osiris/osiris-1D.e'
     workdir += '/' + rundir
     if print == 'yes':
@@ -200,7 +206,10 @@ def runosiris_2d(rundir='',inputfile='osiris-input.txt'):
 #            print(path, end='')
 
     workdir = os.getcwd()
-    localexec = os.path.isfile(workdir+'/osiris-2D.e')
+    if os.path.isfile(workdir+'/osiris-2D.e'):
+        localexec = workdir+'/osiris-2D.e'
+    else:
+        localexec = False
     sysexec = '/usr/local/osiris/osiris-2D.e'
     workdir += '/' + rundir
     print(workdir)
