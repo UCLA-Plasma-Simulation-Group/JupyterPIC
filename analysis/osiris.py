@@ -6,7 +6,7 @@ import h5py
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm
-from ipywidgets import interact
+from ipywidgets import interact, fixed
 from h5_utilities import *
 from analysis import *
 from scipy.optimize import fsolve
@@ -49,7 +49,6 @@ def run_upic_es(rundir='',inputfile='pinput2'):
         out_file = workdir + '/' + ex + '.h5'
         for path in execute(["python", "/usr/local/osiris/combine_h5_util_2d.py", in_file, out_file]):
             IPython.display.clear_output(wait=True)
-
             print(path, end='')
 
     def combine_h5_iaw_2d():
@@ -59,9 +58,12 @@ def run_upic_es(rundir='',inputfile='pinput2'):
             print(path, end='')
             IPython.display.clear_output(wait=True)
 
-
-
     workdir = os.getcwd()
+    if os.path.isfile(workdir+'/upic-es.out'):
+        localexec = workdir+'/upic-es.out'
+    else:
+        localexec = False
+    sysexec = '/usr/local/beps/upic-es.out'
     workdir += '/' + rundir
     print(workdir)
 
@@ -75,8 +77,12 @@ def run_upic_es(rundir='',inputfile='pinput2'):
 
     # run the upic-es executable
     print('running upic-es.out ...')
-    for path in execute(['/usr/local/beps/upic-es.out']):
-        pass
+    if localexec:
+        for path in execute([localexec]):
+            pass
+    else:
+        for path in execute([sysexec]):
+            pass
     IPython.display.clear_output(wait=True)
 
     # run the combine script on electric field data
@@ -91,6 +97,7 @@ def run_upic_es(rundir='',inputfile='pinput2'):
         combine_h5_iaw_2d()
         print('combine_h5_iaw completed normally')
 
+
     IPython.display.clear_output(wait=True)
     print('run_upic_es completed normally')
 
@@ -99,51 +106,87 @@ def run_upic_es(rundir='',inputfile='pinput2'):
     return
     
 
-def runosiris(rundir='',inputfile='osiris-input.txt'):
+def runosiris(rundir='',inputfile='osiris-input.txt',print='yes',combine='yes'):
 
     def combine_h5_1d(ex):
         in_file = workdir + '/MS/FLD/' + ex + '/'
         out_file = workdir + '/' + ex + '.h5'
         for path in execute(["python", "/usr/local/osiris/combine_h5_util_1d.py", in_file, out_file]):
-            IPython.display.clear_output(wait=True)
+            if print == 'yes':
+                IPython.display.clear_output(wait=True)
 #            print(path, end='')
 
     def combine_h5_iaw_1d():
         in_file = workdir + '/MS/DENSITY/ions/charge/'
         out_file = workdir + '/ions.h5'
         for path in execute(["python", "/usr/local/osiris/combine_h5_util_1d.py", in_file, out_file]):
-            IPython.display.clear_output(wait=True)
+            if print == 'yes':
+                IPython.display.clear_output(wait=True)
 #            print(path, end='')
 
     workdir = os.getcwd()
+    if os.path.isfile(workdir+'/osiris-1D.e'):
+        localexec = workdir+'/osiris-1D.e'
+    else:
+        localexec = False
+    sysexec = '/usr/local/osiris/osiris-1D.e'
     workdir += '/' + rundir
-    print(workdir)
+    if print == 'yes':
+        print(workdir)
 
     # run osiris-1D.e executable
     if(not os.path.isdir(workdir)):
-       os.mkdir(workdir)
+        os.mkdir(workdir)
+    else:
+        shutil.rmtree(workdir)
+        os.mkdir(workdir)
     if(rundir != ''):
 #        shutil.copyfile('osiris-1D.e',workdir+'/osiris-1D.e')
         shutil.copyfile(inputfile,workdir+'/osiris-input.txt')
     waittick = 0
-    for path in execute(["osiris-1D.e","-w",workdir,"osiris-input.txt"]):
-        waittick += 1
-        if(waittick == 100):
-            IPython.display.clear_output(wait=True)
-            waittick = 0
-#            print(path, end='')
+
+    if localexec:
+        for path in execute([localexec,"-w",workdir,"osiris-input.txt"]):
+            if print == 'yes':
+                waittick += 1
+                if(waittick == 100):
+                    IPython.display.clear_output(wait=True)
+                    waittick = 0
+                    print(path, end='')
+    else:
+        for path in execute([sysexec,"-w",workdir,"osiris-input.txt"]):
+            if print == 'yes':
+                waittick += 1
+                if(waittick == 100):
+                    IPython.display.clear_output(wait=True)
+                    waittick = 0
+                    print(path, end='')
 
     # run combine_h5_util_1d.py script for e1/, e2/, e3/ (and iaw if applicable)
-    combine_h5_1d('e1')
-    combine_h5_1d('e2')
-    combine_h5_1d('e3')
+
+    if print == 'yes':
+        print('combining E1 files')
+    if combine == 'yes':
+        combine_h5_1d('e1')
+    if print == 'yes':
+        print('combining E2 files')
+    if combine == 'yes':
+        combine_h5_1d('e2')
+    if print == 'yes':
+        print('combining E3 files')
+    if combine == 'yes':
+        combine_h5_1d('e3')
 
     # run combine on iaw data if present
     if (os.path.isdir(workdir+'/MS/DENSITY/ions/charge')):
-        combine_h5_iaw_1d()
-        
-    IPython.display.clear_output(wait=True)
-    print('runosiris completed normally')
+        if print == 'yes':
+            print('combining IAW files')
+        if combine == 'yes':
+            combine_h5_iaw_1d()
+
+    if print == 'yes':
+        IPython.display.clear_output(wait=True)
+        print('runosiris completed normally')
 
     return
 
@@ -165,6 +208,11 @@ def runosiris_2d(rundir='',inputfile='osiris-input.txt'):
 #            print(path, end='')
 
     workdir = os.getcwd()
+    if os.path.isfile(workdir+'/osiris-2D.e'):
+        localexec = workdir+'/osiris-2D.e'
+    else:
+        localexec = False
+    sysexec = '/usr/local/osiris/osiris-2D.e'
     workdir += '/' + rundir
     print(workdir)
 
@@ -175,12 +223,20 @@ def runosiris_2d(rundir='',inputfile='osiris-input.txt'):
 #        shutil.copyfile('osiris-2D.e',workdir+'/osiris-2D.e')
         shutil.copyfile(inputfile,workdir+'/osiris-input.txt')
     waittick = 0
-    for path in execute(["osiris-2D.e","-w",workdir,"osiris-input.txt"]):
-        waittick += 1
-        if(waittick == 100):
-            IPython.display.clear_output(wait=True)
-            waittick = 0
-            print(path, end='')
+    if localexec:
+        for path in execute([localexec,"-w",workdir,"osiris-input.txt"]):
+            waittick += 1
+            if(waittick == 100):
+                IPython.display.clear_output(wait=True)
+                waittick = 0
+                print(path, end='')
+    else:
+        for path in execute([sysexec,"-w",workdir,"osiris-input.txt"]):
+            waittick += 1
+            if(waittick == 100):
+                IPython.display.clear_output(wait=True)
+                waittick = 0
+                print(path, end='')
 
     # run combine_h5_util_1d.py script for e1/, e2/, e3/ (and iaw if applicable)
     print('combining E1 files')
@@ -1013,8 +1069,6 @@ def plot_tk_arb(rundir, field, title='potential', klim=5,tlim=100):
     plt.ylim(0,tlim)
     plt.show()
 
-
-
 def wk_upic_iaw(rundir, field, TITLE='', background=0.0, wlim=[None,None],
                 klim=[None,None], show_theory=True, **kwargs):
 
@@ -1447,31 +1501,31 @@ def zprime(z):
 
 
 def landau(karray):
-    
+
     nk=karray.shape[0]
-    
+
     results=np.zeros(nk)
     results_r = np.zeros(nk)
-    
+
     kmin=karray[0]
     kmax=karray[nk-1]
-    
+
     if (kmin!=0.0):
         root_trial=complex(1,0)
-        
+
         for k_val in np.arange(0.01,kmin,0.01):
             def epsilon(omega):
                 return 1-0.5*((1.0/k_val)**2)*zprime(omega/(np.sqrt(2)*k_val))
             newroot=mpmath.findroot(epsilon,root_trial,solver='muller')
             root_trial=newroot
-        
+
         results[0]=newroot.imag
     else:
         results[0]=0.0
         newroot=complex(1,0)
         root_trial=complex(1,0)
-    
-        
+
+
     for i_mode in range(1,nk):
         k_val=karray[i_mode]
         def epsilon(omega):
@@ -1480,9 +1534,8 @@ def landau(karray):
         root_trial=newroot
         results[i_mode]=newroot.imag
         results_r[i_mode] = newroot.real
-        
-    return results, results_r
 
+    return results, results_r
 
 
 
@@ -1720,46 +1773,123 @@ def phaseinteract_2d(rundir='',dataset='p1x1',species='electrons',
 
 
 
-
-SMALL_SIZE = 20
-MEDIUM_SIZE = 24
-BIGGER_SIZE = 28
-
-plt.rc('font',size=SMALL_SIZE)
-plt.rc('axes',titlesize=SMALL_SIZE)
-plt.rc('axes',labelsize=MEDIUM_SIZE)
-plt.rc('xtick',labelsize=SMALL_SIZE)
-plt.rc('ytick',labelsize=SMALL_SIZE)
-plt.rc('legend',fontsize=SMALL_SIZE)
-plt.rc('figure',titlesize=BIGGER_SIZE)
-
-def phasespace_movie(dirname):
+def tajima(rundir):
 #2345
     import os
-    
-    
-    def something(dirname,file_no):
-        
+
+
+    def something(rundir,file_no):
+
         my_path=os.getcwd()
         #print(my_path)
-        working_dir=my_path+'/'+dirname
+        working_dir=my_path+'/'+rundir
+        #print(working_dir)
+        efield_dir=working_dir+'/MS/FLD/e1/'
+        laser_dir = working_dir+'/MS/FLD/e2/'
+        eden_dir = working_dir + '/MS/DENSITY/electrons/charge/'
+        phase_space_dir=working_dir+'/MS/PHA/p1x1/electrons/'
+        efield_prefix='e1-'
+        laser_prefix='e2-'
+        phase_prefix='p1x1-electrons-'
+        eden_prefix='charge-electrons-'
+        plt.figure(figsize=(12,12))
+
+        filename1=phase_space_dir+phase_prefix+repr(file_no).zfill(6)+'.h5'
+        filename2=eden_dir+eden_prefix+repr(file_no).zfill(6)+'.h5'
+        filename3=efield_dir+efield_prefix+repr(file_no).zfill(6)+'.h5'
+        filename4=laser_dir+laser_prefix+repr(file_no).zfill(6)+'.h5'
+
+        print(filename1)
+        print(filename2)
+
+        phase_space=np.abs(osh5io.read_h5(filename1))
+        # print(repr(phase_space))
+        eden=osh5io.read_h5(filename2)
+        ex = osh5io.read_h5(filename3)
+        ey = osh5io.read_h5(filename4)
+
+        phase_plot=plt.subplot(221)
+        #print(repr(phase_space.axes[0].min))
+        #print(repr(phase_space.axes[1].min))
+        title=phase_space.data_attrs['LONG_NAME']
+        time=phase_space.run_attrs['TIME'][0]
+        ext_stuff=[phase_space.axes[1].min,phase_space.axes[1].max,phase_space.axes[0].min,phase_space.axes[0].max]
+        phase_contour=plt.contourf(np.abs(phase_space+0.000000001),levels=[0.00001,0.0001,0.001,0.01,0.05,0.1,0.2,0.5,1,10],extent=ext_stuff,cmap='Spectral',vmin=1e-5,vmax=30,
+                    norm=colors.LogNorm(vmin=0.0001,vmax=30))
+        phase_plot.set_title('Phase Space' +' , t='+repr(time)+' $\omega_{pe}^{-1}$')
+        phase_plot.set_xlabel('Position [$\Delta x$]')
+        phase_plot.set_ylabel('Velocity [$\omega_{pe} \Delta x$]')
+        #plt.colorbar()
+        #osh5vis.oscontour(phase_space,levels=[10**-5,10**-3,10**-1,1,10,100],colors='black',linestyles='dashed',vmin=1e-5,vmax=1000)
+        # plt.contour(np.abs(phase_space+0.000001),levels=[0.0001,0.001,0.01,0.05,0.1,0.2,0.5,1],extent=ext_stuff,colors='black',linestyles='dashed')
+        plt.colorbar(phase_contour)
+        
+        
+        den_plot = plt.subplot(222)
+        osh5vis.osplot(eden,title='Electron Density',ylim=[-2,0])
+        
+        ex_plot = plt.subplot(223)
+        
+        osh5vis.osplot(ex,title='Wake electric field')
+        
+        ey_plot = plt.subplot(224)
+        
+        osh5vis.osplot(ey,'Laser electric field')
+        
+        
+        # plt.plot(ex[0,:])
+        # plt.ylim([-2,2])
+        # ex_plot.set_xlabel('Position [$\Delta x$]')
+        # ex_plot.set_ylabel('Electric Field')
+        # plt.tight_layout()
+        # plt.show()
+        
+#2345
+    my_path=os.getcwd()
+    working_dir=my_path+'/'+rundir
+    phase_space_dir=working_dir+'/MS/PHA/p1x1/electrons/'
+    files=sorted(os.listdir(phase_space_dir))
+    print(files[1])
+    start=files[1].find('p1x1-electrons')+16
+    end=files[1].find('.')
+    print(files[1][start:end])
+    file_interval=int(files[1][start:end])
+    file_max=(len(files)-1)*file_interval
+
+    interact(something,rundir=fixed(rundir),file_no=widgets.IntSlider(min=0,max=file_max,step=file_interval,value=0))
+    #something(rundir=rundir,file_no=20)
+    
+    
+
+
+
+def phasespace_movie(rundir):
+#2345
+    import os
+
+
+    def something(rundir,file_no):
+
+        my_path=os.getcwd()
+        #print(my_path)
+        working_dir=my_path+'/'+rundir
         #print(working_dir)
         efield_dir=working_dir+'/DIAG/Ex/'
         phase_space_dir=working_dir+'/DIAG/Vx_x/'
         ex_prefix='Ex-0_'
         phase_prefix='vx_x_'
         plt.figure(figsize=(12,6))
-        
+
         filename1=phase_space_dir+phase_prefix+repr(file_no).zfill(6)+'.h5'
         filename2=efield_dir+ex_prefix+repr(file_no).zfill(6)+'.h5'
-        
+
         #print(filename1)
         #print(filename2)
-        
+
         phase_space=np.abs(osh5io.read_h5(filename1))
         # print(repr(phase_space))
         ex=osh5io.read_h5(filename2)
-        
+
         phase_plot=plt.subplot(121)
         #print(repr(phase_space.axes[0].min))
         #print(repr(phase_space.axes[1].min))
@@ -1776,16 +1906,16 @@ def phasespace_movie(dirname):
         plt.contour(phase_space,levels=[0.1,1,2,3,5,10,100,1000,100000],extent=ext_stuff,colors='black',linestyles='dashed')
         plt.colorbar(phase_contour)
         ex_plot = plt.subplot(122)
-        
+
         plt.plot(ex[0,:])
         plt.ylim([-2,2])
         ex_plot.set_xlabel('Position [$\Delta x$]')
         ex_plot.set_ylabel('Electric Field')
         plt.tight_layout()
         plt.show()
-#2345        
+#2345
     my_path=os.getcwd()
-    working_dir=my_path+'/'+dirname    
+    working_dir=my_path+'/'+rundir
     phase_space_dir=working_dir+'/DIAG/Vx_x/'
     files=sorted(os.listdir(phase_space_dir))
     start=files[1].find('_x_')+3
@@ -1793,8 +1923,10 @@ def phasespace_movie(dirname):
     print(files[1][start:end])
     file_interval=int(files[1][start:end])
     file_max=(len(files)-1)*file_interval
-    
-    interact(something,dirname=fixed(dirname),file_no=widgets.IntSlider(min=0,max=file_max,step=file_interval,value=0))
-    #something(dirname=dirname,file_no=20)
+
+    interact(something,rundir=fixed(rundir),file_no=widgets.IntSlider(min=0,max=file_max,step=file_interval,value=0))
+    #something(rundir=rundir,file_no=20)
 
     
+    
+
