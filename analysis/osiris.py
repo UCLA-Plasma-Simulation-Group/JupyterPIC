@@ -106,13 +106,13 @@ def run_upic_es(rundir='',inputfile='pinput2'):
     return
 
 
-def runosiris(rundir='',inputfile='osiris-input.txt',print='yes',combine='yes'):
+def runosiris(rundir='',inputfile='osiris-input.txt',print_out='yes',combine='yes'):
 
     def combine_h5_1d(ex):
         in_file = workdir + '/MS/FLD/' + ex + '/'
         out_file = workdir + '/' + ex + '.h5'
         for path in execute(["python", "/usr/local/osiris/combine_h5_util_1d.py", in_file, out_file]):
-            if print == 'yes':
+            if print_out == 'yes':
                 IPython.display.clear_output(wait=True)
 #            print(path, end='')
 
@@ -120,7 +120,7 @@ def runosiris(rundir='',inputfile='osiris-input.txt',print='yes',combine='yes'):
         in_file = workdir + '/MS/DENSITY/ions/charge/'
         out_file = workdir + '/ions.h5'
         for path in execute(["python", "/usr/local/osiris/combine_h5_util_1d.py", in_file, out_file]):
-            if print == 'yes':
+            if print_out == 'yes':
                 IPython.display.clear_output(wait=True)
 #            print(path, end='')
 
@@ -131,7 +131,7 @@ def runosiris(rundir='',inputfile='osiris-input.txt',print='yes',combine='yes'):
         localexec = False
     sysexec = '/usr/local/osiris/osiris-1D.e'
     workdir += '/' + rundir
-    if print == 'yes':
+    if print_out == 'yes':
         print(workdir)
 
     # run osiris-1D.e executable
@@ -146,7 +146,7 @@ def runosiris(rundir='',inputfile='osiris-input.txt',print='yes',combine='yes'):
     waittick = 0
     if localexec:
         for path in execute([localexec,"-w",workdir,"osiris-input.txt"]):
-            if print == 'yes':
+            if print_out == 'yes':
                 waittick += 1
                 if(waittick == 100):
                     IPython.display.clear_output(wait=True)
@@ -154,7 +154,7 @@ def runosiris(rundir='',inputfile='osiris-input.txt',print='yes',combine='yes'):
                     print(path, end='')
     else:
         for path in execute([sysexec,"-w",workdir,"osiris-input.txt"]):
-            if print == 'yes':
+            if print_out == 'yes':
                 waittick += 1
                 if(waittick == 100):
                     IPython.display.clear_output(wait=True)
@@ -162,27 +162,27 @@ def runosiris(rundir='',inputfile='osiris-input.txt',print='yes',combine='yes'):
                     print(path, end='')
 
     # run combine_h5_util_1d.py script for e1/, e2/, e3/ (and iaw if applicable)
-    if print == 'yes':
+    if print_out == 'yes':
         print('combining E1 files')
     if combine == 'yes':
         combine_h5_1d('e1')
-    if print == 'yes':
+    if print_out == 'yes':
         print('combining E2 files')
     if combine == 'yes':
         combine_h5_1d('e2')
-    if print == 'yes':
+    if print_out == 'yes':
         print('combining E3 files')
     if combine == 'yes':
         combine_h5_1d('e3')
 
     # run combine on iaw data if present
     if (os.path.isdir(workdir+'/MS/DENSITY/ions/charge')):
-        if print == 'yes':
+        if print_out == 'yes':
             print('combining IAW files')
         if combine == 'yes':
             combine_h5_iaw_1d()
 
-    if print == 'yes':
+    if print_out == 'yes':
         IPython.display.clear_output(wait=True)
         print('runosiris completed normally')
 
