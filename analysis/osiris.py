@@ -105,7 +105,10 @@ def run_upic_es(rundir='',inputfile='pinput2'):
 
     return
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> bc6f071... cleaned up Tajima Dawson notebook
 def runosiris(rundir='',inputfile='osiris-input.txt',print_out='yes',combine='yes'):
 
     def combine_h5_1d(ex):
@@ -162,6 +165,10 @@ def runosiris(rundir='',inputfile='osiris-input.txt',print_out='yes',combine='ye
                     print(path, end='')
 
     # run combine_h5_util_1d.py script for e1/, e2/, e3/ (and iaw if applicable)
+<<<<<<< HEAD
+=======
+
+>>>>>>> bc6f071... cleaned up Tajima Dawson notebook
     if print_out == 'yes':
         print('combining E1 files')
     if combine == 'yes':
@@ -1695,6 +1702,96 @@ def phaseinteract_2d(rundir='',dataset='p1x1',species='electrons',
 
 
 
+<<<<<<< HEAD
+=======
+def tajima(rundir):
+#2345
+    import os
+
+
+    def something(rundir,file_no):
+
+        my_path=os.getcwd()
+        #print(my_path)
+        working_dir=my_path+'/'+rundir
+        #print(working_dir)
+        efield_dir=working_dir+'/MS/FLD/e1/'
+        laser_dir = working_dir+'/MS/FLD/e2/'
+        eden_dir = working_dir + '/MS/DENSITY/electrons/charge/'
+        phase_space_dir=working_dir+'/MS/PHA/p1x1/electrons/'
+        efield_prefix='e1-'
+        laser_prefix='e2-'
+        phase_prefix='p1x1-electrons-'
+        eden_prefix='charge-electrons-'
+        plt.figure(figsize=(12,12))
+
+        filename1=phase_space_dir+phase_prefix+repr(file_no).zfill(6)+'.h5'
+        filename2=eden_dir+eden_prefix+repr(file_no).zfill(6)+'.h5'
+        filename3=efield_dir+efield_prefix+repr(file_no).zfill(6)+'.h5'
+        filename4=laser_dir+laser_prefix+repr(file_no).zfill(6)+'.h5'
+
+        #print(filename1)
+        #print(filename2)
+
+        phase_space=np.abs(osh5io.read_h5(filename1))
+        # print(repr(phase_space))
+        eden=osh5io.read_h5(filename2)
+        ex = osh5io.read_h5(filename3)
+        ey = osh5io.read_h5(filename4)
+
+        phase_plot=plt.subplot(221)
+        #print(repr(phase_space.axes[0].min))
+        #print(repr(phase_space.axes[1].min))
+        title=phase_space.data_attrs['LONG_NAME']
+        time=phase_space.run_attrs['TIME'][0]
+        ext_stuff=[phase_space.axes[1].min,phase_space.axes[1].max,phase_space.axes[0].min,phase_space.axes[0].max]
+        phase_contour=plt.contourf(np.abs(phase_space+0.000000001),levels=[0.00001,0.0001,0.001,0.01,0.05,0.1,0.2,0.5,1,10],extent=ext_stuff,cmap='Spectral',vmin=1e-5,vmax=30,
+                    norm=colors.LogNorm(vmin=0.0001,vmax=30))
+        phase_plot.set_title('Phase Space' +' , t='+repr(time)+' $\omega_{pe}^{-1}$')
+        phase_plot.set_xlabel('Position [$\Delta x$]')
+        phase_plot.set_ylabel('Velocity [$\omega_{pe} \Delta x$]')
+        #plt.colorbar()
+        #osh5vis.oscontour(phase_space,levels=[10**-5,10**-3,10**-1,1,10,100],colors='black',linestyles='dashed',vmin=1e-5,vmax=1000)
+        # plt.contour(np.abs(phase_space+0.000001),levels=[0.0001,0.001,0.01,0.05,0.1,0.2,0.5,1],extent=ext_stuff,colors='black',linestyles='dashed')
+        plt.colorbar(phase_contour)
+        
+        
+        den_plot = plt.subplot(222)
+        osh5vis.osplot(eden,title='Electron Density',ylim=[-2,0])
+        
+        ex_plot = plt.subplot(223)
+        
+        osh5vis.osplot(ex,title='Wake electric field')
+        
+        ey_plot = plt.subplot(224)
+        
+        osh5vis.osplot(ey,title='Laser electric field')
+        
+        
+        # plt.plot(ex[0,:])
+        # plt.ylim([-2,2])
+        # ex_plot.set_xlabel('Position [$\Delta x$]')
+        # ex_plot.set_ylabel('Electric Field')
+        # plt.tight_layout()
+        # plt.show()
+        
+#2345
+    my_path=os.getcwd()
+    working_dir=my_path+'/'+rundir
+    phase_space_dir=working_dir+'/MS/PHA/p1x1/electrons/'
+    files=sorted(os.listdir(phase_space_dir))
+    #print(files[1])
+    start=files[1].find('p1x1-electrons')+16
+    end=files[1].find('.')
+    #print(files[1][start:end])
+    file_interval=int(files[1][start:end])
+    file_max=(len(files)-1)*file_interval
+
+    interact(something,rundir=fixed(rundir),file_no=widgets.IntSlider(min=0,max=file_max,step=file_interval,value=0, continous_update=False))
+    #something(rundir=rundir,file_no=20)
+    
+    
+>>>>>>> bc6f071... cleaned up Tajima Dawson notebook
 
 SMALL_SIZE = 20
 MEDIUM_SIZE = 24
@@ -1771,3 +1868,7 @@ def phasespace_movie(rundir):
 
     interact(something,rundir=fixed(rundir),file_no=widgets.IntSlider(min=0,max=file_max,step=file_interval,value=0))
     #something(rundir=rundir,file_no=20)
+<<<<<<< HEAD
+=======
+
+>>>>>>> bc6f071... cleaned up Tajima Dawson notebook
