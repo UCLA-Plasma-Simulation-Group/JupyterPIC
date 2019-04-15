@@ -98,6 +98,8 @@ diag_species
 {
 ndump_fac_ene = 0,
 ndump_fac_pha = 5,
+ndump_fac = 5,
+reports = 'charge',
 !ndump_fac_raw = 0,
 ps_xmin(1:1) = 0.0,
 ps_xmax(1:1) = 102.4,
