@@ -11,9 +11,9 @@
         "z" : [0,10.0]},
     "boundary" : "conducting",
     "n0" : 1.0e16,
-    "time" : 20.1,
+    "time" : 10.1,
     "dt" : 10.0,
-    "nbeams" : 1,
+    "nbeams" : 2,
     "nspecies" : 1,
     "dump_restart" : false,
     "ndump_restart" : 1,
@@ -26,17 +26,17 @@
 "beam" :
 [
     {
-    "evolution" : true,
+    "evolution" : false,
     "profile" : 0,
     "np" : [64,64,128],
     "npmax" : 4000000,
     "q" : -1.0,
     "m" : 1.0,
     "gamma" : 20000,
-    "peak_density" : 2.5,
+    "peak_density" : 25.0,
     "quiet_start" : true,
     "center" : [0.0,0.0,2.5],
-    "sigma" : [0.25,0.25,0.4],
+    "sigma" : [0.1,0.1,0.4],
     "sigma_v" : [3.0,3.0,100.0],
     "centroid_x" : [0.0,0.0,0.0],
     "centroid_y" : [0.0,0.0,0.0],
@@ -44,7 +44,7 @@
     [
         {
         "name" : ["charge"],
-        "ndump" : 1
+        "ndump" : 0
         },
         {
         "name" : ["charge"],
@@ -53,23 +53,23 @@
         },
         {
         "name" : ["raw"],
-        "ndump" : 1,
+        "ndump" : 0,
         "sample" : 10
         }
     ]    
     },
     {
-    "evolution" : true,
+    "evolution" : false,
     "profile" : 0,
     "np" : [64,64,128],
     "npmax" : 4000000,
-    "q" : 1.0,
+    "q" : -1.0,
     "m" : 1.0,
     "gamma" : 20000,
-    "peak_density" : 2.5,
+    "peak_density" : 15.0,
     "quiet_start" : true,
-    "center" : [0.0,0.0,3.75],
-    "sigma" : [0.25,0.25,0.4],
+    "center" : [0.0,0.0,6.5],
+    "sigma" : [0.1,0.1,0.2],
     "sigma_v" : [3.0,3.0,100.0],
     "centroid_x" : [0.0,0.0,0.0],
     "centroid_y" : [0.0,0.0,0.0],
@@ -77,7 +77,7 @@
     [
         {
         "name" : ["charge"],
-        "ndump" : 1
+        "ndump" : 0
         },
         {
         "name" : ["charge"],
@@ -86,7 +86,7 @@
         },
         {
         "name" : ["raw"],
-        "ndump" : 1,
+        "ndump" : 0,
         "sample" : 10
         }
     ]    
@@ -101,14 +101,14 @@
     "q" : -1.0,
     "m" : 1.0,
     "density" : 1.0,
-    "longitudinal_profile" : "piecewise",
+    "longitudinal_profile" : "uniform",
     "piecewise_density" : [1.0,1.5,2.5],
     "piecewise_s" : [0.0,100.0,200.0],
     "diag" :
     [
         {
         "name" : ["charge", "jx"],
-        "ndump" : 1
+        "ndump" : 0
         },
         {
         "name" : ["charge"],
@@ -125,7 +125,7 @@
     [
         {
         "name" : ["ex","ez"],
-        "ndump" : 1
+        "ndump" : 0
         },
         {
         "name" : ["ex","by","ez","psi"],

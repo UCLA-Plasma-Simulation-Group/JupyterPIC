@@ -21,7 +21,7 @@ def execute(cmd):
         raise subprocess.CalledProcessError(return_code, cmd)
         
         
-def runqpic(rundir='',inputfile='rpinput'):
+def runqpic(rundir='',inputfile='qpinput.json'):
     
     workdir = os.getcwd()
     workdir += '/' + rundir
@@ -30,7 +30,7 @@ def runqpic(rundir='',inputfile='rpinput'):
     if(not os.path.isdir(workdir)):
        os.mkdir(workdir)
     if(rundir != ''):
-        shutil.copyfile(inputfile,workdir+'/rpinput')
+        shutil.copyfile(inputfile,workdir+'/qpinput.json')
     
     os.chdir(workdir)
         
