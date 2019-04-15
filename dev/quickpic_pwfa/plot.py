@@ -2,250 +2,391 @@
 import os
 import shutil
 import subprocess
-import IPython.display
+from IPython.display import display
 import h5py
 import numpy as np
 import matplotlib.pyplot as plt
-from ipywidgets import interact
+import ipywidgets
+from ipywidgets import interact, interactive, IntSlider, Layout, interact_manual
 from h5_utilities import *
 from analysis import *
 from scipy.optimize import fsolve
 
+def makeplot():
+    def plot1_qp(x_position):
+        filename='Species0001/Charge_slice_0001/charge_slice_xz_00000001.h5'
+        f=h5py.File(filename)
+        names=list(f.keys())
+        dataname='/'+names[1]
+        dataset=f[dataname]
+        data=dataset[...]
+        xaxis=f['/AXIS/AXIS1'][...]
+        yaxis=f['/AXIS/AXIS2'][...]
+        figure_title = 'Plasma Density'
+        xlabel_bottom = r'$\xi = ct-z\;[c/\omega_p]$'  
+        xlabel_top = '$Plasma Density\;[n_p]$'
+        ylabel_left ='$x\;[c/\omega_p]$'
+        ylabel_right ='$Plasma Density\;[n_p]$'
+        datamin = -10.0
+        datamax = 0.0
+        colormap = 'viridis'
+        x=np.linspace(xaxis[0]/2,xaxis[1]/2,int(data.shape[0]/2)) 
+        y=np.linspace(yaxis[0],yaxis[1],data.shape[1]) 
+        data = data.transpose()
+        da = data[64:192,:] 
+        l_max = 2.0
+        l_min = -10.0
+        fig, ax1 = plt.subplots(figsize=(8,5))
+        plt.axis([ y.min(), y.max(),x.min(), x.max()])
+        plt.title(figure_title)
+        cs1 = plt.pcolormesh(y,x,da,vmin=datamin,vmax=datamax,cmap=colormap)
+        plt.colorbar(cs1, pad = 0.15)
+        ax1.set_xlabel(xlabel_bottom)
+        # Make the y-axis label, ticks and tick labels match the line color.
+        ax1.set_ylabel(ylabel_left, color='b')
+        ax1.tick_params('y', colors='b')
+        ax2 = ax1.twinx()
+        middle_index = int(da.shape[0]/2)
+        lineout_index = int (middle_index + x_position * 21.333333333333333)+1
+        lineout = da[lineout_index,:]
+        ax2.plot(y, lineout, 'r')
+        ax2.set_ylim([l_min,l_max])
+        ax1.plot(y, x_position*np.ones(256), 'w--') # Add a white dashed line at the lineout position
+        ax2.set_ylabel(ylabel_right, color='r')
+        ax2.tick_params('y', colors='r')
+        fig.tight_layout()
+        return
 
-def QEP_plot(filename,figure_title='',xlabel='',ylabel='',datamin=-1,datamax=1):
-    f=h5py.File(filename)
-    names=list(f.keys())
-    dataname='/'+names[1]
-    dataset=f[dataname]
-    data=dataset[...]
-    xaxis=f['/AXIS/AXIS1'][...]
-    yaxis=f['/AXIS/AXIS2'][...]
-    
-    # Only plot the middle(Along x) part of data. Shift the center of x to 0 and decrease the length of x by 1/2 
-    x=np.linspace((xaxis[0]-xaxis[1]/2)/2,(xaxis[1]/2)/2,int(data.shape[0]/2)) 
-    y=np.linspace(yaxis[0],yaxis[1],data.shape[1]) 
+    def plot2_qp(xi_position):
+        filename='Species0001/Charge_slice_0001/charge_slice_xz_00000001.h5'
+        f=h5py.File(filename)
+        names=list(f.keys())
+        dataname='/'+names[1]
+        dataset=f[dataname]
+        data=dataset[...]
+        xaxis=f['/AXIS/AXIS1'][...]
+        yaxis=f['/AXIS/AXIS2'][...]
+        x=np.linspace(xaxis[0]/2,xaxis[1]/2,int(data.shape[0]/2)) 
+        y=np.linspace(yaxis[0],yaxis[1],data.shape[1]) 
+        figure_title = 'Plasma Density'
+        xlabel_bottom = r'$\xi = ct-z\;[c/\omega_p]$'  
+        xlabel_top = '$Plasma Density\;[n_p]$'
+        ylabel_left ='$x\;[c/\omega_p]$'
+        ylabel_right ='$Plasma Density\;[n_p]$'
+        datamin = -10.0
+        datamax = 0.0
+        colormap = 'viridis'
+        data = data.transpose()
+        da = data[64:192,:] 
+        l_max = 2.0
+        l_min = -4.0
+        fig, ax1 = plt.subplots(figsize=(8,5))
+        plt.axis([ y.min(), y.max(),x.min(), x.max()])
+        plt.title(figure_title)
+        cs1 = plt.pcolormesh(y,x,da,vmin=datamin,vmax=datamax,cmap=colormap)
+        plt.colorbar(cs1, pad = 0.15)
+        ax1.set_xlabel(xlabel_bottom)
+        ax1.set_ylabel(ylabel_left, color='b')
+        ax1.tick_params('y', colors='b')
+        ax2 = ax1.twiny()
+        lineout_index = int (xi_position * 25.6) 
+        lineout = da[:,lineout_index]
+        ax2.plot(lineout, x, 'r')
+        ax2.set_xlim([l_min,l_max])
+        ax1.plot(xi_position*np.ones(128),x, 'w--')
+        ax2.set_ylabel(xlabel_top, color='r')
+        ax2.tick_params('y', colors='r')
+        fig.tight_layout()
+        return
 
-    data = data.transpose()
-    datamiddle = data[63:191,:] 
+    def plot1_qb(x_position):
+        filename='Beam0002/Charge_slice_0001/charge_slice_xz_00000001.h5'
+        f=h5py.File(filename)
+        names=list(f.keys())
+        dataname='/'+names[1]
+        dataset=f[dataname]
+        data=dataset[...]
+        xaxis=f['/AXIS/AXIS1'][...]
+        yaxis=f['/AXIS/AXIS2'][...]
+        x=np.linspace(xaxis[0]/2,xaxis[1]/2,int(data.shape[0]/2)) 
+        y=np.linspace(yaxis[0],yaxis[1],data.shape[1])         
+        filename='Beam0001/Charge_slice_0001/charge_slice_xz_00000001.h5'
+        f=h5py.File(filename)
+        names=list(f.keys())
+        dataname='/'+names[1]
+        dataset=f[dataname]
+        data=data+dataset[...]
+        figure_title = 'Beam Density'
+        xlabel_bottom = r'$\xi = ct-z\;[c/\omega_p]$'  
+        xlabel_top = 'Beam Density $[n_p]$'
+        ylabel_left ='$x\;[c/\omega_p]$'
+        ylabel_right ='Beam Density $[n_p]$'
+        datamin = -10.0
+        datamax = 0.0
+        colormap = 'afmhot'
+        data = data.transpose()
+        da = data[64:192,:] 
+        l_max = 0.0
+        l_min = -30.0
+        fig, ax1 = plt.subplots(figsize=(8,5))
+        plt.axis([ y.min(), y.max(),x.min(), x.max()])
+        plt.title(figure_title)
+        cs1 = plt.pcolormesh(y,x,da,vmin=datamin,vmax=datamax,cmap=colormap)
+        plt.colorbar(cs1, pad = 0.15)
+        ax1.set_xlabel(xlabel_bottom)
+        # Make the y-axis label, ticks and tick labels match the line color.
+        ax1.set_ylabel(ylabel_left, color='b')
+        ax1.tick_params('y', colors='b')
+        ax2 = ax1.twinx()
+        middle_index = int(da.shape[0]/2)
+        lineout_index = int (middle_index + x_position * 21.333333333333333)+1 
+        lineout = da[lineout_index,:]
+        ax2.plot(y, lineout, 'r')
+        ax2.set_ylim([l_min,l_max])
+        ax1.plot(y, x_position*np.ones(256), 'b--') # Add a white dashed line at the lineout position
+        ax2.set_ylabel(ylabel_right, color='r')
+        ax2.tick_params('y', colors='r')
+        fig.tight_layout()
+        return
 
-    plt.axis([ y.min(), y.max(),x.min(), x.max()])
-    plt.title(figure_title)
-    plt.xlabel(xlabel)
-    plt.ylabel(ylabel)
-    plt.pcolor(y,x,datamiddle,vmin=datamin,vmax=datamax)
-    plt.colorbar()
-    plt.show()
+    def plot2_qb(xi_position):
+        filename='Beam0001/Charge_slice_0001/charge_slice_xz_00000001.h5'
+        f=h5py.File(filename)
+        names=list(f.keys())
+        dataname='/'+names[1]
+        dataset=f[dataname]
+        data=dataset[...]
+        xaxis=f['/AXIS/AXIS1'][...]
+        yaxis=f['/AXIS/AXIS2'][...]
+        x=np.linspace(xaxis[0]/2,xaxis[1]/2,int(data.shape[0]/2)) 
+        y=np.linspace(yaxis[0],yaxis[1],data.shape[1])         
+        filename='Beam0002/Charge_slice_0001/charge_slice_xz_00000001.h5'
+        f=h5py.File(filename)
+        names=list(f.keys())
+        dataname='/'+names[1]
+        dataset=f[dataname]
+        data=data+dataset[...]
+        figure_title = 'Beam Density'
+        xlabel_bottom = r'$\xi = ct-z\;[c/\omega_p]$'  
+        xlabel_top = 'Beam Density $[n_p]$'
+        ylabel_left ='$x\;[c/\omega_p]$'
+        ylabel_right ='Beam Density $[n_p]$'
+        datamin = -10.0
+        datamax = 0.0
+        colormap = 'afmhot'
+        data = data.transpose()
+        da = data[64:192,:] 
+        l_max = 0.0
+        l_min = -30.0
+        fig, ax1 = plt.subplots(figsize=(8,5))
+        plt.axis([ y.min(), y.max(),x.min(), x.max()])
+        plt.title(figure_title)
+        cs1 = plt.pcolormesh(y,x,da,vmin=datamin,vmax=datamax,cmap=colormap)
+        plt.colorbar(cs1, pad = 0.15)
+        ax1.set_xlabel(xlabel_bottom)
+        ax1.set_ylabel(ylabel_left, color='b')
+        ax1.tick_params('y', colors='b')
+        ax2 = ax1.twiny()
+        lineout_index = int (xi_position * 25.6) 
+        lineout = da[:,lineout_index]
+        ax2.plot(lineout, x, 'r')
+        ax2.set_xlim([l_min,l_max])
+        ax1.plot(xi_position*np.ones(128),x, 'b--')
+        ax2.set_ylabel(xlabel_top, color='r')
+        ax2.tick_params('y', colors='r')
+        fig.tight_layout()
+        return
+
+    def plot1_ez(x_position):
+        filename='Fields/Ez_slice0001/ezslicexz_00000001.h5'
+        f=h5py.File(filename)
+        names=list(f.keys())
+        dataname='/'+names[1]
+        dataset=f[dataname]
+        data=dataset[...]
+        xaxis=f['/AXIS/AXIS1'][...]
+        yaxis=f['/AXIS/AXIS2'][...]
+        x=np.linspace(xaxis[0]/2,xaxis[1]/2,int(data.shape[0]/2)) 
+        y=np.linspace(yaxis[0],yaxis[1],data.shape[1])         
+        figure_title = '$E_z$'
+        xlabel_bottom = r'$\xi = ct-z\;[c/\omega_p]$'  
+        xlabel_top = '$eE_z/mc\omega_p$'
+        ylabel_left ='$x\;[c/\omega_p]$'
+        ylabel_right ='$eE_z/mc\omega_p$'
+        datamin = -1.0
+        datamax = 1.0
+        colormap = 'bwr'
+        data = data.transpose()
+        da = data[64:192,:] 
+        l_max = 1.0
+        l_min = -1.0
+        fig, ax1 = plt.subplots(figsize=(8,5))
+        plt.axis([ y.min(), y.max(),x.min(), x.max()])
+        plt.title(figure_title)
+        cs1 = plt.pcolormesh(y,x,da,vmin=datamin,vmax=datamax,cmap=colormap)
+        plt.colorbar(cs1, pad = 0.15)
+        ax1.set_xlabel(xlabel_bottom)
+        # Make the y-axis label, ticks and tick labels match the line color.
+        ax1.set_ylabel(ylabel_left, color='b')
+        ax1.tick_params('y', colors='b')
+        ax2 = ax1.twinx()
+        middle_index = int(da.shape[0]/2)
+        lineout_index = int (middle_index + x_position * 21.333333333333333) 
+        lineout = da[lineout_index,:]
+        ax2.plot(y, lineout, 'r')
+        ax2.set_ylim([l_min,l_max])
+        ax1.plot(y, x_position*np.ones(256), 'w--') # Add a white dashed line at the lineout position
+        ax2.set_ylabel(ylabel_right, color='r')
+        ax2.tick_params('y', colors='r')
+        fig.tight_layout()
+        return
+
+    def plot2_ez(xi_position):
+        filename='Fields/Ez_slice0001/ezslicexz_00000001.h5'
+        f=h5py.File(filename)
+        names=list(f.keys())
+        dataname='/'+names[1]
+        dataset=f[dataname]
+        data=dataset[...]
+        xaxis=f['/AXIS/AXIS1'][...]
+        yaxis=f['/AXIS/AXIS2'][...]
+        x=np.linspace(xaxis[0]/2,xaxis[1]/2,int(data.shape[0]/2)) 
+        y=np.linspace(yaxis[0],yaxis[1],data.shape[1])         
+        figure_title = '$E_z$'
+        xlabel_bottom = r'$\xi = ct-z\;[c/\omega_p]$'  
+        xlabel_top = '$eE_z/mc\omega_p$'
+        ylabel_left ='$x\;[c/\omega_p]$'
+        ylabel_right ='$eE_z/mc\omega_p$'
+        datamin = -1.0
+        datamax = 1.0
+        colormap = 'bwr'
+        data = data.transpose()
+        da = data[64:192,:] 
+        l_max = 0.5
+        l_min = -0.5
+        fig, ax1 = plt.subplots(figsize=(8,5))
+        plt.axis([ y.min(), y.max(),x.min(), x.max()])
+        plt.title(figure_title)
+        cs1 = plt.pcolormesh(y,x,da,vmin=datamin,vmax=datamax,cmap=colormap)
+        plt.colorbar(cs1, pad = 0.15)
+        ax1.set_xlabel(xlabel_bottom)
+        ax1.set_ylabel(ylabel_left, color='b')
+        ax1.tick_params('y', colors='b')
+        ax2 = ax1.twiny()
+        lineout_index = int (xi_position * 25.6) 
+        lineout = da[:,lineout_index]
+        ax2.plot(lineout, x, 'r')
+        ax2.set_xlim([l_min,l_max])
+        ax1.plot(xi_position*np.ones(128),x, 'w--')
+        ax2.set_ylabel(xlabel_top, color='r')
+        ax2.tick_params('y', colors='r')
+        fig.tight_layout()
+        return
+
+    def plot1_fo(x_position):
+        filename='Fields/Ex_slice0001/exslicexz_00000001.h5'
+        f=h5py.File(filename)
+        names=list(f.keys())
+        dataname='/'+names[1]
+        dataset=f[dataname]
+        data=dataset[...]
+        xaxis=f['/AXIS/AXIS1'][...]
+        yaxis=f['/AXIS/AXIS2'][...]
+        x=np.linspace(xaxis[0]/2,xaxis[1]/2,int(data.shape[0]/2)) 
+        y=np.linspace(yaxis[0],yaxis[1],data.shape[1])         
+        filename='Fields/By_slice0001/byslicexz_00000001.h5'
+        f=h5py.File(filename)
+        names=list(f.keys())
+        dataname='/'+names[1]
+        dataset=f[dataname]
+        data=data-dataset[...]
+        figure_title = 'Focusing Field'
+        xlabel_bottom = r'$\xi = ct-z\;[c/\omega_p]$'  
+        xlabel_top = 'Focusing Field $[mc\omega_p/e]$'
+        ylabel_left ='$x\;[c/\omega_p]$'
+        ylabel_right ='Focusing Field $[mc\omega_p/e]$'
+        datamin = -1.0
+        datamax = 1.0
+        colormap = 'jet'
+        data = data.transpose()
+        da = data[64:192,:] 
+        l_max = 1.0
+        l_min = -1.0
+        fig, ax1 = plt.subplots(figsize=(8,5))
+        plt.axis([ y.min(), y.max(),x.min(), x.max()])
+        plt.title(figure_title)
+        cs1 = plt.pcolormesh(y,x,da,vmin=datamin,vmax=datamax,cmap=colormap)
+        plt.colorbar(cs1, pad = 0.15)
+        ax1.set_xlabel(xlabel_bottom)
+        # Make the y-axis label, ticks and tick labels match the line color.
+        ax1.set_ylabel(ylabel_left, color='b')
+        ax1.tick_params('y', colors='b')
+        ax2 = ax1.twinx()
+        middle_index = int(da.shape[0]/2)
+        lineout_index = int (middle_index + x_position * 21.333333333333333)+1 
+        lineout = da[lineout_index,:]
+        ax2.plot(y, lineout, 'r')
+        ax2.set_ylim([l_min,l_max])
+        ax1.plot(y, x_position*np.ones(256), 'b--') # Add a white dashed line at the lineout position
+        ax2.set_ylabel(ylabel_right, color='r')
+        ax2.tick_params('y', colors='r')
+        fig.tight_layout()
+        return
+
+    def plot2_fo(xi_position):
+        filename='Fields/Ex_slice0001/exslicexz_00000001.h5'
+        f=h5py.File(filename)
+        names=list(f.keys())
+        dataname='/'+names[1]
+        dataset=f[dataname]
+        data=dataset[...]
+        xaxis=f['/AXIS/AXIS1'][...]
+        yaxis=f['/AXIS/AXIS2'][...]
+        x=np.linspace(xaxis[0]/2,xaxis[1]/2,int(data.shape[0]/2)) 
+        y=np.linspace(yaxis[0],yaxis[1],data.shape[1])         
+        filename='Fields/By_slice0001/byslicexz_00000001.h5'
+        f=h5py.File(filename)
+        names=list(f.keys())
+        dataname='/'+names[1]
+        dataset=f[dataname]
+        data=data-dataset[...]
+        figure_title = 'Focusing Field'
+        xlabel_bottom = r'$\xi = ct-z\;[c/\omega_p]$'  
+        xlabel_top = 'Focusing Field $[mc\omega_p/e]$'
+        ylabel_left ='$x\;[c/\omega_p]$'
+        ylabel_right ='Focusing Field $[mc\omega_p/e]$'
+        datamin = -1.0
+        datamax = 1.0
+        colormap = 'jet'
+        data = data.transpose()
+        da = data[64:192,:] 
+        l_max = 0.6
+        l_min = -0.6
+        fig, ax1 = plt.subplots(figsize=(8,5))
+        plt.axis([ y.min(), y.max(),x.min(), x.max()])
+        plt.title(figure_title)
+        cs1 = plt.pcolormesh(y,x,da,vmin=datamin,vmax=datamax,cmap=colormap)
+        plt.colorbar(cs1, pad = 0.15)
+        ax1.set_xlabel(xlabel_bottom)
+        ax1.set_ylabel(ylabel_left, color='b')
+        ax1.tick_params('y', colors='b')
+        ax2 = ax1.twiny()
+        lineout_index = int (xi_position * 25.6) 
+        lineout = da[:,lineout_index]
+        ax2.plot(lineout, x, 'r')
+        ax2.set_xlim([l_min,l_max])
+        ax1.plot(xi_position*np.ones(128),x, 'b--')
+        ax2.set_ylabel(xlabel_top, color='r')
+        ax2.tick_params('y', colors='r')
+        fig.tight_layout()
+        return        
+
+    interact(plot1_qp,x_position=(-3,3,0.05))
+    interact(plot2_qp,xi_position=(0,10,0.05))
+    interact(plot1_qb,x_position=(-3,3,0.05))
+    interact(plot2_qb,xi_position=(0,10,0.05))
+    interact(plot1_ez,x_position=(-3,3,0.05))
+    interact(plot2_ez,xi_position=(0,10,0.05))
+    interact(plot1_fo,x_position=(-3,3,0.05))
+    interact(plot2_fo,xi_position=(0,10,0.05))
     return
-
-def Ez_longilineout_plot(filename,figure_title='',xlabel='',ylabel_left='',ylabel_right='',datamin=-1,datamax=1,lineout_position=0):
-    f=h5py.File(filename,'r')
-    positionOf_=filename.find('_')
-    firstPartOfFilename = filename[0:positionOf_]
-    dataset = f['/'+firstPartOfFilename]
-    data = dataset[...]
-    xaxis=f['/AXIS/AXIS1'][...]
-    yaxis=f['/AXIS/AXIS2'][...]
-    
-    # Only plot the middle(Along x) part of data. Shift the center of x to 0 and decrease the length of x by 1/2 
-    x=np.linspace((xaxis[0]-xaxis[1]/2)/2,(xaxis[1]/2)/2,int(data.shape[0]/2)) 
-    y=np.linspace(yaxis[0],yaxis[1],data.shape[1]) 
-
-    data = data.transpose()
-    datamiddle = data[64:192,:]    
-    
-    fig, ax1 = plt.subplots(figsize=(8,5))
-    
-    plt.axis([ y.min(), y.max(),x.min(), x.max()])
-    plt.title(figure_title)
-
-    cs1 = plt.pcolor(y,x,datamiddle,vmin=datamin,vmax=datamax,cmap='Blues')
-
-    plt.colorbar(cs1, pad = 0.15)
-
-    ax1.set_xlabel(xlabel)
-    # Make the y-axis label, ticks and tick labels match the line color.
-    ax1.set_ylabel(ylabel_left, color='b')
-    ax1.tick_params('y', colors='b')
-
-    ax2 = ax1.twinx()
-
-    middle_index = int(data.shape[0]/2)
-    lineout_index = int (middle_index + lineout_position * 20) 
-    # Roughly speaking, 1 distance(in normalized units) in x correspond to 20 rows in the data matrix. 256/12.778 = 20
-    if (lineout_index >= 64 and lineout_index < 192):
-        E_z = data[lineout_index,:]
-    else:
-        E_z = data[middle_index,:]
-     
-    ax2.plot(y, E_z, 'r')
-    ax1.plot(y, lineout_position*np.ones(256), 'w--') # Add a white dashed line at the lineout position
-    
-    ax2.set_ylabel(ylabel_right, color='r')
-    ax2.tick_params('y', colors='r')
-
-    fig.tight_layout()
-    return
-
-def Ez_translineout_plot(filename,figure_title='',xlabel_down='',xlabel_up='',ylabel='',datamin=-1,datamax=1,lineout_position=0):
-    f=h5py.File(filename,'r')
-    positionOf_=filename.find('_')
-    firstPartOfFilename = filename[0:positionOf_]
-    dataset = f['/'+firstPartOfFilename]
-    data = dataset[...]
-    xaxis=f['/AXIS/AXIS1'][...]
-    yaxis=f['/AXIS/AXIS2'][...]
-    
-    # Only plot the middle(Along x) part of data. Shift the center of x to 0 and decrease the length of x by 1/2 
-    x=np.linspace((xaxis[0]-xaxis[1]/2)/2,(xaxis[1]/2)/2,int(data.shape[0]/2)) 
-    y=np.linspace(yaxis[0],yaxis[1],data.shape[1]) 
-
-    data = data.transpose()
-    datamiddle = data[64:192,:] 
-    
-    fig, ax1 = plt.subplots(figsize=(8,5))
-    
-    plt.axis([ y.min(), y.max(),x.min(), x.max()])
-    #plt.title(figure_title)
-
-    cs1 = plt.pcolor(y,x,datamiddle,vmin=datamin,vmax=datamax,cmap='Blues')
-
-    plt.colorbar(cs1, pad = 0.15)
-
-    ax1.set_ylabel(ylabel)
-  
-    ax1.set_xlabel(xlabel_down, color='b')
-    ax1.tick_params('x', colors='b')
-
-    ax2 = ax1.twiny()
-
-    lineout_index = int(lineout_position * 25)
-    # Roughly speaking, 1 distance(in normalized units) in xi(ct-z) correspond to 25 columns in the data matrix. 256/10.2415 = 25
-    if (lineout_index >= 0 and lineout_index < 256):
-        F_x = datamiddle[:,lineout_index]
-    else:
-        F_x = datamiddle[:,0]
-     
-    ax2.plot(F_x,x, 'r')
-    ax1.plot(lineout_position*np.ones(128),x, 'w--')# Add a white dashed line at the lineout position
-    
-    ax2.set_xlabel(xlabel_up, color='r')
-    ax2.tick_params('x', colors='r')
-
-    fig.tight_layout()
-    
-    return
-
-
-
-
-def Fx_translineout_plot(filename_Ex_XZ,filename_By_XZ,figure_title='',xlabel_down='',xlabel_up='',ylabel='',datamin=-1,datamax=1,lineout_position=0):
-    fEx=h5py.File(filename_Ex_XZ,'r')
-    fBy=h5py.File(filename_By_XZ,'r')
-    positionOf_=filename_Ex_XZ.find('_')
-    firstPartOfFilename = filename_Ex_XZ[0:positionOf_]
-    dataset_Ex = fEx['/'+firstPartOfFilename]
-    data_Ex = dataset_Ex[...]
-    positionOf_=filename_By_XZ.find('_')
-    firstPartOfFilename = filename_By_XZ[0:positionOf_]
-    dataset_By = fBy['/'+firstPartOfFilename]
-    data_By = dataset_By[...]
-    data = data_By - data_Ex
-    xaxis=fEx['/AXIS/AXIS1'][...]
-    yaxis=fEx['/AXIS/AXIS2'][...]
-
-    # Only plot the middle(Along x) part of data. Shift the center of x to 0 and decrease the length of x by 1/2 
-    x=np.linspace((xaxis[0]-xaxis[1]/2)/2,(xaxis[1]/2)/2,int(data.shape[0]/2)) 
-    y=np.linspace(yaxis[0],yaxis[1],data.shape[1]) 
-
-    data = data.transpose()
-    datamiddle = data[64:192,:] 
-    
-    fig, ax1 = plt.subplots(figsize=(8,5))
-    
-    plt.axis([ y.min(), y.max(),x.min(), x.max()])
-    #plt.title(figure_title)
-
-    cs1 = plt.pcolor(y,x,datamiddle,vmin=datamin,vmax=datamax,cmap='Greens')
-
-    plt.colorbar(cs1, pad = 0.15)
-
-    ax1.set_ylabel(ylabel)
-  
-    ax1.set_xlabel(xlabel_down, color='b')
-    ax1.tick_params('x', colors='b')
-
-    ax2 = ax1.twiny()
-
-    lineout_index = int(lineout_position * 25)
-    # Roughly speaking, 1 distance(in normalized units) in xi(ct-z) correspond to 25 columns in the data matrix. 256/10.2415 = 25
-    if (lineout_index >= 0 and lineout_index < 256):
-        F_x = datamiddle[:,lineout_index]
-    else:
-        F_x = datamiddle[:,0]
-     
-    ax2.plot(F_x,x, 'r')
-    ax1.plot(lineout_position*np.ones(128),x, 'w--')# Add a white dashed line at the lineout position
-    
-    ax2.set_xlabel(xlabel_up, color='r')
-    ax2.tick_params('x', colors='r')
-
-    fig.tight_layout()
-    
-    return
-
-
-def Fx_longilineout_plot(filename_Ex_XZ,filename_By_XZ,figure_title='',xlabel='',ylabel_left='',ylabel_right='',datamin=-1,datamax=1,lineout_position=0):
-    fEx=h5py.File(filename_Ex_XZ,'r')
-    fBy=h5py.File(filename_By_XZ,'r')
-    positionOf_=filename_Ex_XZ.find('_')
-    firstPartOfFilename = filename_Ex_XZ[0:positionOf_]
-    dataset_Ex = fEx['/'+firstPartOfFilename]
-    data_Ex = dataset_Ex[...]
-    positionOf_=filename_By_XZ.find('_')
-    firstPartOfFilename = filename_By_XZ[0:positionOf_]
-    dataset_By = fBy['/'+firstPartOfFilename]
-    data_By = dataset_By[...]
-    data = data_By - data_Ex
-    xaxis=fEx['/AXIS/AXIS1'][...]
-    yaxis=fEx['/AXIS/AXIS2'][...]
-
-    # Only plot the middle(Along x) part of data. Shift the center of x to 0 and decrease the length of x by 1/2 
-    x=np.linspace((xaxis[0]-xaxis[1]/2)/2,(xaxis[1]/2)/2,int(data.shape[0]/2)) 
-    y=np.linspace(yaxis[0],yaxis[1],data.shape[1]) 
-
-    data = data.transpose()
-    datamiddle = data[64:192,:]    
-    
-    fig, ax1 = plt.subplots(figsize=(8,5))
-    
-    plt.axis([ y.min(), y.max(),x.min(), x.max()])
-    plt.title(figure_title)
-
-    cs1 = plt.pcolor(y,x,datamiddle,vmin=datamin,vmax=datamax,cmap='Greens')
-
-    plt.colorbar(cs1, pad = 0.15)
-
-    ax1.set_xlabel(xlabel)
-    # Make the y-axis label, ticks and tick labels match the line color.
-    ax1.set_ylabel(ylabel_left, color='b')
-    ax1.tick_params('y', colors='b')
-
-    ax2 = ax1.twinx()
-
-    middle_index = int(data.shape[0]/2)
-    lineout_index = int (middle_index + lineout_position * 20) 
-    # Roughly speaking, 1 distance(in normalized units) in x correspond to 20 rows in the data matrix. 256/12.778 = 20
-    if (lineout_index >= 64 and lineout_index < 192):
-        E_z = data[lineout_index,:]
-    else:
-        E_z = data[middle_index,:]
-     
-    ax2.plot(y, E_z, 'r')
-    ax1.plot(y, lineout_position*np.ones(256), 'w--') # Add a white dashed line at the lineout position
-    
-    ax2.set_ylabel(ylabel_right, color='r')
-    ax2.tick_params('y', colors='r')
-
-    fig.tight_layout()
-    return
-
