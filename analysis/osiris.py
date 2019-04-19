@@ -1788,16 +1788,20 @@ def tajima(rundir):
         laser_dir = working_dir+'/MS/FLD/e2/'
         eden_dir = working_dir + '/MS/DENSITY/electrons/charge/'
         phase_space_dir=working_dir+'/MS/PHA/p1x1/electrons/'
+        p2x1_dir=working_dir+'/MS/PHA/p2x1/electrons/'
+
         efield_prefix='e1-'
         laser_prefix='e2-'
         phase_prefix='p1x1-electrons-'
+        p2x1_prefix='p2x1-electrons-'
         eden_prefix='charge-electrons-'
-        plt.figure(figsize=(12,12))
+        plt.figure(figsize=(12,16))
 
         filename1=phase_space_dir+phase_prefix+repr(file_no).zfill(6)+'.h5'
         filename2=eden_dir+eden_prefix+repr(file_no).zfill(6)+'.h5'
         filename3=efield_dir+efield_prefix+repr(file_no).zfill(6)+'.h5'
         filename4=laser_dir+laser_prefix+repr(file_no).zfill(6)+'.h5'
+        filename5=p2x1_dir+p2x1_prefix+repr(file_no).zfill(6)+'.h5'
 
         #print(filename1)
         #print(filename2)
@@ -1807,16 +1811,21 @@ def tajima(rundir):
         eden=osh5io.read_h5(filename2)
         ex = osh5io.read_h5(filename3)
         ey = osh5io.read_h5(filename4)
+        p2x1=np.abs(osh5io.read_h5(filename5))
 
-        phase_plot=plt.subplot(221)
+        phase_plot=plt.subplot(325)
         #print(repr(phase_space.axes[0].min))
         #print(repr(phase_space.axes[1].min))
         title=phase_space.data_attrs['LONG_NAME']
         time=phase_space.run_attrs['TIME'][0]
         ext_stuff=[phase_space.axes[1].min,phase_space.axes[1].max,phase_space.axes[0].min,phase_space.axes[0].max]
-        phase_contour=plt.contourf(np.abs(phase_space+0.000000001),levels=[0.00001,0.0001,0.001,0.01,0.05,0.1,0.2,0.5,1,10],extent=ext_stuff,cmap='Spectral',vmin=1e-5,vmax=30,
-                    norm=colors.LogNorm(vmin=0.0001,vmax=30))
-        phase_plot.set_title('Phase Space' +' , t='+repr(time)+' $\omega_{pe}^{-1}$')
+        data_max=max(np.abs(np.amax(phase_space)),100)
+        print(repr(data_max))
+        phase_contour=plt.contourf(np.abs(phase_space+0.000000001),
+                    levels=[0.00001*data_max,0.0001*data_max,0.001*data_max,0.01*data_max,0.05*data_max,0.1*data_max,0.2*data_max,0.5*data_max],
+                    extent=ext_stuff,cmap='Spectral',vmin=1e-5*data_max,vmax=1.5*data_max,
+                    norm=colors.LogNorm(vmin=0.00001*data_max,vmax=1.5*data_max))
+        phase_plot.set_title('P2X1 Phase Space' +' , t='+repr(time)+' $\omega_{pe}^{-1}$')
         phase_plot.set_xlabel('Position [$\Delta x$]')
         phase_plot.set_ylabel('Velocity [$\omega_{pe} \Delta x$]')
         #plt.colorbar()
@@ -1825,17 +1834,21 @@ def tajima(rundir):
         plt.colorbar(phase_contour)
         
         
-        den_plot = plt.subplot(222)
+        den_plot = plt.subplot(321)
         osh5vis.osplot(eden,title='Electron Density',ylim=[-2,0])
         
-        ex_plot = plt.subplot(223)
+        ex_plot = plt.subplot(322)
         
         osh5vis.osplot(ex,title='Wake electric field')
         
-        ey_plot = plt.subplot(224)
+        ey_plot = plt.subplot(323)
         
         osh5vis.osplot(ey,title='Laser electric field')
         
+        ey_plot_k = plt.subplot(324)
+        
+        
+        osh5vis.osplot(np.abs(osh5utils.fft(ey)), xlim=[0, 20], ylim=[0, 300],linestyle='-')
         
         # plt.plot(ex[0,:])
         # plt.ylim([-2,2])
@@ -1843,6 +1856,22 @@ def tajima(rundir):
         # ex_plot.set_ylabel('Electric Field')
         # plt.tight_layout()
         # plt.show()
+        
+        p2x1_plot=plt.subplot(326)
+        #print(repr(phase_space.axes[0].min))
+        #print(repr(phase_space.axes[1].min))
+        title=p2x1.data_attrs['LONG_NAME']
+        time=p2x1.run_attrs['TIME'][0]
+        ext_stuff=[p2x1.axes[1].min,p2x1.axes[1].max,p2x1.axes[0].min,p2x1.axes[0].max]
+        p2x1_contour=plt.contourf(np.abs(p2x1+0.000000001),levels=[0.00001,0.0001,0.001,0.01,0.05,0.1,0.2,0.5,1,10,100,500],extent=ext_stuff,cmap='Spectral',vmin=1e-5,vmax=3000,
+                    norm=colors.LogNorm(vmin=0.0001,vmax=3000))
+        p2x1_plot.set_title('Phase Space' +' , t='+repr(time)+' $\omega_{pe}^{-1}$')
+        p2x1_plot.set_xlabel('Position [$\Delta x$]')
+        p2x1_plot.set_ylabel('Velocity [$\omega_{pe} \Delta x$]')
+        #plt.colorbar()
+        #osh5vis.oscontour(phase_space,levels=[10**-5,10**-3,10**-1,1,10,100],colors='black',linestyles='dashed',vmin=1e-5,vmax=1000)
+        # plt.contour(np.abs(phase_space+0.000001),levels=[0.0001,0.001,0.01,0.05,0.1,0.2,0.5,1],extent=ext_stuff,colors='black',linestyles='dashed')
+        plt.colorbar(p2x1_contour)
         
 #2345
     my_path=os.getcwd()
