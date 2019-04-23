@@ -105,14 +105,14 @@ def run_upic_es(rundir='',inputfile='pinput2'):
     
     return
     
-
-def runosiris(rundir='',inputfile='osiris-input.txt',print='yes',combine='yes'):
+def runosiris(rundir='',inputfile='osiris-input.txt',print_out='yes',combine='yes'):
 
     def combine_h5_1d(ex):
         in_file = workdir + '/MS/FLD/' + ex + '/'
         out_file = workdir + '/' + ex + '.h5'
         for path in execute(["python", "/usr/local/osiris/combine_h5_util_1d.py", in_file, out_file]):
-            if print == 'yes':
+
+            if print_out == 'yes':
                 IPython.display.clear_output(wait=True)
 #            print(path, end='')
 
@@ -120,7 +120,7 @@ def runosiris(rundir='',inputfile='osiris-input.txt',print='yes',combine='yes'):
         in_file = workdir + '/MS/DENSITY/ions/charge/'
         out_file = workdir + '/ions.h5'
         for path in execute(["python", "/usr/local/osiris/combine_h5_util_1d.py", in_file, out_file]):
-            if print == 'yes':
+            if print_out == 'yes':
                 IPython.display.clear_output(wait=True)
 #            print(path, end='')
 
@@ -131,7 +131,7 @@ def runosiris(rundir='',inputfile='osiris-input.txt',print='yes',combine='yes'):
         localexec = False
     sysexec = '/usr/local/osiris/osiris-1D.e'
     workdir += '/' + rundir
-    if print == 'yes':
+    if print_out == 'yes':
         print(workdir)
 
     # run osiris-1D.e executable
@@ -147,7 +147,7 @@ def runosiris(rundir='',inputfile='osiris-input.txt',print='yes',combine='yes'):
 
     if localexec:
         for path in execute([localexec,"-w",workdir,"osiris-input.txt"]):
-            if print == 'yes':
+            if print_out == 'yes':
                 waittick += 1
                 if(waittick == 100):
                     IPython.display.clear_output(wait=True)
@@ -155,7 +155,7 @@ def runosiris(rundir='',inputfile='osiris-input.txt',print='yes',combine='yes'):
                     print(path, end='')
     else:
         for path in execute([sysexec,"-w",workdir,"osiris-input.txt"]):
-            if print == 'yes':
+            if print_out == 'yes':
                 waittick += 1
                 if(waittick == 100):
                     IPython.display.clear_output(wait=True)
@@ -164,27 +164,28 @@ def runosiris(rundir='',inputfile='osiris-input.txt',print='yes',combine='yes'):
 
     # run combine_h5_util_1d.py script for e1/, e2/, e3/ (and iaw if applicable)
 
-    if print == 'yes':
+
+    if print_out == 'yes':
         print('combining E1 files')
     if combine == 'yes':
         combine_h5_1d('e1')
-    if print == 'yes':
+    if print_out == 'yes':
         print('combining E2 files')
     if combine == 'yes':
         combine_h5_1d('e2')
-    if print == 'yes':
+    if print_out == 'yes':
         print('combining E3 files')
     if combine == 'yes':
         combine_h5_1d('e3')
 
     # run combine on iaw data if present
     if (os.path.isdir(workdir+'/MS/DENSITY/ions/charge')):
-        if print == 'yes':
+        if print_out == 'yes':
             print('combining IAW files')
         if combine == 'yes':
             combine_h5_iaw_1d()
 
-    if print == 'yes':
+    if print_out == 'yes':
         IPython.display.clear_output(wait=True)
         print('runosiris completed normally')
 
@@ -1799,8 +1800,9 @@ def tajima(rundir):
         filename3=efield_dir+efield_prefix+repr(file_no).zfill(6)+'.h5'
         filename4=laser_dir+laser_prefix+repr(file_no).zfill(6)+'.h5'
 
-        print(filename1)
-        print(filename2)
+
+        #print(filename1)
+        #print(filename2)
 
         phase_space=np.abs(osh5io.read_h5(filename1))
         # print(repr(phase_space))
@@ -1834,7 +1836,8 @@ def tajima(rundir):
         
         ey_plot = plt.subplot(224)
         
-        osh5vis.osplot(ey,'Laser electric field')
+
+        osh5vis.osplot(ey,title='Laser electric field')
         
         
         # plt.plot(ex[0,:])
@@ -1849,14 +1852,14 @@ def tajima(rundir):
     working_dir=my_path+'/'+rundir
     phase_space_dir=working_dir+'/MS/PHA/p1x1/electrons/'
     files=sorted(os.listdir(phase_space_dir))
-    print(files[1])
+    #print(files[1])
     start=files[1].find('p1x1-electrons')+16
     end=files[1].find('.')
-    print(files[1][start:end])
+    #print(files[1][start:end])
     file_interval=int(files[1][start:end])
     file_max=(len(files)-1)*file_interval
 
-    interact(something,rundir=fixed(rundir),file_no=widgets.IntSlider(min=0,max=file_max,step=file_interval,value=0))
+    interact(something,rundir=fixed(rundir),file_no=widgets.IntSlider(min=0,max=file_max,step=file_interval,value=0, continous_update=False))
     #something(rundir=rundir,file_no=20)
     
     
@@ -1924,9 +1927,6 @@ def phasespace_movie(rundir):
     file_interval=int(files[1][start:end])
     file_max=(len(files)-1)*file_interval
 
+
     interact(something,rundir=fixed(rundir),file_no=widgets.IntSlider(min=0,max=file_max,step=file_interval,value=0))
     #something(rundir=rundir,file_no=20)
-
-    
-    
-
