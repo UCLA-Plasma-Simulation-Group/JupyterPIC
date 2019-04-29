@@ -1825,7 +1825,7 @@ def tajima(rundir):
                     levels=[0.00001*data_max,0.0001*data_max,0.001*data_max,0.01*data_max,0.05*data_max,0.1*data_max,0.2*data_max,0.5*data_max],
                     extent=ext_stuff,cmap='Spectral',vmin=1e-5*data_max,vmax=1.5*data_max,
                     norm=colors.LogNorm(vmin=0.00001*data_max,vmax=1.5*data_max))
-        phase_plot.set_title('P2X1 Phase Space' +' , t='+repr(time)+' $\omega_{pe}^{-1}$')
+        phase_plot.set_title('P1X1 Phase Space' +' , t='+repr(time)+' $\omega_{pe}^{-1}$')
         phase_plot.set_xlabel('Position [$\Delta x$]')
         phase_plot.set_ylabel('Velocity [$\omega_{pe} \Delta x$]')
         #plt.colorbar()
@@ -1865,7 +1865,7 @@ def tajima(rundir):
         ext_stuff=[p2x1.axes[1].min,p2x1.axes[1].max,p2x1.axes[0].min,p2x1.axes[0].max]
         p2x1_contour=plt.contourf(np.abs(p2x1+0.000000001),levels=[0.00001,0.0001,0.001,0.01,0.05,0.1,0.2,0.5,1,10,100,500],extent=ext_stuff,cmap='Spectral',vmin=1e-5,vmax=3000,
                     norm=colors.LogNorm(vmin=0.0001,vmax=3000))
-        p2x1_plot.set_title('Phase Space' +' , t='+repr(time)+' $\omega_{pe}^{-1}$')
+        p2x1_plot.set_title('P2X1 Phase Space' +' , t='+repr(time)+' $\omega_{pe}^{-1}$')
         p2x1_plot.set_xlabel('Position [$\Delta x$]')
         p2x1_plot.set_ylabel('Velocity [$\omega_{pe} \Delta x$]')
         #plt.colorbar()
