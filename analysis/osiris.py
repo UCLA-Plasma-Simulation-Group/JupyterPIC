@@ -1820,7 +1820,7 @@ def tajima(rundir):
         time=phase_space.run_attrs['TIME'][0]
         ext_stuff=[phase_space.axes[1].min,phase_space.axes[1].max,phase_space.axes[0].min,phase_space.axes[0].max]
         data_max=max(np.abs(np.amax(phase_space)),100)
-        print(repr(data_max))
+        #print(repr(data_max))
         phase_contour=plt.contourf(np.abs(phase_space+0.000000001),
                     levels=[0.00001*data_max,0.0001*data_max,0.001*data_max,0.01*data_max,0.05*data_max,0.1*data_max,0.2*data_max,0.5*data_max],
                     extent=ext_stuff,cmap='Spectral',vmin=1e-5*data_max,vmax=1.5*data_max,
@@ -1885,7 +1885,7 @@ def tajima(rundir):
     file_interval=int(files[1][start:end])
     file_max=(len(files)-1)*file_interval
 
-    interact(something,rundir=fixed(rundir),file_no=widgets.IntSlider(min=0,max=file_max,step=file_interval,value=0, continous_update=False))
+    interact(something,rundir=fixed(rundir),file_no=widgets.IntSlider(min=0,max=file_max,step=file_interval,value=0), continuous_update=False)
     #something(rundir=rundir,file_no=20)
     
     
