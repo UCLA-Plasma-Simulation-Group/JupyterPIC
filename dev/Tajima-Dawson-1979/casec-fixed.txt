@@ -16,7 +16,7 @@ coordinates = "cartesian",
 !----------time step and global data dump timestep number----------
 time_step
 {
-dt = 0.0995e0,
+dt = 0.099e0,
 ndump = 1,
 }
 restart
