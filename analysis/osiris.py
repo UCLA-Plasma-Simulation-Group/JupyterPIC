@@ -1848,7 +1848,7 @@ def tajima(rundir):
         ey_plot_k = plt.subplot(324)
         
         
-        osh5vis.osplot(np.abs(osh5utils.fft(ey)), xlim=[0, 20], ylim=[0, 300],linestyle='-')
+        osh5vis.osplot(np.abs(osh5utils.fft(ey)), xlim=[0, 20],linestyle='-')
         
         # plt.plot(ex[0,:])
         # plt.ylim([-2,2])
