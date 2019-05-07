@@ -1795,7 +1795,7 @@ def tajima(rundir):
         phase_prefix='p1x1-electrons-'
         p2x1_prefix='p2x1-electrons-'
         eden_prefix='charge-electrons-'
-        plt.figure(figsize=(12,16))
+        fig = plt.figure(figsize=(12,16) )
 
         filename1=phase_space_dir+phase_prefix+repr(file_no).zfill(6)+'.h5'
         filename2=eden_dir+eden_prefix+repr(file_no).zfill(6)+'.h5'
@@ -1813,11 +1813,13 @@ def tajima(rundir):
         ey = osh5io.read_h5(filename4)
         p2x1=np.abs(osh5io.read_h5(filename5))
 
-        phase_plot=plt.subplot(325)
+        phase_plot=plt.subplot(325 )
         #print(repr(phase_space.axes[0].min))
         #print(repr(phase_space.axes[1].min))
         title=phase_space.data_attrs['LONG_NAME']
         time=phase_space.run_attrs['TIME'][0]
+
+        fig.suptitle('Time = '+repr(time)+'$\omega_p^{-1}$')
         ext_stuff=[phase_space.axes[1].min,phase_space.axes[1].max,phase_space.axes[0].min,phase_space.axes[0].max]
         data_max=max(np.abs(np.amax(phase_space)),100)
         #print(repr(data_max))
@@ -1825,9 +1827,9 @@ def tajima(rundir):
                     levels=[0.00001*data_max,0.0001*data_max,0.001*data_max,0.01*data_max,0.05*data_max,0.1*data_max,0.2*data_max,0.5*data_max],
                     extent=ext_stuff,cmap='Spectral',vmin=1e-5*data_max,vmax=1.5*data_max,
                     norm=colors.LogNorm(vmin=0.00001*data_max,vmax=1.5*data_max))
-        phase_plot.set_title('P1X1 Phase Space' +' , t='+repr(time)+' $\omega_{pe}^{-1}$')
-        phase_plot.set_xlabel('Position [$\Delta x$]')
-        phase_plot.set_ylabel('Velocity [$\omega_{pe} \Delta x$]')
+        phase_plot.set_title('P1X1 Phase Space')
+        phase_plot.set_xlabel('Position [$c / \omega_{p}$]')
+        phase_plot.set_ylabel('Proper Velocity $\gamma v_1$ [ c ]')
         second_x = plt.twinx()
         second_x.plot(ex.axes[0],ex,'g',linestyle='-.')
         
@@ -1841,10 +1843,10 @@ def tajima(rundir):
         osh5vis.osplot(eden,title='Electron Density')
         
         for i in range(ex.shape[0]-2,-1,-1):
-            ex[i]=ex[i+1] - ex.axes[0].increment*ex[i]
+            ex[i]=ex[i+1] + ex.axes[0].increment*ex[i]
         ex_plot = plt.subplot(322)
         
-        osh5vis.osplot(ex,title='Wake $\psi$ ')
+        osh5vis.osplot(ex,title='Wake $\psi$ ',ylabel='$\psi [m_e c^2/e]$')
         
         ey_plot = plt.subplot(323)
         
@@ -1854,7 +1856,7 @@ def tajima(rundir):
         ey_plot_k = plt.subplot(324)
         
         
-        osh5vis.osplot(np.abs(osh5utils.fft(ey)), xlim=[0, 20],linestyle='-')
+        osh5vis.osplot(np.abs(osh5utils.fft(ey)), xlim=[0, 20],linestyle='-',title='k spectrum')
         
         # plt.plot(ex[0,:])
         # plt.ylim([-2,2])
@@ -1871,9 +1873,9 @@ def tajima(rundir):
         ext_stuff=[p2x1.axes[1].min,p2x1.axes[1].max,p2x1.axes[0].min,p2x1.axes[0].max]
         p2x1_contour=plt.contourf(np.abs(p2x1+0.000000001),levels=[0.00001,0.0001,0.001,0.01,0.05,0.1,0.2,0.5,1,10,100,500],extent=ext_stuff,cmap='Spectral',vmin=1e-5,vmax=3000,
                     norm=colors.LogNorm(vmin=0.0001,vmax=3000))
-        p2x1_plot.set_title('P2X1 Phase Space' +' , t='+repr(time)+' $\omega_{pe}^{-1}$')
-        p2x1_plot.set_xlabel('Position [$\Delta x$]')
-        p2x1_plot.set_ylabel('Velocity [$\omega_{pe} \Delta x$]')
+        p2x1_plot.set_title('P2X1 Phase Space')
+        p2x1_plot.set_xlabel('Position [$c/ \omega_{p}$]')
+        p2x1_plot.set_ylabel('Proper Velocity $\gamma v_2$ [$c$]')
         #plt.colorbar()
         #osh5vis.oscontour(phase_space,levels=[10**-5,10**-3,10**-1,1,10,100],colors='black',linestyles='dashed',vmin=1e-5,vmax=1000)
         # plt.contour(np.abs(phase_space+0.000001),levels=[0.0001,0.001,0.01,0.05,0.1,0.2,0.5,1],extent=ext_stuff,colors='black',linestyles='dashed')
