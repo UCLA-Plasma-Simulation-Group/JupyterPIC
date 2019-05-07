@@ -1819,7 +1819,7 @@ def tajima(rundir):
         title=phase_space.data_attrs['LONG_NAME']
         time=phase_space.run_attrs['TIME'][0]
 
-        fig.suptitle('Time = '+repr(time)+'$\omega_p^{-1}$')
+        fig.suptitle('Time = '+repr(time)+'$\omega_p^{-1}$',fontsize=24)
         ext_stuff=[phase_space.axes[1].min,phase_space.axes[1].max,phase_space.axes[0].min,phase_space.axes[0].max]
         data_max=max(np.abs(np.amax(phase_space)),100)
         #print(repr(data_max))
