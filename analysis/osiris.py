@@ -1835,15 +1835,18 @@ def tajima(rundir):
         
         
         den_plot = plt.subplot(321)
-        osh5vis.osplot(eden,title='Electron Density',ylim=[-2,0])
+        osh5vis.osplot(eden,title='Electron Density')
         
+        for i in range(ex.shape[0]-2,-1,-1):
+            ex[i]=ex[i+1] - ex.axes[0].increment*ex[i]
         ex_plot = plt.subplot(322)
         
-        osh5vis.osplot(ex,title='Wake electric field')
+        osh5vis.osplot(ex,title='Wake $\psi$ ')
         
         ey_plot = plt.subplot(323)
         
-        osh5vis.osplot(ey,title='Laser electric field')
+        
+        osh5vis.osplot(ey,title='Laser Electric Field')
         
         ey_plot_k = plt.subplot(324)
         
