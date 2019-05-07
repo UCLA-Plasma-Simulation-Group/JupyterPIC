@@ -1828,6 +1828,9 @@ def tajima(rundir):
         phase_plot.set_title('P1X1 Phase Space' +' , t='+repr(time)+' $\omega_{pe}^{-1}$')
         phase_plot.set_xlabel('Position [$\Delta x$]')
         phase_plot.set_ylabel('Velocity [$\omega_{pe} \Delta x$]')
+        second_x = plt.twinx()
+        second_x.plot(ex.axes[0],ex,'g',linestyle='-.')
+        
         #plt.colorbar()
         #osh5vis.oscontour(phase_space,levels=[10**-5,10**-3,10**-1,1,10,100],colors='black',linestyles='dashed',vmin=1e-5,vmax=1000)
         # plt.contour(np.abs(phase_space+0.000001),levels=[0.0001,0.001,0.01,0.05,0.1,0.2,0.5,1],extent=ext_stuff,colors='black',linestyles='dashed')
@@ -1835,15 +1838,18 @@ def tajima(rundir):
         
         
         den_plot = plt.subplot(321)
-        osh5vis.osplot(eden,title='Electron Density',ylim=[-2,0])
+        osh5vis.osplot(eden,title='Electron Density')
         
+        for i in range(ex.shape[0]-2,-1,-1):
+            ex[i]=ex[i+1] - ex.axes[0].increment*ex[i]
         ex_plot = plt.subplot(322)
         
-        osh5vis.osplot(ex,title='Wake electric field')
+        osh5vis.osplot(ex,title='Wake $\psi$ ')
         
         ey_plot = plt.subplot(323)
         
-        osh5vis.osplot(ey,title='Laser electric field')
+        
+        osh5vis.osplot(ey,title='Laser Electric Field')
         
         ey_plot_k = plt.subplot(324)
         
