@@ -1,1 +1,0 @@
- run -it -v /Users/benjum/jupyter-tmp/jupyter-ben/JupyterPIC:/home/jovyan --rm -p 8888:8888 picksc/jupyterpic:050719
