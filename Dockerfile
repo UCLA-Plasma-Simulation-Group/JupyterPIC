@@ -92,7 +92,7 @@ WORKDIR ..
 COPY notebooks-260 notebooks-260
 RUN chmod 777 notebooks-260
 WORKDIR notebooks-260
-RUN chmod 777 Tajima-Dawson-1979
+RUN chmod 777 LWFA-Workbook-1-Tajima-Dawson
 
 WORKDIR ..
 
