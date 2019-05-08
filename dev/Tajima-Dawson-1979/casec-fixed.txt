@@ -73,7 +73,7 @@ name = "electrons",
 num_par_max = 500000,
 rqm = -1.0d0,
 q_real = -1.0d0,
-num_par_x(1:1) = 32,
+num_par_x(1:1) = 10,
 }
 udist
 {
@@ -116,7 +116,7 @@ collisions
 !----------SMOOTHING FOR CURRENTS------------------------------------------------------------
 smooth
 {
- ! type = '5pass',
+ type = '5pass',
 }
 diag_current
 {
