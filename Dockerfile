@@ -77,7 +77,9 @@ WORKDIR ..
 COPY dev dev
 RUN chmod 777 dev
 WORKDIR dev
+RUN chmod 777 Forslund-Kindel-Lindman-1975
 RUN chmod 777 Landau-Damping
+RUN chmod 777 Tajima-Dawson-1979
 RUN chmod 777 buneman
 RUN chmod 777 driven_waves
 RUN chmod 777 heatflow_oshun
@@ -85,6 +87,12 @@ RUN chmod 777 iaw-fluid-theory
 RUN chmod 777 interactive-theory
 RUN chmod 777 quickpic_pwfa
 RUN chmod 777 weibel
+
+WORKDIR ..
+COPY notebooks-260 notebooks-260
+RUN chmod 777 notebooks-260
+WORKDIR notebooks-260
+RUN chmod 777 Tajima-Dawson-1979
 
 WORKDIR ..
 
