@@ -15,6 +15,7 @@ interact_calc=interact_manual.options(manual_name="Make New Input and Run")
 import os
 from osiris import tajima
 
+
 def plot_maxgamma_t(simdir):
     
     maxg, time = [], []
@@ -218,3 +219,4 @@ def tajima_moving_widget():
     im_moving = interact_calc(newifile2, iname=a,oname=b,uth=c,a0=d,omega0=e,t_flat=f, 
                   t_rise=g, t_fall=h, xmax=xmaxw, ndump=ndumpw, ppc=ppc, tmax=tmaxw);
     im_moving.widget.manual_button.layout.width='250px'
+
