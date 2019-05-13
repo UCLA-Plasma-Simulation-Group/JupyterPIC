@@ -14,6 +14,9 @@ import ipywidgets as widgets
 interact_calc=interact_manual.options(manual_name="Make New Input and Run")
 import os
 from osiris import tajima
+from h5_utilities import *
+from analysis import *
+import matplotlib.colors as colors
 
 def plot_maxgamma_t(simdir):
     
@@ -218,3 +221,39 @@ def tajima_moving_widget():
     im_moving = interact_calc(newifile2, iname=a,oname=b,uth=c,a0=d,omega0=e,t_flat=f, 
                   t_rise=g, t_fall=h, xmax=xmaxw, ndump=ndumpw, ppc=ppc, tmax=tmaxw);
     im_moving.widget.manual_button.layout.width='250px'
+
+def xt_and_energy_plot(rundir, field='e2'):
+    PATH = os.getcwd() + '/' + rundir +'/'+ field + '.h5'
+    hdf5_data = read_hdf(PATH)
+
+    xlim = [hdf5_data.axes[0].axis_min, hdf5_data.axes[0].axis_max]
+    tlim = [hdf5_data.axes[1].axis_min, hdf5_data.axes[1].axis_max]
+
+    fig, axs = plt.subplots(1, 2, sharey=True, figsize=(8,5), gridspec_kw={'width_ratios': [1, 3]})
+    fig.subplots_adjust(wspace=0.05)
+
+    #This calculates the energy as the electric field squared, summed over x at each time step.
+    energy = np.sum(hdf5_data.data * hdf5_data.data, axis=1)*hdf5_data.axes[0].increment
+    
+
+    axs[0].set_xlabel('Energy [$mc^{2}n_{0}c \omega_{p}^{-1}$]')
+    axs[0].set_ylabel('Time [$\omega_p^{-1}$]')
+    axs[0].set_ylim(tlim[0],tlim[1]) 
+    axs[0].plot(energy, np.linspace(0, tlim[1], len(energy)))
+
+    extent_stuff = [hdf5_data.axes[0].axis_min, hdf5_data.axes[0].axis_max, hdf5_data.axes[1].axis_min,
+                        hdf5_data.axes[1].axis_max]
+    plt.imshow(hdf5_data.data, extent=extent_stuff, aspect='auto',origin='lower')
+    cbar = plt.colorbar()
+    cbar.set_label('$E_{' + field[1] +'} [m_e c \omega_{p} e^{-1}]$')
+
+    if field == 'e2':
+        field_name = 'Laser'
+    if field == 'e1':
+        field_name = 'Wake'
+    fig.suptitle(field_name + ' Electric Field', fontsize=16)
+    plt.xlabel('Position [$c/ \omega_{p}$]')
+    plt.xlim(xlim[0],xlim[1])
+    plt.ylim(tlim[0],tlim[1])  
+
+    fig.show() 
