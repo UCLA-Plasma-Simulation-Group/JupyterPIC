@@ -195,7 +195,7 @@ def tajima_widget():
     xmaxw = widgets.FloatText(value=102.4, description='xmax:', style=style, layout=layout)
     ndumpw = widgets.IntText(value=1, description='ndump:', style=style, layout=layout)
     ppc = widgets.IntText(value=10, description='Particles per cell:', style=style, layout=layout)
-
+    print('d='+repr(d))
     im = interact_calc(newifile, iname=a,oname=b,uth=c,a0=d,omega0=e,t_flat=f, 
                   t_rise=g, t_fall=h, nx_p=nx_pw, xmax=xmaxw, ndump=ndumpw, ppc=ppc);
     im.widget.manual_button.layout.width='250px'
@@ -233,7 +233,11 @@ def xt_and_energy_plot(rundir, field='e2'):
     fig.subplots_adjust(wspace=0.05)
 
     #This calculates the energy as the electric field squared, summed over x at each time step.
-    energy = np.sum(hdf5_data.data * hdf5_data.data, axis=1)*hdf5_data.axes[0].increment
+    print(hdf5_data.axes[0].axis_min)
+    print(hdf5_data.axes[0].axis_max)
+    print(hdf5_data.data.shape)
+    dx = (hdf5_data.axes[0].axis_max-hdf5_data.axes[0].axis_min)/hdf5_data.data.shape[1]
+    energy = 0.5 * np.sum(hdf5_data.data * hdf5_data.data, axis=1)*dx
     
 
     axs[0].set_xlabel('Energy [$mc^{2}n_{0}c \omega_{p}^{-1}$]')
@@ -257,3 +261,40 @@ def xt_and_energy_plot(rundir, field='e2'):
     plt.ylim(tlim[0],tlim[1])  
 
     fig.show() 
+
+def yujian_action( iname='qpinput.json',oname='qp_new.json', indx=8, indy=8  ):    
+    
+    with open(iname) as osdata:
+        data = osdata.readlines()
+        
+    for i in range(len(data)):
+        if 'indx' in data[i]:
+            data[i] = ' \" indx \" :' + str(indx)+' , \n'
+        if 'indy' in data[i]:
+            data[i] = ' \" indy \" :' + str(indy)+' , \n'
+
+  
+    with open(oname,'w') as f:
+        for line in data:
+            f.write(line)
+    
+    print('New file '+oname+' is written.')
+    dirname = oname.strip('.txt')
+    print('Running QuickPIC in directory '+dirname+'...')
+    print('Done')
+
+def yujian_widget():
+    
+    style = {'description_width': '350px'}
+    layout = Layout(width='55%')
+
+    a = widgets.Text(value='qpinput.json', description='Template Input File:',style=style,layout=layout)
+    b = widgets.Text(value='qp_new.json', description='New Output File:',style=style,layout=layout)
+    
+    indy = widgets.IntText(value=8, description='indy:', style=style, layout=layout)
+    indx = widgets.IntSlider(value=8,min=0,max=20,step=1, description='indx:',orientation='horizontal', style=style, layout=layout)
+
+    im_qpic = interact_calc(yujian_action, iname=a, oname = b, indx = indx, indy = indy);
+    im_qpic.widget.manual_button.layout.width='250px'
+    
+    
