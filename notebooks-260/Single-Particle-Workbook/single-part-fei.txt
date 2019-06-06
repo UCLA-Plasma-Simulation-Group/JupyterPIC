@@ -1,0 +1,178 @@
+!--------the node configuration for this simulation--------
+simulation
+{
+  algorithm = "fei",
+}
+
+node_conf 
+{
+  node_number(1:2) =  4, 1,
+  if_periodic(1:2) =  .false., .true.,
+}
+
+!----------spatial grid----------
+grid 
+{
+  nx_p(1:2) =  1000, 12,
+  coordinates = "cartesian",
+}
+
+!----------time step and global data dump timestep number----------
+time_step 
+{
+  dt     =   0.05,
+  ndump  =   1000,
+}
+
+!----------restart information----------
+restart 
+{
+  ndump_fac = 0,
+  if_restart = .false.,
+}
+
+!----------spatial limits of the simulations----------
+space 
+{
+  xmin(1:2) = -100.0, -1.2,
+  xmax(1:2) =  100.0,  1.2,
+  if_move(1:2) = .true., .false.,
+}
+
+!----------time limits ----------
+time 
+{
+  tmin = 0.0d0,
+  tmax = 4000.,
+}
+
+!----------field solver set up----------
+el_mag_fld 
+{
+  ! dt = 0.05
+  solver = "customized-coef-dual",
+  solver_ord = 2,
+  n_coef = 16,
+  coef_e(1:16) =
+   1.303727002779369,
+  -0.154321097140188,
+   0.051349263481017,
+  -0.022906445399087,
+   0.011515540123939,
+  -0.006081036219291,
+   0.003249905977579,
+  -0.001716115824778,
+   0.000879015211244,
+  -0.000429458421721,
+   0.000196582480468,
+  -0.000082471989918,
+   0.000030755738600,
+  -0.000009706294182,
+   0.000002363934237,
+  -0.000000345694371,
+
+  coef_b(1:16) =
+   1.195359644151597,
+  -0.097933492050341,
+   0.031613804813592,
+  -0.013983531880287,
+   0.007005175224411,
+  -0.003692653104173,
+   0.001971451156815,
+  -0.001040355863786,
+   0.000532653157196,
+  -0.000260158406472,
+   0.000119059970967,
+  -0.000049940788583,
+   0.000018621703686,
+  -0.000005876282268,
+   0.000001431030024,
+  -0.000000209255033,
+}
+
+!----------boundary conditions for em-fields ----------
+emf_bound 
+{
+}
+
+diag_emf
+{
+  ! ndump_fac = 1,
+  ! reports = "e1", "e2", "e3", "b1", "b2", "b3",
+  ! reports = "e2",
+}
+
+
+!----------number of particle species----------
+particles
+{
+  interpolation = "quadratic",
+  num_species = 1,
+}
+
+!----------information for species 1----------
+species 
+{
+  name = "electron",
+  num_par_max = 100,
+  rqm=-1.0,
+  num_par_x(1:2) = 1, 1,
+  add_tag = .true.,
+  push_type = "standard",
+}
+
+!----------inital proper velocities-----------------
+udist
+{
+  uth(1:3) = 0.0d0, 0.0d0, 0.0d0,
+  ufl(1:3) = 0.0, 0.0, 0.0,
+}
+
+!----------density profile for this species----------
+profile 
+{
+  density = 1.0d-6,
+  profile_type(1:2) = "piecewise-linear", "piecewise-linear",
+  num_x = 6,
+  x(1:6,1)  = -1.0, -0.1, -0.05, 0.05, 0.1, 1.0,
+  fx(1:6,1) =  0.0,  0.0,   1.0,  1.0, 0.0, 0.0,
+  x(1:6,2)  = -1.0, -0.1, -0.05, 0.05, 0.1, 1.0,
+  fx(1:6,2) =  0.0,  0.0,   1.0,  1.0, 0.0, 0.0,
+}
+
+!----------boundary conditions for this species----------
+spe_bound 
+{
+}
+
+!----------diagnostic for this species----------
+diag_species 
+{
+  ! ndump_fac = 1,
+  ! reports = "charge",
+  ! ndump_fac_raw = 1,
+  ndump_fac_tracks = 1,
+  niter_tracks = 1,
+  ifdmp_tracks_efl(1:3) = .false.,.true.,.false.,
+  file_tags = '../tags-single-particle.txt',
+}
+
+zpulse
+{
+  a0 = 5,
+  omega0 = 1.0,
+  pol_type = 0,
+  pol = 0.0,
+  phase = 0.0,
+  lon_type = "polynomial",
+  lon_start = 100.0,
+  lon_rise = 50.0,
+  lon_fall = 50.0,
+  lon_flat = 100.0,
+  per_type = "plane",
+  corr_fac = 0.994687565427130,
+}
+
+current
+{
+}
