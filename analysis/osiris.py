@@ -229,7 +229,7 @@ def runosiris(rundir='',inputfile='osiris-input.txt',print_out='yes',combine='ye
     return
 
 
-def runosiris_2d(rundir='',inputfile='osiris-input.txt',np=None):
+def runosiris_2d(rundir='',inputfile='osiris-input.txt',print_out='yes',combine='yes',np=None):
 
     if rundir == '':
         print('Error:  You must specify a runtime directory name via the rundir parameter.')
@@ -255,7 +255,8 @@ def runosiris_2d(rundir='',inputfile='osiris-input.txt',np=None):
         localexec = False
     sysexec = '/usr/local/osiris/osiris-2D.e'
 
-    print(rundir)
+    if print_out == 'yes':
+        print(rundir)
 
     # run osiris-2D.e executable
     if(not os.path.isdir(rundir)):
@@ -266,52 +267,65 @@ def runosiris_2d(rundir='',inputfile='osiris-input.txt',np=None):
     if np==None:
         if localexec:
             for path in execute([localexec,"-w",rundir,"osiris-input.txt"]):
-                waittick += 1
-                if(waittick == 100):
-                    IPython.display.clear_output(wait=True)
-                    waittick = 0
-                    print(path, end='')
+                if print_out == 'yes':
+                    waittick += 1
+                    if(waittick == 100):
+                        IPython.display.clear_output(wait=True)
+                        waittick = 0
+                        print(path, end='')
         else:
             for path in execute([sysexec,"-w",rundir,"osiris-input.txt"]):
-                waittick += 1
-                if(waittick == 100):
-                    IPython.display.clear_output(wait=True)
-                    waittick = 0
-                    print(path, end='')
+                if print_out == 'yes':
+                    waittick += 1
+                    if(waittick == 100):
+                        IPython.display.clear_output(wait=True)
+                        waittick = 0
+                        print(path, end='')
     else:
         if localexec:
             for path in execute(["mpirun","-n",str(np),localexec,"-w",rundir,"osiris-input.txt"]):
-                waittick += 1
-                if(waittick == 100):
-                    IPython.display.clear_output(wait=True)
-                    waittick = 0
-                    print(path, end='')
+                if print_out == 'yes':
+                    waittick += 1
+                    if(waittick == 100):
+                        IPython.display.clear_output(wait=True)
+                        waittick = 0
+                        print(path, end='')
         else:
             for path in execute(["mpirun","-n",str(np),sysexec,"-w",rundir,"osiris-input.txt"]):
-                waittick += 1
-                if(waittick == 100):
-                    IPython.display.clear_output(wait=True)
-                    waittick = 0
-                    print(path, end='')
+                if print_out == 'yes':
+                    waittick += 1
+                    if(waittick == 100):
+                        IPython.display.clear_output(wait=True)
+                        waittick = 0
+                        print(path, end='')
 
     # run combine_h5_util_1d.py script for e1/, e2/, e3/ (and iaw if applicable)
-    print('combining E1 files')
-    combine_h5_2d('e1')
-    print('combining E2 files')
-    combine_h5_2d('e2')
-    print('combining E3 files')
-    combine_h5_2d('e3')
-    print('combining B1 files')
-    combine_h5_2d('b1')
-    print('combining B2 files')
-    combine_h5_2d('b2')
-    print('combining B3 files')
-    combine_h5_2d('b3')
+    if combine == 'yes':
+        if print_out == 'yes':
+            print('combining E1 files')
+        combine_h5_2d('e1')
+        if print_out == 'yes':
+            print('combining E2 files')
+        combine_h5_2d('e2')
+        if print_out == 'yes':
+            print('combining E3 files')
+        combine_h5_2d('e3')
+        if print_out == 'yes':
+            print('combining B1 files')
+        combine_h5_2d('b1')
+        if print_out == 'yes':
+            print('combining B2 files')
+        combine_h5_2d('b2')
+        if print_out == 'yes':
+            print('combining B3 files')
+        combine_h5_2d('b3')
 
     # run combine on iaw data if present
     if (os.path.isdir(rundir+'/MS/DENSITY/ions/charge')):
-        print('combining IAW files')
-        combine_h5_iaw_2d()
+        if combine == 'yes':
+            if print_out == 'yes':
+                print('combining IAW files')
+            combine_h5_iaw_2d()
 
     IPython.display.clear_output(wait=True)
     print('runosiris completed normally')
