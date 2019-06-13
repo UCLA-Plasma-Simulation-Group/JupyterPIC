@@ -19,30 +19,53 @@ def execute(cmd):
     return_code = popen.wait()
     if return_code:
         raise subprocess.CalledProcessError(return_code, cmd)
-        
-        
-def runqpic(rundir='',inputfile='qpinput.json'):
-    
-    workdir = os.getcwd()
-    workdir += '/' + rundir
-    print(workdir)
 
-    if(not os.path.isdir(workdir)):
-       os.mkdir(workdir)
-    if(rundir != ''):
-        shutil.copyfile(inputfile,workdir+'/qpinput.json')
-    
-    os.chdir(workdir)
-        
-    # run quickpic executable    
+
+def runqpic(rundir='',inputfile='qpinput.json'):
+
+    if rundir == '':
+        print('Error:  You must specify a runtime directory name via the rundir parameter.')
+        return
+
+    if os.path.isfile('qpic.e'):
+        localexec = 'qpic.e'
+    else:
+        localexec = False
+    sysexec = '/usr/local/quickpic/qpic.e'
+
+    print(rundir)
+
+    if(not os.path.isdir(rundir)):
+        os.mkdir(rundir)
+    else:
+        shutil.rmtree(rundir)
+        os.mkdir(rundir)
+
+    shutil.copyfile(inputfile,rundir+'/qpinput.json')
+
+    os.chdir(rundir)
+
+    # run quickpic executable
+    print('running qpic.e ...')
     waittick = 0
-    for path in execute(["/usr/local/quickpic/qpic.e"]):
-        waittick += 1
-        if(waittick == 100):
-            IPython.display.clear_output(wait=True)
-            waittick = 0    
+    if localexec:
+        localexec = './'+localexec
+        for path in execute([localexec]):
+            waittick += 1
+            if(waittick == 100):
+                IPython.display.clear_output(wait=True)
+                waittick = 0
+    else:
+        for path in execute([sysexec]):
+            waittick += 1
+            if(waittick == 100):
+                IPython.display.clear_output(wait=True)
+                waittick = 0
     IPython.display.clear_output(wait=True)
     print('quickpic completed normally')
+
+    os.chdir('../')
+
     return
 
 def field(rundir='',dataset='e1',time=0,space=-1,
@@ -98,4 +121,3 @@ def field(rundir='',dataset='e1',time=0,space=-1,
         plt.clim(zlim)
 
     plt.show()
-
