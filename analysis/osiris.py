@@ -42,7 +42,7 @@ def execute(cmd):
         raise subprocess.CalledProcessError(return_code, cmd)
 
 
-def run_upic_es(rundir='',inputfile='pinput2'):
+def run_upic_es(rundir='',inputfile='pinput2',np=None):
 
     if rundir == '':
         print('Error:  You must specify a runtime directory name via the rundir parameter.')
@@ -85,13 +85,23 @@ def run_upic_es(rundir='',inputfile='pinput2'):
 
     # run the upic-es executable
     print('running upic-es.out ...')
-    if localexec:
-        localexec = './'+localexec
-        for path in execute([localexec]):
-            pass
+    if np==None:
+        if localexec:
+            localexec = './'+localexec
+            for path in execute([localexec]):
+                pass
+        else:
+            for path in execute([sysexec]):
+                pass
     else:
-        for path in execute([sysexec]):
-            pass
+        if localexec:
+            localexec = './'+localexec
+            for path in execute(["mpirun","-n",str(np),localexec]):
+                pass
+        else:
+            for path in execute(["mpirun","-n",str(np),sysexec]):
+                pass
+
     IPython.display.clear_output(wait=True)
 
     # run the combine script on electric field data
@@ -115,7 +125,7 @@ def run_upic_es(rundir='',inputfile='pinput2'):
     return
 
 
-def runosiris(rundir='',inputfile='osiris-input.txt',print_out='yes',combine='yes'):
+def runosiris(rundir='',inputfile='osiris-input.txt',print_out='yes',combine='yes',np=None):
 
     if rundir == '':
         print('Error:  You must specify a runtime directory name via the rundir parameter.')
@@ -155,22 +165,40 @@ def runosiris(rundir='',inputfile='osiris-input.txt',print_out='yes',combine='ye
     shutil.copyfile(inputfile,rundir+'/osiris-input.txt')
     waittick = 0
 
-    if localexec:
-        for path in execute([localexec,"-w",rundir,"osiris-input.txt"]):
-            if print_out == 'yes':
-                waittick += 1
-                if(waittick == 100):
-                    IPython.display.clear_output(wait=True)
-                    waittick = 0
-                    print(path, end='')
+    if np==None:
+        if localexec:
+            for path in execute([localexec,"-w",rundir,"osiris-input.txt"]):
+                if print_out == 'yes':
+                    waittick += 1
+                    if(waittick == 100):
+                        IPython.display.clear_output(wait=True)
+                        waittick = 0
+                        print(path, end='')
+        else:
+            for path in execute([sysexec,"-w",rundir,"osiris-input.txt"]):
+                if print_out == 'yes':
+                    waittick += 1
+                    if(waittick == 100):
+                        IPython.display.clear_output(wait=True)
+                        waittick = 0
+                        print(path, end='')
     else:
-        for path in execute([sysexec,"-w",rundir,"osiris-input.txt"]):
-            if print_out == 'yes':
-                waittick += 1
-                if(waittick == 100):
-                    IPython.display.clear_output(wait=True)
-                    waittick = 0
-                    print(path, end='')
+        if localexec:
+            for path in execute(["mpirun","-n",str(np),localexec,"-w",rundir,"osiris-input.txt"]):
+                if print_out == 'yes':
+                    waittick += 1
+                    if(waittick == 100):
+                        IPython.display.clear_output(wait=True)
+                        waittick = 0
+                        print(path, end='')
+        else:
+            for path in execute(["mpirun","-n",str(np),sysexec,"-w",rundir,"osiris-input.txt"]):
+                if print_out == 'yes':
+                    waittick += 1
+                    if(waittick == 100):
+                        IPython.display.clear_output(wait=True)
+                        waittick = 0
+                        print(path, end='')
 
     # run combine_h5_util_1d.py script for e1/, e2/, e3/ (and iaw if applicable)
 
@@ -201,7 +229,7 @@ def runosiris(rundir='',inputfile='osiris-input.txt',print_out='yes',combine='ye
     return
 
 
-def runosiris_2d(rundir='',inputfile='osiris-input.txt'):
+def runosiris_2d(rundir='',inputfile='osiris-input.txt',np=None):
 
     if rundir == '':
         print('Error:  You must specify a runtime directory name via the rundir parameter.')
@@ -235,20 +263,36 @@ def runosiris_2d(rundir='',inputfile='osiris-input.txt'):
 
     shutil.copyfile(inputfile,rundir+'/osiris-input.txt')
     waittick = 0
-    if localexec:
-        for path in execute([localexec,"-w",rundir,"osiris-input.txt"]):
-            waittick += 1
-            if(waittick == 100):
-                IPython.display.clear_output(wait=True)
-                waittick = 0
-                print(path, end='')
+    if np==None:
+        if localexec:
+            for path in execute([localexec,"-w",rundir,"osiris-input.txt"]):
+                waittick += 1
+                if(waittick == 100):
+                    IPython.display.clear_output(wait=True)
+                    waittick = 0
+                    print(path, end='')
+        else:
+            for path in execute([sysexec,"-w",rundir,"osiris-input.txt"]):
+                waittick += 1
+                if(waittick == 100):
+                    IPython.display.clear_output(wait=True)
+                    waittick = 0
+                    print(path, end='')
     else:
-        for path in execute([sysexec,"-w",rundir,"osiris-input.txt"]):
-            waittick += 1
-            if(waittick == 100):
-                IPython.display.clear_output(wait=True)
-                waittick = 0
-                print(path, end='')
+        if localexec:
+            for path in execute(["mpirun","-n",str(np),localexec,"-w",rundir,"osiris-input.txt"]):
+                waittick += 1
+                if(waittick == 100):
+                    IPython.display.clear_output(wait=True)
+                    waittick = 0
+                    print(path, end='')
+        else:
+            for path in execute(["mpirun","-n",str(np),sysexec,"-w",rundir,"osiris-input.txt"]):
+                waittick += 1
+                if(waittick == 100):
+                    IPython.display.clear_output(wait=True)
+                    waittick = 0
+                    print(path, end='')
 
     # run combine_h5_util_1d.py script for e1/, e2/, e3/ (and iaw if applicable)
     print('combining E1 files')
