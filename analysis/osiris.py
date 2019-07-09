@@ -1,4 +1,5 @@
 import os
+import re
 import shutil
 import subprocess
 import IPython.display
@@ -44,8 +45,12 @@ def execute(cmd):
 
 def run_upic_es(rundir='',inputfile='pinput2',np=None):
 
-    if rundir == '':
-        print('Error:  You must specify a runtime directory name via the rundir parameter.')
+    if rundir == '' or not bool(re.match("^[A-Za-z0-9_-]*$", rundir)):
+        print('''
+        Error for osiris.run_upic_es:
+        rundir must be specified for the name of a runtime directory
+        and rundir must be a string containing only numbers, letters, dashes, or underscores
+        ''')
         return
 
     def combine_h5_2d(path, ex):
@@ -127,8 +132,12 @@ def run_upic_es(rundir='',inputfile='pinput2',np=None):
 
 def runosiris(rundir='',inputfile='osiris-input.txt',print_out='yes',combine='yes',np=None):
 
-    if rundir == '':
-        print('Error:  You must specify a runtime directory name via the rundir parameter.')
+    if rundir == '' or not bool(re.match("^[A-Za-z0-9_-]*$", rundir)):
+        print('''
+        Error for osiris.runosiris:
+        rundir must be specified for the name of a runtime directory
+        and rundir must be a string containing only numbers, letters, dashes, or underscores
+        ''')
         return
 
     def combine_h5_1d(ex):
@@ -231,8 +240,12 @@ def runosiris(rundir='',inputfile='osiris-input.txt',print_out='yes',combine='ye
 
 def runosiris_2d(rundir='',inputfile='osiris-input.txt',print_out='yes',combine='yes',np=None):
 
-    if rundir == '':
-        print('Error:  You must specify a runtime directory name via the rundir parameter.')
+    if rundir == '' or not bool(re.match("^[A-Za-z0-9_-]*$", rundir)):
+        print('''
+        Error for osiris.runosiris_2d:
+        rundir must be specified for the name of a runtime directory
+        and rundir must be a string containing only numbers, letters, dashes, or underscores
+        ''')
         return
 
     def combine_h5_2d(ex):
@@ -261,6 +274,9 @@ def runosiris_2d(rundir='',inputfile='osiris-input.txt',print_out='yes',combine=
     # run osiris-2D.e executable
     if(not os.path.isdir(rundir)):
        os.mkdir(rundir)
+    else:
+        shutil.rmtree(rundir)
+        os.mkdir(rundir)
 
     shutil.copyfile(inputfile,rundir+'/osiris-input.txt')
     waittick = 0

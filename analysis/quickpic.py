@@ -1,4 +1,5 @@
 import os
+import re
 import shutil
 import subprocess
 import IPython.display
@@ -23,8 +24,12 @@ def execute(cmd):
 
 def runqpic(rundir='',inputfile='qpinput.json'):
 
-    if rundir == '':
-        print('Error:  You must specify a runtime directory name via the rundir parameter.')
+    if rundir == '' or not bool(re.match("^[A-Za-z0-9_-]*$", rundir)):
+        print('''
+        Error for quickpic.runqpic:
+        rundir must be specified for the name of a runtime directory
+        and rundir must be a string containing only numbers, letters, dashes, or underscores
+        ''')
         return
 
     if os.path.isfile('qpic.e'):
