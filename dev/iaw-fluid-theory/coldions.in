@@ -13,14 +13,14 @@
  NPXBI = 0, NPYBI = 0
  MOVION = 1
  RMASS = 100
- TEND =  3000.0, DT =   0.200
+ TEND =  1000.0, DT =   0.200
  NTW = 10, NTP = 200
  NDW = 10, NDP = 200
  NPLOT = 0
  /
 
 &pinput2_jf
-  ntfield=0,
+  ntfield=500,
   fvxmax=25., fvymax=25. ,
   fvxmax_ion=10., fvymax_ion=10. ,
   nphbx=100,nphby=100,
