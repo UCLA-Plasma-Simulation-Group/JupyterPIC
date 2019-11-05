@@ -11,14 +11,14 @@ if_periodic(1:1) = .false.,
 grid
 {
 
-nx_p(1:1) = 512,
+nx_p(1:1) = 1024,
 coordinates = "cartesian",
 }
 !----------time step and global data dump timestep number----------
 time_step
 {
-dt = 0.195e0,
-ndump = 1,
+dt = 0.084e0,
+ndump = 150,
 }
 restart
 {
@@ -32,14 +32,14 @@ if_remold=.true.,
 space
 {
 xmin(1:1) = 0.000e0,
-xmax(1:1) = 102.4e0,
+xmax(1:1) = 100.0e0,
 if_move(1:1) = .false.,
 }
 !----------time limits ----------
 time
 {
 tmin = 0.0e0,
-tmax = 120.0e0,
+tmax = 1800.0e0,
 }
 !----------field solver set up-----------------
 el_mag_fld
@@ -57,7 +57,7 @@ vpml_diffuse(1:2,1) = .true., .true.,
 }
 diag_emf
 {
-ndump_fac = 5,
+ndump_fac = 1,
 reports = "e1","e2","e3","b1","b2","b3",
 }
 
@@ -73,47 +73,45 @@ species
 name = "electrons",
 num_par_max = 500000,
 rqm = -1.0d0,
-q_real = -1.0d0,
-num_par_x(1:1) = 10,
+num_par_x(1:1) = 100,
 }
 udist
 {
-uth(1:3) = 0.2d0 , 0.2d0 , 0.2d0 ,
+uth(1:3) = 0.0356d0 , 0.0356d0 , 0.0356d0 ,
 ufl(1:3) = 0.0d0 , 0.0d0 , 0.0d0 ,
 }
 profile
 {
-num_x = 2,
-fx(1:2,1) =  1.0, 1.0,
-x(1:2,1) = 0.0, 102.4,
+num_x = 6,
+fx(1:6,1) =  0.0, 0.0, 0.1, 0.1, 0.0, 0.0,
+x(1:6,1) = 0.0, 20.0, 20.01, 80.0, 80.01, 100.0,
 }
 !----------boundary conditions for this species----------
 spe_bound
 {
 
 type(1:2,1) = 'thermal', 'thermal',
-uth_bnd(1:3,1,1) = 0.2d0 , 0.2d0 , 0.2d0 ,
-uth_bnd(1:3,2,1) = 0.2d0 , 0.2d0 , 0.2d0 ,
+uth_bnd(1:3,1,1) = 0.0356d0 , 0.0356d0 , 0.0356d0 ,
+uth_bnd(1:3,2,1) = 0.0356d0 , 0.0356d0 , 0.0356d0 ,
 }
 diag_species
 {
 ndump_fac_ene = 0,
-ndump_fac_pha = 5,
-ndump_fac = 5,
+ndump_fac_pha = 1,
+ndump_fac = 1,
 reports = 'charge',
 !ndump_fac_raw = 0,
 ps_xmin(1:1) = 0.0,
-ps_xmax(1:1) = 102.4,
+ps_xmax(1:1) = 100.0,
 ps_nx(1:1) = 512,
-ps_pmin(1:3) = -1.0, -1.0, -1.0,
-ps_pmax(1:3) = 1.0, 1.0, 1.0,
+ps_pmin(1:3) = -0.4, -0.4, -0.4,
+ps_pmax(1:3) = 0.4, 0.4, 0.4,
 ps_np(1:3) = 100, 100, 100,
 if_ps_p_auto(1:3) = .true., .true., .false.,
 phasespaces = "p1x1","p2x1","gx1",
 }
-collisions
-{
-}
+
+
 !----------SMOOTHING FOR CURRENTS------------------------------------------------------------
 smooth
 {
@@ -130,10 +128,12 @@ n_antenna = 1,
 }
 antenna
 {
-a0 = 1.0d0,
-t_rise = 0.0d0,
-t_flat = 3.14d0,
-t_fall = 0.0d0,
-omega0 = 2.32d0,
+a0 = 0.1d0,
+t_rise = 100.0d0,
+t_flat = 100000,
+t_fall = 314.0d0,
+omega0 = 1.0,
 pol = 0.0d0,
 }
+
+

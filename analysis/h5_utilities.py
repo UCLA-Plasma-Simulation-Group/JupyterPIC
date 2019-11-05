@@ -325,7 +325,7 @@ def read_hdf(filename):
 def scan_hdf5_file_for_main_data_array(file):
     datasetName = ""
     for k,v in file.items():
-        if isinstance(v, h5py.highlevel.Dataset):
+        if isinstance(v, h5py.Dataset):
             datasetName = k
             break
     return file[datasetName]
