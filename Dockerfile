@@ -93,6 +93,8 @@ COPY notebooks-260 notebooks-260
 RUN chmod 777 notebooks-260
 WORKDIR notebooks-260
 RUN chmod 777 LWFA-Workbook-1-Tajima-Dawson
+RUN chmod 777 Single-Particle-Workbook
+RUN chmod 777 PWFA
 
 WORKDIR ..
 
