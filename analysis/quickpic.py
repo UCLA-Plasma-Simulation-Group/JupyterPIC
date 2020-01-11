@@ -47,14 +47,14 @@ def runqpic(rundir='',inputfile='qpinput.json'):
         os.mkdir(rundir)
 
     shutil.copyfile(inputfile,rundir+'/qpinput.json')
-
+    
     os.chdir(rundir)
 
     # run quickpic executable
     print('running qpic.e ...')
     waittick = 0
     if localexec:
-        localexec = './'+localexec
+        localexec = '../'+localexec
         for path in execute([localexec]):
             waittick += 1
             if(waittick == 100):
