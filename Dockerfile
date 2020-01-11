@@ -87,6 +87,13 @@ RUN chmod 777 iaw-fluid-theory
 RUN chmod 777 interactive-theory
 RUN chmod 777 quickpic_pwfa
 RUN chmod 777 weibel
+RUN chmod 777 RPA
+RUN chmod 777 SBS
+RUN chmod 777 TPD
+RUN chmod 777 forslund-SRS
+RUN chmod 777 grid-instability
+RUN chmod 777 single-particle
+RUN chmod 777 Leap-Frog
 
 WORKDIR ..
 COPY notebooks-260 notebooks-260
