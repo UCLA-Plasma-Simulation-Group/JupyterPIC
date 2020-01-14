@@ -1,0 +1,140 @@
+{
+"simulation" : 
+{
+    "nodes" : [1,1],  
+    "indx" : 8,
+    "indy" : 8,
+    "indz" : 8,
+    "box" : {
+        "x" : [-6.4,6.4],
+        "y" : [-6.4,6.4],
+        "z" : [0,10.0]},
+    "boundary" : "conducting",
+    "n0" : 1.0e16,
+    "time" : 10.1,
+    "dt" : 10.0,
+    "nbeams" : 2,
+    "nspecies" : 1,
+    "dump_restart" : false,
+    "ndump_restart" : 1,
+    "read_restart" : false,
+    "restart_timestep" : 1,
+    "iter" : 1,
+    "verbose" : 0
+},
+
+"beam" :
+[
+    {
+    "evolution" : false,
+    "profile" : 0,
+    "np" : [128,128,256],
+    "npmax" : 40000000,
+    "q" : -1.0,
+    "m" : 1.0,
+    "gamma" : 20000,
+    "peak_density" : 0.11,
+    "quiet_start" : true,
+    "center" : [0.0,0.0,2.5],
+    "sigma" : [0.2,0.2,0.4],
+    "sigma_v" : [0.0,0.0,0.0],
+    "centroid_x" : [0.0,0.0,0.0],
+    "centroid_y" : [0.0,0.0,0.0],
+    "diag" :
+    [
+        {
+        "name" : ["charge"],
+        "ndump" : 0
+        },
+        {
+        "name" : ["charge"],
+        "ndump" : 1,
+        "slice" : [["xz", 129],["yz",129],["xy",20]]
+        },
+        {
+        "name" : ["raw"],
+        "ndump" : 1,
+        "sample" : 10
+        }
+    ]    
+    },
+    {
+    "evolution" : false,
+    "profile" : 1,
+    "np" : [128,128,256],
+    "npmax" : 40000000,
+    "q" : -1.0,
+    "m" : 1.0,
+    "gamma" : 20000,
+    "peak_density" : 0.11,
+    "piecewise_fz" : [0.0,1.0,0.0,0.0],
+    "piecewise_z" : [0.0,3.5,5,0.0],
+    "quiet_start" : true,
+    "center" : [0.0,0.0,3.5],
+    "sigma" : [0.2,0.2],
+    "sigma_v" : [0.0,0.0,0.0],
+    "centroid_x" : [0.0,0.0,0.0],
+    "centroid_y" : [0.0,0.0,0.0],
+    "diag" :
+    [
+        {
+        "name" : ["charge"],
+        "ndump" : 0
+        },
+        {
+        "name" : ["charge"],
+        "ndump" : 1,
+        "slice" : [["xz", 129],["yz",129],["xy",20]]
+        },
+        {
+        "name" : ["raw"],
+        "ndump" : 1,
+        "sample" : 10
+        }
+    ]    
+    }
+],
+
+"species" :
+[
+    {
+    "profile" : 0,
+    "ppc" : [2,2],
+    "q" : -1.0,
+    "m" : 1.0,
+    "density" : 1.0,
+    "longitudinal_profile" : "uniform",
+    "piecewise_density" : [1.0,1.5,2.5],
+    "piecewise_s" : [0.0,100.0,200.0],
+    "diag" :
+    [
+        {
+        "name" : ["charge", "jx", "jy", "jz"],
+        "ndump" : 0
+        },
+        {
+        "name" : ["charge"],
+        "ndump" : 1,
+        "slice" : [["xz", 129],["yz",129],["xy",20]]
+        }
+    ]    
+    }
+],
+
+"field" :
+{
+    "diag" :
+    [
+        {
+        "name" : ["ex","ez"],
+        "ndump" : 0
+        },
+        {
+        "name" : ["ex","ey","ez","bx","by","bz","psi"],
+        "ndump" : 1,
+        "slice" : [["xz", 129],["yz", 129],["xy",20]]
+        }
+    ]    
+    
+}
+}
