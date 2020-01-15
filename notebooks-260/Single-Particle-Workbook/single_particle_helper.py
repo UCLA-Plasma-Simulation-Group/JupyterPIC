@@ -10,7 +10,7 @@ import numpy as np
 import h5py
 import matplotlib.pyplot as plt
     
-def newifile(oname='single-part-1.txt',field_solve='yee',t_final=600.0,dt=0.95,
+def newifile(oname='single-part-1',field_solve='yee',t_final=600.0,dt=0.95,
             pusher='standard',uz0=0.0,a0=1.0,phi0=0.0,run_osiris=True):
     
     if field_solve == 'fei':
@@ -38,21 +38,20 @@ def newifile(oname='single-part-1.txt',field_solve='yee',t_final=600.0,dt=0.95,
         if 'phase =' in data[i]:
             data[i] = '  phase = '+str(phi0)+',\n'
 
-    with open(oname,'w') as f:
+    with open(oname+'.txt','w') as f:
         for line in data:
             f.write(line)
     
-    print('New file '+oname+' is written.')
+    print('New file '+oname+'.txt is written.')
     if run_osiris:
-        dirname = oname.strip('.txt')
-        print('Running OSIRIS in directory '+dirname+'...')
-        osiris.runosiris_2d(rundir=dirname,inputfile=oname,print_out='yes',combine='no',np=4)
+        print('Running OSIRIS in directory '+oname+'...')
+        osiris.runosiris_2d(rundir=oname,inputfile=oname+'.txt',print_out='yes',combine='no',np=4)
 
 def single_particle_widget(run_osiris=True):
     style = {'description_width': '350px'}
     layout = Layout(width='55%')
 
-    a = widgets.Text(value='single-part-1.txt', description='New output file:',style=style,layout=layout)
+    a = widgets.Text(value='single-part-1', description='New output file:',style=style,layout=layout)
     b = widgets.Dropdown(options=['yee', 'fei'],value='yee', description='Field solver:',style=style,layout=layout)
     c = widgets.BoundedFloatText(value=600.0, min=50.0, max=1e9, description='t_final:',style=style,layout=layout)
     d = widgets.BoundedFloatText(value=0.95, min=0.0, max=1.0, description='dt/t_courant:',style=style,layout=layout)
