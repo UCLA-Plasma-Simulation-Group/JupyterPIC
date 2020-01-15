@@ -20,7 +20,7 @@ grid
 time_step 
 {
   dt     =   0.14,
-  ndump  =   1000,
+  ndump  =   350,
 }
 
 !----------restart information----------
