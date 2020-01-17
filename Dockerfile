@@ -23,6 +23,7 @@ RUN apt-get update && \
     && rm -rf /var/lib/apt/lists/*
 
 ENV H5_ROOT /usr/lib/x86_64-linux-gnu/hdf5/openmpi/lib
+ENV OMPI_MCA_btl_vader_single_copy_mechanism none
 
 RUN mkdir /usr/local/osiris
 RUN mkdir /usr/local/beps

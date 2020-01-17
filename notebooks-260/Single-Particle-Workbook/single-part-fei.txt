@@ -108,7 +108,7 @@ udist
 !----------density profile for this species----------
 profile 
 {
-  density = 1.0d-6,
+  density = 1.0d-20,
   profile_type(1:2) = "piecewise-linear", "piecewise-linear",
   num_x = 6,
   x(1:6,1)  = -1.0, -0.1, -0.05, 0.05, 0.1, 1.0,
