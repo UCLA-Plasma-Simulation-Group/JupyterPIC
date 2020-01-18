@@ -26,7 +26,7 @@
 "beam" :
 [
     {
-    "evolution" : false,
+    "evolution" : true,
     "profile" : 0,
     "np" : [128,128,256],
     "npmax" : 40000000,
@@ -59,7 +59,7 @@
     ]    
     },
     {
-    "evolution" : false,
+    "evolution" : true,
     "profile" : 1,
     "np" : [128,128,256],
     "npmax" : 40000000,
