@@ -20,7 +20,7 @@ grid
 time_step 
 {
   dt     =   0.14,
-  ndump  =   350,
+  ndump  =   100,
 }
 
 !----------restart information----------
@@ -66,7 +66,7 @@ diag_emf
 !----------number of particle species----------
 particles
 {
-  interpolation = "quadratic",
+  interpolation = "linear",
   num_species = 1,
 }
 
@@ -114,6 +114,7 @@ diag_species
   ndump_fac_tracks = 1,
   niter_tracks = 1,
   ifdmp_tracks_efl(1:3) = .false.,.true.,.false.,
+  ifdmp_tracks_bfl(1:3) = .false.,.false.,.true.,
   file_tags = '../tags-single-particle.txt',
 }
 

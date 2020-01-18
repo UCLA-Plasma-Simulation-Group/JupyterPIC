@@ -32,7 +32,11 @@ def newifile(oname='single-part-1',field_solve='yee',t_final=600.0,dt=0.95,
         if 'push_type' in data[i]:
             data[i] = '  push_type = "'+pusher+'",\n'
         if 'ufl(1:3)' in data[i]:
-            data[i] = '  ufl(1:3) = '+str(uz0)+', 0.0, 0.0,\n'
+            if uz0==0.0:
+                # Give initial velocity in x2 since this is the momentum at -dt/2
+                data[i] = '  ufl(1:3) = '+str(uz0)+', '+str(dt*courant*a0/2.0)+', 0.0,\n'
+            else:
+                data[i] = '  ufl(1:3) = '+str(uz0)+', 0.0, 0.0,\n'
         if ' a0 =' in data[i]:
             data[i] = '  a0 = '+str(a0)+',\n'
         if 'phase =' in data[i]:
@@ -53,7 +57,7 @@ def single_particle_widget(run_osiris=True):
 
     a = widgets.Text(value='single-part-1', description='New output file:',style=style,layout=layout)
     b = widgets.Dropdown(options=['yee', 'fei'],value='yee', description='Field solver:',style=style,layout=layout)
-    c = widgets.BoundedFloatText(value=600.0, min=50.0, max=1e9, description='t_final:',style=style,layout=layout)
+    c = widgets.BoundedFloatText(value=600.0, min=40.0, max=1e9, description='t_final:',style=style,layout=layout)
     d = widgets.BoundedFloatText(value=0.95, min=0.0, max=1.0, description='dt/t_courant:',style=style,layout=layout)
     e = widgets.Dropdown(options=['standard', 'vay', 'cond_vay', 'cary', 'fullrot', 'euler'],value='standard',description='Pusher:',style=style,layout=layout)
     f = widgets.FloatText(value=0.0, description='uz0:',style=style,layout=layout)
@@ -108,6 +112,7 @@ def grab_data(dirname):
     x2 = f['data'][:,4]
     p1 = f['data'][:,5]
     p2 = f['data'][:,6]
+    i_max = np.argmax(f['data'][:,1]==0) # Find where charge is 0, i.e., particle leaves
     f.close()
 
     x1 = x1-x1[0]
@@ -120,7 +125,7 @@ def grab_data(dirname):
         elif x2[i+1]-x2[i]<-1.2:
             x2[i+1:] += 2.4
 
-    return [t,x2,x1,p2,p1,ene]
+    return [t,x2,x1,p2,p1,ene,i_max]
 
 def plot_data(dirname,off=0.0,theory=True,xlim_max=None,plot_z=False,save_fig=True):
     # Get a0 and uz0 from input deck
@@ -132,7 +137,7 @@ def plot_data(dirname,off=0.0,theory=True,xlim_max=None,plot_z=False,save_fig=Tr
         if ' a0 =' in data[i]:
             a0 = float(data[i].split(" ")[-1][:-2])
 
-    [t,x2,x1,p2,p1,ene] = grab_data(dirname)
+    [t,x2,x1,p2,p1,ene,i_max] = grab_data(dirname)
     if xlim_max==None:
         tf = np.max(t)
     else:
@@ -148,6 +153,10 @@ def plot_data(dirname,off=0.0,theory=True,xlim_max=None,plot_z=False,save_fig=Tr
             l = len(t)
         else:
             l = np.argmax(t>xlim_max)
+
+    # Don't plot values after the particle has left the box
+    if i_max > 0:
+        l = np.min([ l, i_max ])
 
     plt.figure(figsize=(14,6),dpi=300)
 
