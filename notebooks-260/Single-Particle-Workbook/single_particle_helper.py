@@ -127,7 +127,7 @@ def grab_data(dirname):
 
     return [t,x2,x1,p2,p1,ene,i_max]
 
-def plot_data(dirname,off=0.0,theory=True,xlim_max=None,plot_z=False,save_fig=True):
+def plot_data(dirname,offset=None,theory=True,xlim_max=None,plot_z=False,save_fig=True):
     # Get a0 and uz0 from input deck
     with open(dirname+'.txt') as osdata:
         data = osdata.readlines()
@@ -136,13 +136,18 @@ def plot_data(dirname,off=0.0,theory=True,xlim_max=None,plot_z=False,save_fig=Tr
             uz0 = float(data[i].split(" ")[-3][:-1])
         if ' a0 =' in data[i]:
             a0 = float(data[i].split(" ")[-1][:-2])
+        if 'phase = ' in data[i]:
+            off = float(data[i].split(" ")[-1][:-2])*np.pi/180.
+
+    if offset is not None:
+        off = offset
 
     [t,x2,x1,p2,p1,ene,i_max] = grab_data(dirname)
     if xlim_max==None:
         tf = np.max(t)
     else:
         tf = xlim_max
-    ux0=0.0; uy0=0.0; t0=np.pi/2+off; z0=0.0;
+    ux0=0.0; uy0=0.0; t0=np.pi/2-off; z0=0.0;
     [tt,xx,zz,pxx,pzz,gg] = haines(a0,ux0,uy0,uz0,t0,tf,z0)
 
     if xlim_max==None:
