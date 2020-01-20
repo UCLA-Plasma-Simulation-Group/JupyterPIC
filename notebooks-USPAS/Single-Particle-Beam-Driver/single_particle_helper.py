@@ -140,13 +140,32 @@ def plot_data(dirname,off=0.0,theory=True,xlim_max=None):
 
     plt.subplot(324)
     plt.plot(xi,p2[:l],label='Simulation')
-    if(first_out > 0):
-        plt.plot(np.arange(int(xi[-1]+1)), \
-            np.ones(int(xi[-1]+1))*np.sqrt(2*lamb.value * np.log(x2[first_out]/x2[first_in])),'r--',label=r'Theory Eq. (36)' )
-    else:
-        plt.plot(np.arange(int(xi[-1]+1)), \
-            np.ones(int(xi[-1]+1))*np.sqrt(2*lamb.value * np.log(x2[-1]/x2[first_in])),'r--',label=r'Theory Eq. (36)' )
+
+    ## Eq (36). solution
+
+    pr_solution = np.sqrt(2*lamb.value * np.log(x2[first_out]/x2[first_in]))
     
+    ## Student solution 
+    ## needed variables
+    ## lamb.value gives lambda
+    ## a_0.value gives the driver radius
+    ## Fill in these two lines
+    use_student_solution = False
+    student_solution = a_0.value *lamb.value
+    ## 
+    ## 
+
+
+
+    if(first_out > 0):
+        plt.plot(np.arange(int(xi[-1]+1)), np.ones(int(xi[-1]+1))*pr_solution,'r--',label=r'Theory Eq. (36)' )
+        if(use_student_solution):
+            plt.plot(np.arange(int(xi[-1]+1)), np.ones(int(xi[-1]+1))*student_solution,'b--',label=r'Student Solution' )
+    else:
+        plt.plot(np.arange(int(xi[-1]+1)), np.ones(int(xi[-1]+1))*pr_solution,'r--',label=r'Theory Eq. (36)' )
+        if(use_student_solution):
+            plt.plot(np.arange(int(xi[-1]+1)), np.ones(int(xi[-1]+1))*student_solution,'b--',label=r'Student Solution' )
+
     plt.xlabel(r'$\xi$ $[c/\omega_0]$')
     plt.legend()
     plt.ylabel(r'$p_r$')
