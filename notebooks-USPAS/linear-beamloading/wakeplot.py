@@ -8,15 +8,15 @@ import numpy as np
 import mpmath as mp
 import matplotlib.pyplot as plt
 
-from ipywidgets import interact_manual,fixed,Layout,interact, FloatSlider
+from ipywidgets import interact_manual,fixed,Layout,interact, FloatSlider, SelectionSlider
 import ipywidgets as widgets
 
 
-def z1_interact(box_z,indz,nb_d,z_d,sigr_d,sigz_d,nb_w,sigr_w,z1_w,z2_w,use_theory,use_fixed_length):
+def z1_interact(box_z,indz,nb_d,z_d,sigr_d,sigz_d,nb_w,sigr_w,z1_w,z2_w,use_fixed_length,use_theory):
     
     if nb_w>0 and not(z1_w>np.pi/2.0 and z1_w<np.pi):
         sys.exit('Error: trying to load beam in the wrong region')
-        
+       
     if nb_w<0 and not(z1_w>1.5*np.pi and z1_w<2.0*np.pi):
         sys.exit('Error: trying to load beam in the wrong region')
     
@@ -64,7 +64,7 @@ def z1_interact(box_z,indz,nb_d,z_d,sigr_d,sigz_d,nb_w,sigr_w,z1_w,z2_w,use_theo
             ax2=ax1.twinx()
             ax2.set_ylabel(ylabel_right, color='b')
             ax2.tick_params('y', colors='b')
-            nbmax=np.max(np.array([nb_d,nb_w]))
+            nbmax=np.max(np.array([nb_d,nb_wlocal]))
             ax2.set_ylim([-2.0*nbmax,2.0*nbmax])
 
             temp=xi[xi<z_d+3.0*sigr_d]
@@ -116,7 +116,7 @@ def z1_interact(box_z,indz,nb_d,z_d,sigr_d,sigz_d,nb_w,sigr_w,z1_w,z2_w,use_theo
             
             if use_theory==True:
                 print('Tail location = ','%.3f' % z2_wlocal)
-                print('Beam density = ','%.3f' % nb_wlocal)
+                print('Beam density = ','%.3e' % nb_wlocal)
             
     def plot_wakes_nb(nb_w):
         
@@ -222,7 +222,11 @@ def z1_interact(box_z,indz,nb_d,z_d,sigr_d,sigz_d,nb_w,sigr_w,z1_w,z2_w,use_theo
     i1=interact(plot_wakes,z1_w=FloatSlider(min=z1_wmin,max=z1_wmax,step=0.05,value=z1_w,continuous_update=False))
     
     nb_wmax=nb_d*np.sqrt(2.0*np.pi)*sigz_d*np.exp(-sigz_d**2/2.)*R0th/R0thw*0.99
-    if nb_w0>0:
-        i2=interact(plot_wakes_nb,nb_w=FloatSlider(min=nb_wmax/10.0,max=nb_wmax,step=nb_wmax/10.0,value=nb_w0,continuous_update=False))
-    else:
-        i2=interact(plot_wakes_nb,nb_w=FloatSlider(min=nb_wmax/10.0,max=nb_wmax,step=nb_wmax/10.0,value=-nb_w0,continuous_update=False))
+    
+    #if nb_w0>0:
+    #    i2=interact(plot_wakes_nb,nb_w=FloatSlider(min=nb_wmax/10.0,max=nb_wmax,step=nb_wmax/10.0,value=nb_w0,continuous_update=False))
+    #else:
+    #    i2=interact(plot_wakes_nb,nb_w=FloatSlider(min=nb_wmax/10.0,max=nb_wmax,step=nb_wmax/10.0,value=-nb_w0,continuous_update=False))
+        
+    values=np.arange(nb_wmax/10.0,1.01*nb_wmax,nb_wmax/10.0)
+    i2=interact(plot_wakes_nb,nb_w=SelectionSlider(options=[("%.3e"%i,i) for i in values],continuous_update=False))

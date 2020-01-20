@@ -256,7 +256,7 @@ def makeWidgetsForLinearInput():
         
  
         
-def makeplot(rundir,isLinear,isSmooth):
+def makeplot(rundir,isLinear):
     with open('qpinput.json') as f:
         inputDeck = json.load(f,object_pairs_hook=OrderedDict)
         
@@ -284,8 +284,8 @@ def makeplot(rundir,isLinear,isSmooth):
         datamin = -10.0
         datamax = 0.0
         colormap = 'viridis'
-        x=np.linspace(xaxis[0]/2,xaxis[1]/2,int(data.shape[0]/2)) 
-        xi=np.linspace(yaxis[0],yaxis[1],data.shape[1]) 
+        x=np.linspace(xaxis[0]/2,xaxis[1]/2,int(data.shape[1]/2)) 
+        xi=np.linspace(yaxis[0],yaxis[1],data.shape[0]) 
         data = data.transpose()
         # Only visalize the middle part of the data
         da = data[int(xCellsTotal/4):int(3*xCellsTotal/4),:]  
@@ -369,8 +369,8 @@ def makeplot(rundir,isLinear,isSmooth):
         data=dataset[...]
         xaxis=f['/AXIS/AXIS1'][...]
         yaxis=f['/AXIS/AXIS2'][...]
-        x=np.linspace(xaxis[0]/2,xaxis[1]/2,int(data.shape[0]/2)) 
-        xi=np.linspace(yaxis[0],yaxis[1],data.shape[1]) 
+        x=np.linspace(xaxis[0]/2,xaxis[1]/2,int(data.shape[1]/2)) 
+        xi=np.linspace(yaxis[0],yaxis[1],data.shape[0]) 
         figure_title = 'Plasma Density'
         xlabel_bottom = r'$\xi = ct-z\;[c/\omega_p]$'  
         xlabel_top = '$Plasma Density\;[n_p]$'
@@ -454,8 +454,8 @@ def makeplot(rundir,isLinear,isSmooth):
         data=dataset[...]
         xaxis=f['/AXIS/AXIS1'][...]
         yaxis=f['/AXIS/AXIS2'][...]
-        x=np.linspace(xaxis[0]/2,xaxis[1]/2,int(data.shape[0]/2)) 
-        xi=np.linspace(yaxis[0],yaxis[1],data.shape[1])  
+        x=np.linspace(xaxis[0]/2,xaxis[1]/2,int(data.shape[1]/2)) 
+        xi=np.linspace(yaxis[0],yaxis[1],data.shape[0])  
         # For linear case, we run simulation with only drive beam. For nonlinear case, we also have witness beam
         if(isLinear == False): 
             filename=rundir+'/Beam0002/Charge_slice_0001/charge_slice_xz_00000001.h5'
@@ -511,8 +511,8 @@ def makeplot(rundir,isLinear,isSmooth):
         data=dataset[...]
         xaxis=f['/AXIS/AXIS1'][...]
         yaxis=f['/AXIS/AXIS2'][...]
-        x=np.linspace(xaxis[0]/2,xaxis[1]/2,int(data.shape[0]/2)) 
-        xi=np.linspace(yaxis[0],yaxis[1],data.shape[1])         
+        x=np.linspace(xaxis[0]/2,xaxis[1]/2,int(data.shape[1]/2)) 
+        xi=np.linspace(yaxis[0],yaxis[1],data.shape[0])         
         if(isLinear == False):
             filename=rundir+'/Beam0002/Charge_slice_0001/charge_slice_xz_00000001.h5'
             f=h5py.File(filename)
@@ -564,8 +564,8 @@ def makeplot(rundir,isLinear,isSmooth):
         data=dataset[...]
         xaxis=f['/AXIS/AXIS1'][...]
         yaxis=f['/AXIS/AXIS2'][...]
-        x=np.linspace(xaxis[0]/2,xaxis[1]/2,int(data.shape[0]/2)) 
-        xi=np.linspace(yaxis[0],yaxis[1],data.shape[1])         
+        x=np.linspace(xaxis[0]/2,xaxis[1]/2,int(data.shape[1]/2)) 
+        xi=np.linspace(yaxis[0],yaxis[1],data.shape[0])         
         figure_title = '$E_z$'
         xlabel_bottom = r'$\xi = ct-z\;[c/\omega_p]$'  
         xlabel_top = '$eE_z/mc\omega_p$'
@@ -728,8 +728,8 @@ def makeplot(rundir,isLinear,isSmooth):
         data=dataset[...]
         xaxis=f['/AXIS/AXIS1'][...]
         yaxis=f['/AXIS/AXIS2'][...]
-        x=np.linspace(xaxis[0]/2,xaxis[1]/2,int(data.shape[0]/2)) 
-        xi=np.linspace(yaxis[0],yaxis[1],data.shape[1])         
+        x=np.linspace(xaxis[0]/2,xaxis[1]/2,int(data.shape[1]/2)) 
+        xi=np.linspace(yaxis[0],yaxis[1],data.shape[0])         
         figure_title = '$E_z$'
         xlabel_bottom = r'$\xi = ct-z\;[c/\omega_p]$'  
         xlabel_top = '$eE_z/mc\omega_p$'
@@ -868,8 +868,8 @@ def makeplot(rundir,isLinear,isSmooth):
         data=dataset[...]
         xaxis=f['/AXIS/AXIS1'][...]
         yaxis=f['/AXIS/AXIS2'][...]
-        x=np.linspace(xaxis[0]/2,xaxis[1]/2,int(data.shape[0]/2)) 
-        xi=np.linspace(yaxis[0],yaxis[1],data.shape[1])         
+        x=np.linspace(xaxis[0]/2,xaxis[1]/2,int(data.shape[1]/2)) 
+        xi=np.linspace(yaxis[0],yaxis[1],data.shape[0])         
         filename=rundir+'/Fields/By_slice0001/byslicexz_00000001.h5'
         f=h5py.File(filename)
         names=list(f.keys())
@@ -994,8 +994,8 @@ def makeplot(rundir,isLinear,isSmooth):
         data=dataset[...]
         xaxis=f['/AXIS/AXIS1'][...]
         yaxis=f['/AXIS/AXIS2'][...]
-        x=np.linspace(xaxis[0]/2,xaxis[1]/2,int(data.shape[0]/2)) 
-        xi=np.linspace(yaxis[0],yaxis[1],data.shape[1])         
+        x=np.linspace(xaxis[0]/2,xaxis[1]/2,int(data.shape[1]/2)) 
+        xi=np.linspace(yaxis[0],yaxis[1],data.shape[0])         
         filename=rundir+'/Fields/By_slice0001/byslicexz_00000001.h5'
         f=h5py.File(filename)
         names=list(f.keys())

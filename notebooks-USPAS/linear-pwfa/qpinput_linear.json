@@ -19,7 +19,7 @@
     "ndump_restart" : 1,
     "read_restart" : false,
     "restart_timestep" : 1,
-    "iter" : 1,
+    "iter" : 2,
     "verbose" : 0
 },
 
