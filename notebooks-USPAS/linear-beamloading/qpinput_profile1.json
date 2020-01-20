@@ -8,7 +8,7 @@
     "box" : {
         "x" : [-6.4,6.4],
         "y" : [-6.4,6.4],
-        "z" : [-3.0,10.0]},
+        "z" : [0,10.0]},
     "boundary" : "conducting",
     "n0" : 1.0e16,
     "time" : 10.1,
@@ -19,14 +19,14 @@
     "ndump_restart" : 1,
     "read_restart" : false,
     "restart_timestep" : 1,
-    "iter" : 3,
+    "iter" : 1,
     "verbose" : 0
 },
 
 "beam" :
 [
     {
-    "evolution" : false,
+    "evolution" : true,
     "profile" : 0,
     "np" : [128,128,256],
     "npmax" : 40000000,
@@ -59,7 +59,7 @@
     ]    
     },
     {
-    "evolution" : false,
+    "evolution" : true,
     "profile" : 1,
     "np" : [128,128,256],
     "npmax" : 40000000,

@@ -462,6 +462,36 @@ planeToAxisLabel = {'xz':(axisLabel[2],axisLabel[0]),'yz':(axisLabel[2],axisLabe
 #                  energySpread_driver = energySpread_driverW,
 #                  peak_density_driver = peak_density_driverW);
  
+def get_efficiency(rundir):
+
+    with open('qpinput.json') as f:
+        inputDeck = json.load(f, object_pairs_hook=OrderedDict)
+
+    beam1_psample = inputDeck['beam'][0]['diag'][2]['sample'] / 100
+    beam2_psample = inputDeck['beam'][1]['diag'][2]['sample'] / 100
+    filename10 = rundir + '/Beam0001/Raw/raw_00000000.h5'
+    filename11 = rundir + '/Beam0001/Raw/raw_00000001.h5'
+    filename20 = rundir + '/Beam0002/Raw/raw_00000000.h5'
+    filename21 = rundir + '/Beam0002/Raw/raw_00000001.h5'
+
+    def get_beam_energy(filename, sample):
+        f = h5py.File(filename, 'r')
+        p1 = f['/p1'][:]
+        p2 = f['/p2'][:]
+        p3 = f['/p3'][:]
+        q = np.abs(f['/q'][:])
+        gamma = np.sqrt(1 + p1**2 + p2**2 + p3**2)
+        gamma_sum = np.sum(gamma*q) / sample
+        return gamma_sum
+
+    beam1_ene0 = get_beam_energy(filename10, beam1_psample)
+    beam1_ene1 = get_beam_energy(filename11, beam1_psample)
+    beam2_ene0 = get_beam_energy(filename20, beam2_psample)
+    beam2_ene1 = get_beam_energy(filename21, beam2_psample)
+
+    eff = np.abs(beam2_ene1 - beam2_ene0) / np.abs(beam1_ene1 - beam1_ene0)
+    print('The acceleration efficiency is: ', eff)
+    
         
 def makeplot(rundir):
     isLinear=True
