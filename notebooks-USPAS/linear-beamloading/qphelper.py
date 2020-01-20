@@ -49,7 +49,7 @@ def plotSourceProfile():
 
 def makeInput(inputDeckTemplateName,
                  indx,indz,n0,dt,nbeams,time,ndump2D,
-                 boxXlength,boxYlength,boxZlength,
+                 boxXlength,boxYlength,boxZinit,boxZlength,
                  z_driver,
                  sigma_r_driver,sigma_z_driver,
                  sigma_vx_driver,sigma_vy_driver,
@@ -114,7 +114,8 @@ def makeInput(inputDeckTemplateName,
     inputDeck['simulation']['box']['x'][1] = boxXlength / 2
     inputDeck['simulation']['box']['y'][0] = - boxYlength / 2
     inputDeck['simulation']['box']['y'][1] = boxYlength / 2
-    inputDeck['simulation']['box']['z'][1] = boxZlength
+    inputDeck['simulation']['box']['z'][0] = boxZinit
+    inputDeck['simulation']['box']['z'][1] = boxZlength+boxZinit
     
     inputDeck['beam'][0]['gamma'] = gammaE_driver
     inputDeck['beam'][0]['peak_density'] = peak_density_driver
@@ -126,10 +127,10 @@ def makeInput(inputDeckTemplateName,
     inputDeck['beam'][1]['gamma'] = gammaE_witness
     inputDeck['beam'][1]['peak_density'] = peak_density_witness
     
-    inputDeck['beam'][1]['piecewise_z'][1] = piecewise_z1_witness
-    inputDeck['beam'][1]['piecewise_z'][2] = piecewise_z2_witness
-    inputDeck['beam'][1]['piecewise_z'][0] = piecewise_z1_witness-0.01
-    inputDeck['beam'][1]['piecewise_z'][3] = piecewise_z2_witness+0.01
+    inputDeck['beam'][1]['piecewise_z'][1] = piecewise_z1_witness-boxZinit
+    inputDeck['beam'][1]['piecewise_z'][2] = piecewise_z2_witness-boxZinit
+    inputDeck['beam'][1]['piecewise_z'][0] = piecewise_z1_witness-boxZinit-0.0001
+    inputDeck['beam'][1]['piecewise_z'][3] = piecewise_z2_witness-boxZinit+0.0001
     
     inputDeck['beam'][1]['center'][2] = piecewise_z1_witness
     inputDeck['beam'][1]['sigma'] = [sigma_r_witness,sigma_r_witness]
@@ -186,8 +187,8 @@ def makeWidgetsForInput():
     #plasmaDataFileW = widgets.Text(value='plasma.txt', description='Plasma Data File:',style=style,layout=layout)
     #zDataFileW = widgets.Text(value='z.txt', description='z Data File (Normalized/$\mu$m):',style=style,layout=layout)
     
-    indxW = widgets.IntText(value=8, description='indx (indy):', style=style, layout=layout)
-    indzW = widgets.IntText(value=8, description='indz:', style=style, layout=layout)
+    indxW = widgets.IntText(value=7, description='indx (indy):', style=style, layout=layout)
+    indzW = widgets.IntText(value=9, description='indz:', style=style, layout=layout)
 
     n0W = widgets.FloatText(value=4, description='$n_0\;(10^{16}/cm^3)$:', style=style, layout=layout)
 
@@ -199,11 +200,12 @@ def makeWidgetsForInput():
     
     boxXlengthW = widgets.FloatText(value=12.8, description='boxXlength (Normalized):', style=style, layout=layout)
     boxYlengthW = widgets.FloatText(value=12.8, description='boxYlength (Normalized):', style=style, layout=layout)
+    boxZinitW = widgets.FloatText(value=-3.0, description='boxZinit (Normalized):', style=style, layout=layout)
     boxZlengthW = widgets.FloatText(value=10.0, description='boxZlength (Normalized):', style=style, layout=layout)
     
     # Driving beam
 
-    z_driverW = widgets.FloatText(value=2.5, description='driver z position (Normalized):', style=style, layout=layout)
+    z_driverW = widgets.FloatText(value=0.0, description='driver z position (Normalized):', style=style, layout=layout)
 
     sigma_r_driverW = widgets.FloatText(value=0.5, description='$\sigma_r$(Normalized) (driver):', style=style, layout=layout)
     #sigma_y_driverW = widgets.FloatText(value=0.5, description='$\sigma_y$(Normalized) (driver):', style=style, layout=layout)
@@ -214,14 +216,14 @@ def makeWidgetsForInput():
     
     gammaE_driverW = widgets.FloatText(value=20000, description='$\gamma$ (driver):', style=style, layout=layout)    
     energySpread_driverW = widgets.FloatText(value=0.0, description='$\Delta \gamma /\gamma$ (%) (driver):', style=style, layout=layout)
-    peak_density_driverW = widgets.FloatText(value=0.11, description='$n_{peak}$ (Normalized) (driver):', style=style, layout=layout)
+    peak_density_driverW = widgets.FloatText(value=0.001, description='$n_{peak}$ (Normalized) (driver):', style=style, layout=layout)
 
     # Witness beam
 
     #z_witnessW = widgets.FloatText(value=3.5, description='witness z position (Normalized/$\mu$m):', style=style, layout=layout)
     
-    piecewise_z1_witnessW = widgets.FloatText(value=3.5, description='front of witness beam (Normalized):', style=style, layout=layout)
-    piecewise_z2_witnessW = widgets.FloatText(value=5.0, description='back of witness beam (Normalized):', style=style, layout=layout)
+    piecewise_z1_witnessW = widgets.FloatText(value=2.5, description='front of witness beam (Normalized):', style=style, layout=layout)
+    piecewise_z2_witnessW = widgets.FloatText(value=3.247, description='back of witness beam (Normalized):', style=style, layout=layout)
 
     sigma_r_witnessW = widgets.FloatText(value=0.5, description='$\sigma_r$(Normalized) (witness):', style=style, layout=layout)
     #sigma_y_witnessW = widgets.FloatText(value=0.5, description='$\sigma_y$(Normalized) (witness):', style=style, layout=layout)
@@ -231,17 +233,18 @@ def makeWidgetsForInput():
     
     gammaE_witnessW = widgets.FloatText(value=20000, description='$\gamma$ (witness):', style=style, layout=layout)    
     energySpread_witnessW = widgets.FloatText(value=0.0, description='$\Delta \gamma /\gamma$ (%) (witness):', style=style, layout=layout)
-    peak_density_witnessW = widgets.FloatText(value=0.11, description='$n_{peak}$ (Normalized) (witness):', style=style, layout=layout)
+    peak_density_witnessW = widgets.FloatText(value=0.00055, description='$n_{peak}$ (Normalized) (witness):', style=style, layout=layout)
     
     interact_calc(makeInput,inputDeckTemplateName = inputDeckTemplateNameW,
                   indx = indxW,indz=indzW,n0 = n0W,dt=dtW,nbeams=nbeamsW,time = timeW,ndump2D = ndump2DW,
                   boxXlength=boxXlengthW,boxYlength=boxYlengthW,boxZlength=boxZlengthW,
-                  z_driver = z_driverW,
+                  boxZinit=boxZinitW,z_driver = z_driverW,
                   sigma_r_driver = sigma_r_driverW,sigma_z_driver = sigma_z_driverW,  
                   sigma_vx_driver = sigma_vx_driverW,sigma_vy_driver = sigma_vy_driverW,
                   gammaE_driver = gammaE_driverW,energySpread_driver=energySpread_driverW,
                   peak_density_driver = peak_density_driverW,
-                  piecewise_z1_witness=piecewise_z1_witnessW,piecewise_z2_witness=piecewise_z2_witnessW,
+                  piecewise_z1_witness=piecewise_z1_witnessW,
+                  piecewise_z2_witness=piecewise_z2_witnessW,
                   sigma_r_witness = sigma_r_witnessW,
                   sigma_vx_witness = sigma_vx_witnessW,sigma_vy_witness = sigma_vy_witnessW,
                   gammaE_witness = gammaE_witnessW,energySpread_witness=energySpread_witnessW,
@@ -458,38 +461,8 @@ planeToAxisLabel = {'xz':(axisLabel[2],axisLabel[0]),'yz':(axisLabel[2],axisLabe
 #                  gammaE_driver = gammaE_driverW,
 #                  energySpread_driver = energySpread_driverW,
 #                  peak_density_driver = peak_density_driverW);
-
-def get_efficiency(rundir):
-
-    with open('qpinput.json') as f:
-        inputDeck = json.load(f, object_pairs_hook=OrderedDict)
-
-    beam1_psample = inputDeck['beam'][0]['diag'][2]['sample'] / 100
-    beam2_psample = inputDeck['beam'][1]['diag'][2]['sample'] / 100
-    filename10 = rundir + '/Beam0001/Raw/raw_00000000.h5'
-    filename11 = rundir + '/Beam0001/Raw/raw_00000001.h5'
-    filename20 = rundir + '/Beam0002/Raw/raw_00000000.h5'
-    filename21 = rundir + '/Beam0002/Raw/raw_00000001.h5'
-
-    def get_beam_energy(filename, sample):
-        f = h5py.File(filename, 'r')
-        p1 = f['/p1'][:]
-        p2 = f['/p2'][:]
-        p3 = f['/p3'][:]
-        q = np.abs(f['/q'][:])
-        gamma = np.sqrt(1 + p1**2 + p2**2 + p3**2)
-        gamma_sum = np.sum(gamma*q) / sample
-        return gamma_sum
-
-    beam1_ene0 = get_beam_energy(filename10, beam1_psample)
-    beam1_ene1 = get_beam_energy(filename11, beam1_psample)
-    beam2_ene0 = get_beam_energy(filename20, beam2_psample)
-    beam2_ene1 = get_beam_energy(filename21, beam2_psample)
-
-    eff = np.abs(beam2_ene1 - beam2_ene0) / np.abs(beam1_ene1 - beam1_ene0)
-    print('The acceleration efficiency is: ', eff)
-
-
+ 
+        
 def makeplot(rundir):
     isLinear=True
     isSmooth=False
@@ -690,65 +663,8 @@ def makeplot(rundir):
         data=dataset[...]
         xaxis=f['/AXIS/AXIS1'][...]
         yaxis=f['/AXIS/AXIS2'][...]
-        x=np.linspace(xaxis[0]/2,xaxis[1]/2,int(data.shape[0]/2)) 
-        xi=np.linspace(yaxis[0],yaxis[1],data.shape[1])  
-        # For linear case, we run simulation with only drive beam. For nonlinear case, we also have witness beam
-        if(isLinear == False): 
-            filename=rundir+'/Beam0002/Charge_slice_0001/charge_slice_xz_00000001.h5'
-            f=h5py.File(filename)
-            names=list(f.keys())
-            dataname='/'+names[1]
-            dataset=f[dataname]
-            data=data+dataset[...]
-            
-        figure_title = 'Beam Density'
-        xlabel_bottom = r'$\xi = ct-z\;[c/\omega_p]$'  
-        xlabel_top = 'Beam Density $[n_p]$'
-        ylabel_left ='$x\;[c/\omega_p]$'
-        ylabel_right ='Beam Density $[n_p]$'
-        datamin = -10.0
-        datamax = 0.0
-        colormap = 'afmhot'
-        data = data.transpose()
-        da = data[int(xCellsTotal/4):int(3*xCellsTotal/4),:] 
-        l_max = 0.0
-        l_min = -30.0
-        fig, ax1 = plt.subplots(figsize=(8,5))
-        plt.axis([ xi.min(), xi.max(),x.min(), x.max()])
-        plt.title(figure_title)
-        if(isLinear): 
-            cs1 = plt.pcolormesh(xi,x,da,cmap=colormap)
-        else:
-            cs1 = plt.pcolormesh(xi,x,da,vmin=datamin,vmax=datamax,cmap=colormap)
-        plt.colorbar(cs1, pad = 0.15)
-        ax1.set_xlabel(xlabel_bottom)
-        # Make the y-axis label, ticks and tick labels match the line color.
-        ax1.set_ylabel(ylabel_left, color='k')
-        ax1.tick_params('y', colors='k')
-        ax2 = ax1.twinx()
-        middle_index = int(da.shape[0]/2)
-        lineout_index = int (middle_index + x_position * xCellsPerUnitLength)+1 
-        lineout = da[lineout_index,:]
-        ax2.plot(xi, lineout, 'r')
-#         if(isLinear == False):
-#             ax2.set_ylim([l_min,l_max])
-        ax1.plot(xi, x_position*np.ones(da.shape[1]), 'b--') # Add a dashed line at the lineout position
-        ax2.set_ylabel(ylabel_right, color='r')
-        ax2.tick_params('y', colors='r')
-        fig.tight_layout()
-        return
-    
-    def plot1_qb_w(x_position):
-        filename=rundir+'/Beam0002/Charge_slice_0001/charge_slice_xz_00000001.h5'
-        f=h5py.File(filename,'r')
-        names=list(f.keys())
-        dataname='/'+names[1]
-        dataset=f[dataname]
-        data=dataset[...]
-        xaxis=f['/AXIS/AXIS1'][...]
-        yaxis=f['/AXIS/AXIS2'][...]
-        x=np.linspace(xaxis[0]/2,xaxis[1]/2,int(data.shape[0]/2)) 
-        xi=np.linspace(yaxis[0],yaxis[1],data.shape[1])  
+        x=np.linspace(xaxis[0]/2,xaxis[1]/2,int(data.shape[1]/2)) 
+        xi=np.linspace(yaxis[0],yaxis[1],data.shape[0])  
         # For linear case, we run simulation with only drive beam. For nonlinear case, we also have witness beam
         if(isLinear == False): 
             filename=rundir+'/Beam0002/Charge_slice_0001/charge_slice_xz_00000001.h5'
@@ -794,8 +710,75 @@ def makeplot(rundir):
         ax2.tick_params('y', colors='r')
         fig.tight_layout()
         
-        z1=inputDeck['beam'][1]['piecewise_z'][1]
-        z2=inputDeck['beam'][1]['piecewise_z'][2]
+        
+        boxz0=inputDeck['simulation']['box']['z'][0]
+        xi0=inputDeck['beam'][0]['center'][2]
+        sigz_d=inputDeck['beam'][0]['sigma'][2]
+        nb_d=inputDeck['beam'][0]['peak_density']
+        
+        ax2.plot(xi,-nb_d*np.exp(-(xi-xi0)**2/(2.0*sigz_d**2)),'k--')
+        
+        return
+    
+    def plot1_qb_w(x_position):
+        filename=rundir+'/Beam0002/Charge_slice_0001/charge_slice_xz_00000001.h5'
+        f=h5py.File(filename,'r')
+        names=list(f.keys())
+        dataname='/'+names[1]
+        dataset=f[dataname]
+        data=dataset[...]
+        xaxis=f['/AXIS/AXIS1'][...]
+        yaxis=f['/AXIS/AXIS2'][...]
+        x=np.linspace(xaxis[0]/2,xaxis[1]/2,int(data.shape[1]/2)) 
+        xi=np.linspace(yaxis[0],yaxis[1],data.shape[0])  
+        # For linear case, we run simulation with only drive beam. For nonlinear case, we also have witness beam
+        if(isLinear == False): 
+            filename=rundir+'/Beam0002/Charge_slice_0001/charge_slice_xz_00000001.h5'
+            f=h5py.File(filename)
+            names=list(f.keys())
+            dataname='/'+names[1]
+            dataset=f[dataname]
+            data=data+dataset[...]
+            
+        figure_title = 'Beam Density'
+        xlabel_bottom = r'$\xi = ct-z\;[c/\omega_p]$'  
+        xlabel_top = 'Beam Density $[n_p]$'
+        ylabel_left ='$x\;[c/\omega_p]$'
+        ylabel_right ='Beam Density $[n_p]$'
+        datamin = -10.0
+        datamax = 0.0
+        colormap = 'afmhot'
+        data = data.transpose()
+        da = data[int(xCellsTotal/4):int(3*xCellsTotal/4),:] 
+        l_max = 0.0
+        l_min = -30.0
+        fig, ax1 = plt.subplots(figsize=(8,5))
+        plt.axis([ xi.min(), xi.max(),x.min(), x.max()])
+        plt.title(figure_title)
+        if(isLinear): 
+            cs1 = plt.pcolormesh(xi,x,da,cmap=colormap)
+        else:
+            cs1 = plt.pcolormesh(xi,x,da,vmin=datamin,vmax=datamax,cmap=colormap)
+        plt.colorbar(cs1, pad = 0.15)
+        ax1.set_xlabel(xlabel_bottom)
+        # Make the y-axis label, ticks and tick labels match the line color.
+        ax1.set_ylabel(ylabel_left, color='k')
+        ax1.tick_params('y', colors='k')
+        ax2 = ax1.twinx()
+        middle_index = int(da.shape[0]/2)
+        lineout_index = int (middle_index + x_position * xCellsPerUnitLength)+1 
+        lineout = da[lineout_index,:]
+        ax2.plot(xi, lineout, 'r')
+#         if(isLinear == False):
+#             ax2.set_ylim([l_min,l_max])
+        ax1.plot(xi, x_position*np.ones(da.shape[1]), 'b--') # Add a dashed line at the lineout position
+        ax2.set_ylabel(ylabel_right, color='r')
+        ax2.tick_params('y', colors='r')
+        fig.tight_layout()
+       
+        boxz0=inputDeck['simulation']['box']['z'][0]
+        z1=inputDeck['beam'][1]['piecewise_z'][1]+boxz0
+        z2=inputDeck['beam'][1]['piecewise_z'][2]+boxz0
         nb_w=inputDeck['beam'][1]['peak_density']
         ax2.plot([z1,z2],[-nb_w,0],'k--')
         ax2.plot([z1-0.01,z1],[0,-nb_w],'k--')
@@ -864,8 +847,8 @@ def makeplot(rundir):
         data=dataset[...]
         xaxis=f['/AXIS/AXIS1'][...]
         yaxis=f['/AXIS/AXIS2'][...]
-        x=np.linspace(xaxis[0]/2,xaxis[1]/2,int(data.shape[0]/2)) 
-        xi=np.linspace(yaxis[0],yaxis[1],data.shape[1])         
+        x=np.linspace(xaxis[0]/2,xaxis[1]/2,int(data.shape[1]/2)) 
+        xi=np.linspace(yaxis[0],yaxis[1],data.shape[0])         
         figure_title = '$E_z$'
         xlabel_bottom = r'$\xi = ct-z\;[c/\omega_p]$'  
         xlabel_top = '$eE_z/mc\omega_p$'
@@ -954,6 +937,13 @@ def makeplot(rundir):
             kpsigz=inputDeck['beam'][0]['sigma'][2]
             nb=inputDeck['beam'][0]['peak_density']
             R0th=kpsigr**2/2.0*np.exp(kpsigr**2/2.0)*mp.gammainc(0,kpsigr**2/2.0)
+            
+            kpsigrw=inputDeck['beam'][1]['sigma'][0]
+            boxz0=inputDeck['simulation']['box']['z'][0]
+            z1_w=inputDeck['beam'][1]['piecewise_z'][1]+boxz0
+            z2_w=inputDeck['beam'][1]['piecewise_z'][2]+boxz0
+            nb_w=inputDeck['beam'][1]['peak_density']
+            R0thw=kpsigrw**2/2.0*np.exp(kpsigrw**2/2.0)*mp.gammainc(0,kpsigrw**2/2.0)
 
             def Zp(kpsigz, xi, b, N):
                 h=float(b-xi)/N
@@ -970,8 +960,17 @@ def makeplot(rundir):
             def Zpth(kpxi):
                 return np.sqrt(2.*np.pi)*kpsigz*np.exp(-kpsigz**2/2.)*np.cos(kpxi)
             
+            def Zpthw(kpxi):
+                if kpxi<z2_w:
+                    return nb_w/(z2_w-z1_w)*( (z2_w-z1_w)*np.sin(kpxi-z1_w)+np.cos(kpxi-z1_w)-1.0)
+                else:
+                    return nb_w/(z2_w-z1_w)*( (z2_w-z1_w)*np.sin(kpxi-z1_w)+np.cos(kpxi-z1_w)-np.cos(kpxi-z2_w))
+            
             def ezth(kpxi):
                 return nb*Zpth(kpxi)*R0th
+            
+            def ezthw(kpxi):
+                return [Zpthw(i)*R0thw for i in kpxi]
             
             def ez0(kpxi):
                 #return -nb*Zp(kpsigz,kpxi,10.*kpxi,-1000)*R0(kpsigr,5.*kpsigr,1000)
@@ -989,10 +988,12 @@ def makeplot(rundir):
 
             xin=np.linspace(xi[0],xi[-1],30) 
             xi0=inputDeck['beam'][0]['center'][2]
-            #ax2.plot(y[y>xi0],ezth(y[y>xi0]-xi0),'k')
-            #ax2.plot(y[y>xi0],[ez0(i) for i in y[y>xi0]-xi0],'y--')
-            #if x_position==0.0:
-            #    ax2.plot(xin,ezth(xin-xi0),'k',label='Analytic')
+            ax1.plot([z1_w,z1_w],ax1.get_ylim(),'y--')
+            ax1.plot([z2_w,z2_w],ax1.get_ylim(),'y--')
+            #ax2.plot(xin[xin<=z1_w],ezth(xin[xin<=z1_w]-xi0),'k',label='Analytic')
+            #ax2.plot(xin,ezthw(xin),'b',label='Analytic witness')
+            #ax2.plot(xin[xin>=z1_w],ezthw(xin[xin>=z1_w])+ezth(xin[xin>z1_w]-xi0),'w--',label='Analytic witness')
+            #ax2.plot([z1_w,z1_w],ax2.get_ylim(),'k--')
             #    ax2.plot(xin,[ez0(i) for i in xin-xi0],'b--',label='Numerical Integration')
             #    ax2.legend()      
             #else:                    
@@ -1028,8 +1029,8 @@ def makeplot(rundir):
         data=dataset[...]
         xaxis=f['/AXIS/AXIS1'][...]
         yaxis=f['/AXIS/AXIS2'][...]
-        x=np.linspace(xaxis[0]/2,xaxis[1]/2,int(data.shape[0]/2)) 
-        xi=np.linspace(yaxis[0],yaxis[1],data.shape[1])         
+        x=np.linspace(xaxis[0]/2,xaxis[1]/2,int(data.shape[1]/2)) 
+        xi=np.linspace(yaxis[0],yaxis[1],data.shape[0])         
         figure_title = '$E_z$'
         xlabel_bottom = r'$\xi = ct-z\;[c/\omega_p]$'  
         xlabel_top = '$eE_z/mc\omega_p$'
@@ -1056,7 +1057,7 @@ def makeplot(rundir):
         ax2 = ax1.twiny()
         lineout_index = int (xi_position * zCellsPerUnitLength) 
         lineout = da[:,lineout_index]
-        ax2.plot(lineout, x, 'r',label='Simulation')
+        ax2.plot(lineout, x, 'k',label='Simulation')
         if(isLinear == False):
             ax2.set_xlim([l_min,l_max])
         ax1.plot(xi_position*np.ones(da.shape[0]),x, 'k--')
@@ -1151,8 +1152,14 @@ def makeplot(rundir):
             xi0=inputDeck['beam'][0]['center'][2]
             #ax2.plot(y[y>xi0],ezth(y[y>xi0]-xi0),'k')
             #ax2.plot(y[y>xi0],[ez0(i) for i in y[y>xi0]-xi0],'y--')
-            ax2.plot([ez(xi_position-xi0,i) for i in xn],xn,'b--',label='Numerical Integration')
-            ax2.legend()                     
+            #ax2.plot([ez(xi_position-xi0,i) for i in xn],xn,'b--',label='Numerical Integration')
+            #ax2.legend()                     
+            
+            boxz0=inputDeck['simulation']['box']['z'][0]
+            z1_w=inputDeck['beam'][1]['piecewise_z'][1]+boxz0
+            z2_w=inputDeck['beam'][1]['piecewise_z'][2]+boxz0
+            ax1.plot([z1_w,z1_w],ax1.get_ylim(),'y--')
+            ax1.plot([z2_w,z2_w],ax1.get_ylim(),'y--')
                             
         # End of Lance's codes
         
@@ -1420,7 +1427,10 @@ def makeplot(rundir):
 #    i2=interact(plot2_qb,xi_position=FloatSlider(min=0,max=10,step=0.05,value=2.5,continuous_update=False))
 #    i3=interact(plot1_qp,x_position=FloatSlider(min=-3,max=3,step=0.05,continuous_update=False))
 #    i4=interact(plot2_qp,xi_position=FloatSlider(min=0,max=10,step=0.05,value=4.25,continuous_update=False))
-#    i6=interact(plot2_ez,xi_position=FloatSlider(min=0,max=10,step=0.05,value=5.6,continuous_update=False))
+    boxz0=inputDeck['simulation']['box']['z'][0]
+    z1_w=inputDeck['beam'][1]['piecewise_z'][1]+boxz0
+    z2_w=inputDeck['beam'][1]['piecewise_z'][2]+boxz0
+#    i6=interact(plot2_ez,xi_position=FloatSlider(min=z1_w,max=z2_w,step=0.05,value=(z1_w+z2_w)/2.0,continuous_update=False))
 #    i7=interact(plot1_fo,x_position=FloatSlider(min=-3,max=3,step=0.05,value=-1.1,continuous_update=False))
 #    i8=interact(plot2_fo,xi_position=FloatSlider(min=0,max=10,step=0.05,value=4.1,continuous_update=False))
 #     else:    
