@@ -33,7 +33,7 @@ def newifile(oname='single-part-1.txt',sigz = 3.0, a_0=1.0, lamb = 1.0,tmax=20,r
         if 'tmax =' in data[i]:
             data[i] = '  tmax ='+str(tmax)+',\n'
         if 'n_b' in data[i]:
-            data[i] = 'density = ' + str(np.float(lamb)/a_0**2) + ',\n'
+            data[i] = 'density = ' + str(2*np.float(lamb)/a_0**2) + ',\n'
         if 'a_0' in data[i]:
             data[i] = 'x(1:6,2)  = 0.0,' + str(a_0) + ',' + str(a_0 + 0.0001) + ',10, 20,30,\n'
         if 'x_i' in data[i]:
@@ -142,10 +142,10 @@ def plot_data(dirname,off=0.0,theory=True,xlim_max=None):
     plt.plot(xi,p2[:l],label='Simulation')
     if(first_out > 0):
         plt.plot(np.arange(int(xi[-1]+1)), \
-            np.ones(int(xi[-1]+1))*np.sqrt(lamb.value * np.log(x2[first_out]/x2[first_in])),'r--',label=r'Theory Eq. (36)' )
+            np.ones(int(xi[-1]+1))*np.sqrt(2*lamb.value * np.log(x2[first_out]/x2[first_in])),'r--',label=r'Theory Eq. (36)' )
     else:
         plt.plot(np.arange(int(xi[-1]+1)), \
-            np.ones(int(xi[-1]+1))*np.sqrt(lamb.value * np.log(x2[-1]/x2[first_in])),'r--',label=r'Theory Eq. (36)' )
+            np.ones(int(xi[-1]+1))*np.sqrt(2*lamb.value * np.log(x2[-1]/x2[first_in])),'r--',label=r'Theory Eq. (36)' )
     
     plt.xlabel(r'$\xi$ $[c/\omega_0]$')
     plt.legend()
