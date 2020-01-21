@@ -270,15 +270,24 @@ def lwfa_density_plot(rundir):
 
         eden=osh5io.read_h5(filename2)
         ex = osh5io.read_h5(filename3)
+        psi = osh5io.read_h5(filename3) 
 
         den_plot = plt.subplot(121)
         osh5vis.osplot(eden,title='Electron Density')
-
-        for i in range(ex.shape[0]-2,-1,-1):
-            ex[i]=ex[i+1] + ex.axes[0].increment*ex[i]
+        
         ex_plot = plt.subplot(122)
 
-        osh5vis.osplot(ex,title='Wake $\psi$ ',ylabel='$\psi [m_e c^2/e]$')
+        for i in range(psi.shape[0]-2,-1,-1):
+            psi[i]=psi[i+1] + psi.axes[0].increment*psi[i]
+        
+
+        osh5vis.osplot(psi,title='Wake $\psi$ ',ylabel='$\psi [m_e c^2/e]$')
+        
+        second_x = plt.twinx()
+        second_x.plot(ex.axes[0], ex, 'g', linestyle='-.')
+        second_x.set_ylabel('$E_{z}$', color='g')
+        second_x.tick_params(axis='y', labelcolor='g')
+        
 
     my_path=os.getcwd()
     working_dir=my_path+'/'+rundir
@@ -388,6 +397,7 @@ def lwfa_phase_space(rundir):
         phase_plot.set_ylabel('Proper Velocity $\gamma v_1$ [ c ]')
         second_x = plt.twinx()
         second_x.plot(ex.axes[0],ex,'g',linestyle='-.')
+        second_x.tick_params(axis='y', labelcolor='g')
 
         plt.colorbar(phase_contour)
 
