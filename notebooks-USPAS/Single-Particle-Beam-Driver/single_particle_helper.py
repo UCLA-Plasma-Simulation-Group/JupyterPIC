@@ -18,7 +18,7 @@ a = widgets.Text(value='single-part-1.txt', description='New output file:',style
 sigz = FloatSlider(value = 3.0, min=0,max=10,step=0.05,continuous_update=False,description = r'$(\xi_f - \xi_i) \ [c/\omega_p]$',style = style,layout=layout)
 a_0 = FloatSlider(value = 1.0, min=0,max=1.0,step=0.05,continuous_update=False,description = r'$a_0 \ [c/\omega_p]$',style = style,layout=layout)
 lamb = FloatSlider(value = 1.0, min=0,max=10,step=0.05,continuous_update=False,description = r'$\Lambda$',style = style,layout=layout)
-r_i = FloatSlider(value = 1.0, min=0,max=10,step=0.01562,continuous_update=False,description = r'$r_i \ [c/\omega_p]$',style = style,layout=layout)
+r_i = FloatSlider(value = 1.0, min=0.03232,max=10,step=0.0625,continuous_update=False,description = r'$r_i \ [c/\omega_p]$',style = style,layout=layout)
 tmax = FloatSlider(value = 20, min=10,max=200,step=10 ,continuous_update=False,description = r'$t_{max} \   [1/\omega_p]$',style = style,layout=layout)
 
 
@@ -39,7 +39,7 @@ def newifile(oname='single-part-1.txt',sigz = 3.0, a_0=1.0, lamb = 1.0,tmax=20,r
 		if 'x_i' in data[i]:
 			data[i] = 'x(1:6,1)  = -30.001,' +str(-1 * sigz - 0.001) + ',' + str(-1 * sigz) + ',0.0001, 0.001, 1.0,\n'
 		if('r_i' in data[i]):
-			data[i] = 'x(1:6,2)  = 0.0,' + str(r_i) + ',' + str(r_i + 1.0/32) + ',' + str(r_i + 1.0/32 + 0.0001) + ',99, 100.0,\n'
+			data[i] = 'x(1:6,2)  = 0.0,' + str(r_i-1.0/32.0) + ',' + str(r_i) + ',' + str(r_i +1/32.0 + 0.0001) + ',99, 100.0,\n'
 	#     if 'ufl(1:3)' in data[i]:
 	#         data[i] = '  ufl(1:3) = '+str(uz0)+', 0.0, 0.0,\n'
 	#     if ' a0 =' in data[i]:
@@ -157,6 +157,7 @@ def plot_data(dirname,off=0.0,theory=True,xlim_max=None):
 		student_solution = 0
 	## 
 	## 
+	print(x2[first_in])
 
 
 
