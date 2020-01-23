@@ -35,11 +35,11 @@ def newifile(oname='single-part-1.txt',sigz = 3.0, a_0=1.0, lamb = 1.0,tmax=20,r
         if 'n_b' in data[i]:
             data[i] = 'density = ' + str(2*np.float(lamb)/a_0**2) + ',\n'
         if 'a_0' in data[i]:
-            data[i] = 'x(1:6,2)  = 0.0,' + str(a_0) + ',' + str(a_0 + 0.0001) + ',10, 20,30,\n'
+            data[i] = 'x(1:6,2)  = 0.0,' + str(a_0) + ',' + str(a_0 + 0.0001) + ',30, 40,50,\n'
         if 'x_i' in data[i]:
-            data[i] = 'x(1:6,1)  = -10.001,' +str(-1 * sigz - 0.001) + ',' + str(-1 * sigz) + ',0.0001, 0.001, 1.0,\n'
+            data[i] = 'x(1:6,1)  = -30.001,' +str(-1 * sigz - 0.001) + ',' + str(-1 * sigz) + ',0.0001, 0.001, 1.0,\n'
         if('r_i' in data[i]):
-            data[i] = 'x(1:6,2)  = 0.0,' + str(r_i) + ',' + str(r_i + 1.0/64) + ',' + str(r_i + 1.0/64 + 0.0001) + ',99, 100.0,\n'
+            data[i] = 'x(1:6,2)  = 0.0,' + str(r_i) + ',' + str(r_i + 1.0/32) + ',' + str(r_i + 1.0/32 + 0.0001) + ',99, 100.0,\n'
     #     if 'ufl(1:3)' in data[i]:
     #         data[i] = '  ufl(1:3) = '+str(uz0)+', 0.0, 0.0,\n'
     #     if ' a0 =' in data[i]:
@@ -140,18 +140,21 @@ def plot_data(dirname,off=0.0,theory=True,xlim_max=None):
 
     plt.subplot(324)
     plt.plot(xi,p2[:l],label='Simulation')
-
     ## Eq (36). solution
-
-    pr_solution = np.sqrt(2*lamb.value * np.log(x2[first_out]/x2[first_in]))
-    
+    if(first_out > 0):
+        pr_solution = np.sqrt(2*lamb.value * np.log(x2[first_out]/x2[first_in]))
+    else: 
+        pr_solution = 0
     ## Student solution 
     ## needed variables
     ## lamb.value gives lambda
     ## a_0.value gives the driver radius
     ## Fill in these two lines
-    use_student_solution = False
-    student_solution = a_0.value *lamb.value
+    use_student_solution = True
+    if(first_out > 0):
+        student_solution = np.sqrt(2*lamb.value * (np.log(x2[first_out]/a_0.value) + 0.5 *(1-x2[first_in]**2/a_0.value**2)))
+    else:
+        student_solution = 0
     ## 
     ## 
 

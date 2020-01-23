@@ -19,7 +19,7 @@ grid
 !----------time step and global data dump timestep number----------
 time_step 
 {
-  dt     =   0.0125,
+  dt     =   0.025,
   ndump  =   800,
 }
 
@@ -33,8 +33,8 @@ restart
 !----------spatial limits of the simulations----------
 space 
 {
-  xmin(1:2) = -10.0,  0,
-  xmax(1:2) =  2.0,  10,
+  xmin(1:2) = -22.0,  0,
+  xmax(1:2) =  2.0,  20,
   if_move(1:2) = .true., .false.,
 }
 
@@ -146,10 +146,10 @@ profile
   density = 1,  !n_b
   profile_type(1:2) = "piecewise-linear", "piecewise-linear",
   num_x = 6,
-  x(1:6,1)  = -10, -3.001, -3, 0, 0.001, 1.0, !x_i
+  x(1:6,1)  = -30, -3.001, -3, 0, 0.001, 1.0, !x_i
   fx(1:6,1) =  0.0,  0.0,   1.0,  1.0, 0.0, 0.0,
   
-  x(1:6,2)  = 0.0, 1, 1.0001, 10, 20,30, !a_0
+  x(1:6,2)  = 0.0, 1, 1.0001, 15, 20,30, !a_0
   fx(1:6,2) =  1.0,  1.0,   0.0,  0.0, 0.0, 0.0,
 }
 
