@@ -152,7 +152,7 @@ def plot_data(dirname,off=0.0,theory=True,xlim_max=None):
     ## Fill in these two lines
     use_student_solution = False
     if(first_out > 0):
-	student_solution = lamb.value * a_0.value
+		student_solution = lamb.value * a_0.value
     else:
         student_solution = 0
     ## 
