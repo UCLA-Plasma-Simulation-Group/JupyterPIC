@@ -113,7 +113,7 @@ def plot_data(dirname,off=0.0,theory=True,xlim_max=None):
 	plt.plot(sigz.value*np.zeros(10),(np.arange(10))/9.0 * x2[first_in],'m--', label = r'$\xi_i$' )
 	# plt.plot(- np.arange(10) ,(np.ones(10)) * x2[first_in],'m--' )
 	plt.legend()
-	plt.text(0.05,x2[first_out] * 1.05, r'$\Delta r =$' + str(x2[first_out]-x2[first_in])[:3] )
+	plt.text(0.05,x2[first_out] * 1.05, r'$\Delta r =$' + str(x2[first_out]-x2[first_in])[:5] )
 		
 	plt.ylabel(r'$r$ $[c/\omega_0]$')
 	plt.xlabel(r'$\xi$ $[c/\omega_0]$')
