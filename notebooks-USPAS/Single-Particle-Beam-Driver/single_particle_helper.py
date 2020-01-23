@@ -150,9 +150,9 @@ def plot_data(dirname,off=0.0,theory=True,xlim_max=None):
     ## lamb.value gives lambda
     ## a_0.value gives the driver radius
     ## Fill in these two lines
-    use_student_solution = True
+    use_student_solution = False
     if(first_out > 0):
-        student_solution = np.sqrt(2*lamb.value * (np.log(x2[first_out]/a_0.value) + 0.5 *(1-x2[first_in]**2/a_0.value**2)))
+	student_solution = lamb.value * a_0.value
     else:
         student_solution = 0
     ## 
