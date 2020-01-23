@@ -48,12 +48,12 @@ def newifile(iname='case0.txt', oname='case1.txt', uth=1e-6,
             data[i] = 'a0 = '+str(a0)+',\n'
         if 'omega0 =' in data[i]:
             data[i] = 'omega0 = '+str(omega0)+',\n'
-        if 't_flat =' in data[i]:
-            data[i] = 't_flat = '+str(t_flat)+',\n'
-        if 't_rise =' in data[i]:
-            data[i] = 't_rise = '+str(t_rise)+',\n'
-        if 't_fall =' in data[i]:
-            data[i] = 't_fall = '+str(t_fall)+',\n'
+        if 'lon_flat =' in data[i]:
+            data[i] = 'lon_flat = '+str(t_flat)+',\n'
+        if 'lon_rise =' in data[i]:
+            data[i] = 'lon_rise = '+str(t_rise)+',\n'
+        if 'lon_fall =' in data[i]:
+            data[i] = 'lon_fall = '+str(t_fall)+',\n'
         if 'nx_p(1:1) =' in data[i]:
             data[i] = 'nx_p(1:1) = '+str(nx_p)+',\n'
         if 'dt =' in data[i]:
@@ -111,12 +111,12 @@ def newifile2(iname='case0.txt', oname='case1.txt', uth=1e-6,
             data[i] = 'a0 = '+str(a0)+',\n'
         if 'omega0 =' in data[i]:
             data[i] = 'omega0 = '+str(omega0)+',\n'
-        if 't_flat =' in data[i]:
-            data[i] = 't_flat = '+str(t_flat)+',\n'
-        if 't_rise =' in data[i]:
-            data[i] = 't_rise = '+str(t_rise)+',\n'
-        if 't_fall =' in data[i]:
-            data[i] = 't_fall = '+str(t_fall)+',\n'
+        if 'lon_flat =' in data[i]:
+            data[i] = 'lon_flat = '+str(t_flat)+',\n'
+        if 'lon_rise =' in data[i]:
+            data[i] = 'lon_rise = '+str(t_rise)+',\n'
+        if 'lon_fall =' in data[i]:
+            data[i] = 'lon_fall = '+str(t_fall)+',\n'
         if 'nx_p(1:1) =' in data[i]:
             data[i] = 'nx_p(1:1) = '+str(nx_p)+',\n'
         if 'dt =' in data[i]:

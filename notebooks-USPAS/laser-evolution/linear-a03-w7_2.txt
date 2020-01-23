@@ -38,7 +38,7 @@ if_move(1:1) = .true.,
 time
 {
 tmin = 0.0e0,
-tmax =200.0
+tmax =544.5
 }
 !----------field solver set up-----------------
 el_mag_fld
@@ -116,16 +116,16 @@ zpulse
 {
 
 
-a0 = 0.3,
+a0 = 1.0,
 omega0 = 10.0,
 pol = 0,
 propagation = "forward",
 lon_type = "polynomial",
 
 
-lon_rise=0,
-lon_flat=3.14159,
-lon_fall=0,
+lon_rise = 10.0,
+lon_flat = 0.0,
+lon_fall = 10.0,
 lon_start = 23.5
 
 }

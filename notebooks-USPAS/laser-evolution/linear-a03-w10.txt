@@ -123,9 +123,9 @@ propagation = "forward",
 lon_type = "polynomial",
 
 
-lon_rise=0,
-lon_flat=3.14159,
-lon_fall=0,
+lon_rise = 0,
+lon_flat = 3.14159,
+lon_fall = 0,
 lon_start = 23.5
 
 }
