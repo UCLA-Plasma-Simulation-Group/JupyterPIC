@@ -12,7 +12,7 @@ node_conf
 !----------spatial grid----------
 grid 
 {
-  nx_p(1:2) =  768, 320,
+  nx_p(1:2) =  384, 640,
   coordinates = "cylindrical",
 }
 
@@ -33,8 +33,8 @@ restart
 !----------spatial limits of the simulations----------
 space 
 {
-  xmin(1:2) = -22.0,  0,
-  xmax(1:2) =  2.0,  20,
+  xmin(1:2) = -12.0,  0,
+  xmax(1:2) =  2.0,  40,
   if_move(1:2) = .true., .false.,
 }
 
