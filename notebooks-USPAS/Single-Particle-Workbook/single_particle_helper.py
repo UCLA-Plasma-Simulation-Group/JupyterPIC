@@ -32,11 +32,12 @@ def newifile(oname='single-part-1',field_solve='yee',t_final=600.0,dt=0.95,
         if 'push_type' in data[i]:
             data[i] = '  push_type = "'+pusher+'",\n'
         if 'ufl(1:3)' in data[i]:
-            if uz0==0.0:
-                # Give initial velocity in x2 since this is the momentum at -dt/2
-                data[i] = '  ufl(1:3) = '+str(uz0)+', '+str(dt*courant*a0/2.0)+', 0.0,\n'
-            else:
-                data[i] = '  ufl(1:3) = '+str(uz0)+', 0.0, 0.0,\n'
+            # Give correct initial velocity in x2 since this is the momentum at -dt/2
+            # With this momentum, the true initial velocity in x2 will average to 0
+            data[i] = '  ufl(1:3) = '+str(uz0)+', '+str( dt*courant*a0/2.0 - 
+                np.sqrt( ( np.sqrt( np.square( a0*dt*courant*uz0 )
+                                  + np.square( 1.0 + np.square(uz0) ) )
+                                  - 1.0 - np.square(uz0) ) / 2.0 ) )+', 0.0,\n'
         if ' a0 =' in data[i]:
             data[i] = '  a0 = '+str(a0)+',\n'
         if 'phase =' in data[i]:
