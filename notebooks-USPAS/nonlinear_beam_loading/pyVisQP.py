@@ -24,21 +24,7 @@ def NDiff(a,xLength,yLength,Ddir):
         b[1:-1,:] = (a[2:,:]-a[0:-2,:])/ (2*dy)
     return b
 
-with open('qpinput.json') as f:
-    inputDeck = json.load(f,object_pairs_hook=OrderedDict)
 
-    xCellsTotal = 2 ** inputDeck['simulation']['indx'] - 1
-    zCellsTotal = 2 ** inputDeck['simulation']['indz'] - 1
-    xMax = inputDeck['simulation']['box']['x'][1]
-    xMin = inputDeck['simulation']['box']['x'][0]
-    xLengthTotal = xMax - xMin
-    
-    zMax = inputDeck['simulation']['box']['z'][1]
-    zMin = inputDeck['simulation']['box']['z'][0]
-    zLengthTotal = zMax - zMin
-
-    xCellsPerUnitLength = xCellsTotal/xLengthTotal
-    zCellsPerUnitLength = zCellsTotal/zLengthTotal
 
 # Show_theory = 'focus'
 # DiffDir = 'r' or 'xi'
@@ -61,14 +47,7 @@ def makeplot(fileNameList,scaleList = [1],LineoutDir = None,Show_theory = None,D
         colorBarDefaultRange = [-1,1]
         colorBarTotalRange = [-5,5]
         lineoutAxisRange = [-2,2]
-    
-    # Determine the range of the lineout, depending on the direction of the lineout
-    lineoutRange = [0,0]
-    if(LineoutDir == 'transverse'):
-        lineoutRange = [zMin,zMax]
-    elif(LineoutDir == 'longitudinal'):
-        lineoutRange = [xMin /2 ,xMax /2]
-        
+  
     for i in range(len(fileNameList)):
         f=h5py.File(fileNameList[i],'r')
         k=list(f.keys()) # k = ['AXIS', 'charge_slice_xz']
@@ -79,7 +58,6 @@ def makeplot(fileNameList,scaleList = [1],LineoutDir = None,Show_theory = None,D
             data += np.array(DATASET) * scaleList[i]
 
     AXIS = f[k[0]] # AXIS is a group, which contains two datasets: AXIS1 and AXIS2
-     
 
     LONG_NAME = DATASET.attrs['LONG_NAME']
     UNITS = DATASET.attrs['UNITS']
@@ -112,20 +90,38 @@ def makeplot(fileNameList,scaleList = [1],LineoutDir = None,Show_theory = None,D
     label_left = '$'+axisLabel1+'$' + '  $[' + unit1 + ']$' 
 
     axis = list(AXIS) # axis = ['AXIS1', 'AXIS2']
-    
 
-    xRange=list(f['AXIS/AXIS1'])
-    xiRange=list(f['AXIS/AXIS2'])
+    xRange=np.array(f['AXIS/AXIS1'])
+    xiRange=np.array(f['AXIS/AXIS2'])
     
-    x=np.linspace(xRange[0],xRange[1],data.shape[1])
-    xi=np.linspace(xiRange[0],xiRange[1],data.shape[0]) 
+    xLengthTotal = xRange[1] - xRange[0]
+    zLengthTotal = xiRange[1] - xiRange[0]
     
+    xCellsTotal = data.shape[1]
+    zCellsTotal = data.shape[0]
+    
+    x=np.linspace(xRange[0],xRange[1],xCellsTotal)
+    xi=np.linspace(xiRange[0],xiRange[1],zCellsTotal) 
+    
+    # Determine the range of the lineout, depending on the direction of the lineout
+    lineoutRange = [0,0]
+    if(LineoutDir == 'transverse'):
+        lineoutRange = xiRange
+    elif(LineoutDir == 'longitudinal'):
+        lineoutRange = xRange / 2
+
+    xLengthTotal = xRange[1] - xRange[0]
+    zLengthTotal = xiRange[1] - xiRange[0]
+
+    xCellsPerUnitLength = xCellsTotal/xLengthTotal
+    zCellsPerUnitLength = zCellsTotal/zLengthTotal
+   
     ##### If we need to take a derivative
 
     if(DiffDir == 'xi'):
-        data = NDiff(data,xRange[1] - xRange[0],xiRange[1] - xiRange[0],Ddir = 'column')
+        data = NDiff(data,xLengthTotal,zLengthTotal,Ddir = 'column')
     elif(DiffDir == 'r'):
-        data = NDiff(data,xRange[1] - xRange[0],xiRange[1] - xiRange[0],Ddir = 'row')
+        data = NDiff(data,xLengthTotal,zLengthTotal,Ddir = 'row')
 
     #####
     
@@ -141,7 +137,6 @@ def makeplot(fileNameList,scaleList = [1],LineoutDir = None,Show_theory = None,D
         ###
 
         ax1.set_title(figure_title)
-        
 
         cs1 = ax1.pcolormesh(xi,x,dataT,vmin=colorBarRange[0],vmax=colorBarRange[1],cmap=colormap)
        
@@ -165,7 +160,7 @@ def makeplot(fileNameList,scaleList = [1],LineoutDir = None,Show_theory = None,D
                 ax2.plot(xi,focusing_force_theory, 'r--',label='F = -1/2 r')
                 ax2.legend()
             
-            
+    
             ax2.set_ylim(lineoutAxisRange)
             ax1.plot(xi, lineout_position*np.ones(dataT.shape[1]), 'b--') # Add a dashed line at the lineout position
             ax2.tick_params('y', colors='r')
@@ -184,6 +179,27 @@ def makeplot(fileNameList,scaleList = [1],LineoutDir = None,Show_theory = None,D
             ax2.set_xlim(lineoutAxisRange)
             ax1.plot(lineout_position*np.ones(dataT.shape[0]),x, 'b--')
             ax2.tick_params('x', colors='r')
+            
+            
+        if(Show_theory == 'bubble_boundary'):
+            boundary = getBubbleBoundary(filename)
+            ax1.plot(boundary[0],boundary[1],'k--',label='bubble boundary')
+            
+#         if(Show_theory == 'Ez'):
+#             boundary = getBubbleBoundary('rundir/Species0001/Charge_slice_0001/charge_slice_xz_00000001.h5')
+#             xii = boundary[0]
+#             rb = boundary[1]
+            
+#             Delta_l = 1.1
+#             Delta_s = 0.0
+#             alpha = Delta_l/rb + Delta_s
+#             beta = ((1+alpha)**2 * np.log((1+alpha)**2))/((1+alpha)**2-1)-1
+            
+#             psi0 = rb**2/4 * (1+beta)
+#             Ez = Nd(xi,psi0)
+#             Ez = smooth(Ez)
+#             ax2.plot(xii,Ez,'r--',label='theory')
+#             ax2.legend()
       
         fig.tight_layout()
      
@@ -194,3 +210,74 @@ def makeplot(fileNameList,scaleList = [1],LineoutDir = None,Show_theory = None,D
                 lineout_position = FloatSlider(min=lineoutRange[0],max=lineoutRange[1],step=0.05,description='lineout position:',continuous_update=False)
                )
     return
+
+def Nd(x,y):
+    if(len(x)!=len(y)):
+        print('Length of x and y have to be the same!')
+        return
+    if(len(x) < 5):
+        print('Length of x is too short. Meaningless for numerical derivative!')
+        return
+    dy = np.zeros(len(x))
+    dy[0] = (y[1]-y[0])/(x[1]-x[0])
+    dy[1] = (y[2]-y[0])/(x[2]-x[0])
+    dy[-1]=(y[-1]-y[-2])/(x[-1]-x[-2])
+    dy[-2] = (y[-1]-y[-3])/(x[-1]-x[-3])
+    for i in range(2,len(x)-2):
+        dy[i] = (-y[i+2] + 8 * y[i+1] - 8 * y[i-1] + y[i-2])/12/((x[i+2]-x[i-2])/4)
+    return dy
+
+
+def smooth(x):
+    if(len(x) < 7):
+        return x
+    x_smooth = np.zeros(len(x))
+    x_smooth[0] = x[0]
+    x_smooth[1] = (x[0] + x[1] + x[2])/3.0
+    x_smooth[2] = (x[0] + x[1] + x[2] + x[3] + x[4])/5.0
+    x_smooth[-1] = x[-1]
+    x_smooth[-2] = (x[-1] + x[-2] + x[-3])/3.0
+    x_smooth[-3] = (x[-1] + x[-2] + x[-3] + x[-4] + x[-5])/5.0
+    for i in range(3,len(x) - 3):
+        x_smooth[i] = (x[i-3] + x[i-2] + x[i-1] + x[i] + x[i+1] + x[i+2] + x[i+3])/7.0
+    return x_smooth
+
+
+
+# This function returns [xi_rb;rb_smoothed]
+def getBubbleBoundary(filename,ionBubbleThreshold = -8e-2):
+    
+    f=h5py.File(filename,'r')
+    k=list(f.keys())
+    DATASET = f[k[1]]
+    data = np.array(DATASET)
+    xaxis=f['/AXIS/AXIS1'][...]
+    yaxis=f['/AXIS/AXIS2'][...]
+
+    xiCells = data.shape[0]
+    xCells = data.shape[1]
+    xMidIndex = int(xCells/2)
+
+    xi=np.linspace(yaxis[0],yaxis[1],xiCells) 
+    x=np.linspace(xaxis[0],xaxis[1],xCells) 
+
+    axis = data[:,xMidIndex]
+
+    rb = np.array([])
+    xi_rb = np.array([])
+
+    for i in range(xiCells):
+        if(axis[i] > ionBubbleThreshold): # The part of axis inside the ion bubble
+            xi_rb = np.append(xi_rb,xi[i])
+            j = xMidIndex
+            while((data[i][j] > ionBubbleThreshold) and (j < xCells)):
+                j = j + 1
+            rb = np.append(rb,x[j])
+
+    rb_smooth = smooth(rb)
+    rb_smooth = smooth(rb_smooth)
+    boundary = np.array([xi_rb, rb_smooth])
+    return boundary
+
+# boundary = getBubbleBoundary()
+# ax1.plot(boundary[0],boundary[1],'k--',label='bubble boundary')
