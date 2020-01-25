@@ -179,7 +179,7 @@ def makeWidgetsForInput():
     style = {'description_width': '350px'}
     layout = Layout(width='55%')
     
-    inputDeckTemplateNameW = widgets.Text(value='qpinput_profile1.json', description='Template Input File:',style=style,layout=layout)
+    inputDeckTemplateNameW = widgets.Text(value='qpinput_profile_electron.json', description='Template Input File:',style=style,layout=layout)
 
     #unitsW = widgets.Dropdown(options=['Normalized', 'SI'],value='Normalized', description='Units:',style=style,layout=layout)
     #plasmaDensityProfileW = widgets.Dropdown(options=['uniform', 'piecewise'],value='uniform', description='Longitudinal Plasma Density Profile:',style=style,layout=layout)
