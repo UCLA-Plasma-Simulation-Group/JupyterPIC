@@ -37,6 +37,8 @@ def newifile(oname='single-part-1',field_solve='yee',dx1=0.2,dx2=0.2,dt=0.95,
             data[i] = '  xmin(1:2) = -100.0, -{:f},\n'.format(6.0*dx2)
         if 'xmax' in data[i]:
             data[i] = '  xmax(1:2) =  100.0,  {:f},\n'.format(6.0*dx2)
+        if ' x(1:6,1)' in data[i]:
+            data[i] = '  x(1:6,1)  = -1.0, 0.0, {:f}, {:f}, {:f},\n'.format(dx1/2,dx1,dx1*2)
         if ' x(1:6,2)' in data[i]:
             data[i] = '  x(1:6,2)  = -1.0, 0.0, {:f}, {:f}, {:f},\n'.format(dx2/2,dx2,dx2*2)
         if 'tmax =' in data[i]:
@@ -59,7 +61,7 @@ def newifile(oname='single-part-1',field_solve='yee',dx1=0.2,dx2=0.2,dt=0.95,
     else:
         os_exec = '/usr/local/osiris/osiris-2D.e'
     output = subprocess.run( [os_exec,"-t",oname+'.txt'], stderr=subprocess.DEVNULL, stdout=subprocess.PIPE )
-    courant = float( re.search( r"max\(dt\).*([0-9]+\.[0-9]*)", output.stdout.decode("utf-8") ).group(1) )
+    courant = float( re.search( r"max\(dt\).*([0-9]+\..*)\n", output.stdout.decode("utf-8") ).group(1) )
 
     # Generate final input deck with new time step
     for i in range(len(data)):
