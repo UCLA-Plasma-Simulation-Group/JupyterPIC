@@ -1,43 +1,48 @@
-import sys
-import glob
+import sys, glob, os, subprocess, re
 from ipywidgets import interact_manual,fixed,Layout,interact, FloatSlider
 import ipywidgets as widgets
 interact_calc=interact_manual.options(manual_name="Make New Input and Run")
-import os
 import osiris
 from scipy import optimize
 import numpy as np
 import h5py
 import matplotlib.pyplot as plt
     
-def newifile(oname='single-part-1',field_solve='yee',t_final=600.0,dt=0.95,
-            pusher='standard',uz0=0.0,a0=1.0,phi0=0.0,run_osiris=True):
+def newifile(oname='single-part-1',field_solve='yee',dx1=0.2,dx2=0.2,dt=0.95,
+            t_final=600.0,pusher='standard',uz0=0.0,a0=1.0,phi0=0.0,nproc=4,run_osiris=True):
     
     if field_solve == 'fei':
         fname = 'single-part-fei.txt'
-        courant = 0.1162789
     else:
         fname = 'single-part-std.txt'
-        courant = 0.1414213
+
+    # Remake the tags file based on the number of processors being used
+    with open('tags-single-particle.txt') as osdata:
+        data = osdata.readlines()
+    data[1] = '{:d}, 1,'.format(nproc//2+1)
+    with open('tags-single-particle.txt','w') as f:
+        for line in data:
+            f.write(line)
+
     with open(fname) as osdata:
         data = osdata.readlines()
 
+    # Replace all parameters that don't depend on dt
     for i in range(len(data)):
-        if 'dt ' in data[i]:
-            data[i] = '  dt     =   '+str(dt*courant)+',\n'
+        if 'node_number' in data[i]:
+            data[i] = '  node_number(1:2) =  {:d}, 1,\n'.format(nproc)
+        if 'nx_p' in data[i]:
+            data[i] = '  nx_p(1:2) =  {:d}, 12,\n'.format(np.around(200.0/dx1).astype(int))
+        if 'xmin' in data[i]:
+            data[i] = '  xmin(1:2) = -100.0, -{:f},\n'.format(6.0*dx2)
+        if 'xmax' in data[i]:
+            data[i] = '  xmax(1:2) =  100.0,  {:f},\n'.format(6.0*dx2)
+        if ' x(1:6,2)' in data[i]:
+            data[i] = '  x(1:6,2)  = -1.0, 0.0, {:f}, {:f}, {:f},\n'.format(dx2/2,dx2,dx2*2)
         if 'tmax =' in data[i]:
             data[i] = '  tmax = '+str(t_final)+',\n'
-        if 'dtdx1' in data[i]:
-            data[i] = '  dtdx1 = '+str(dt*courant*5)+', ! dt/dx1\n'
         if 'push_type' in data[i]:
             data[i] = '  push_type = "'+pusher+'",\n'
-        if 'ufl(1:3)' in data[i]:
-            # Give correct initial velocity in x2 since this is the momentum at -dt/2
-            # With this momentum, the true initial velocity in x2 will average to 0
-            data[i] = '  ufl(1:3) = '+str(uz0)+', '+str( dt*courant*a0/2.0 - 
-                np.sqrt( ( np.sqrt( np.square( a0*dt*courant*uz0 )
-                                  + np.square( 1.0 + np.square(uz0) ) )
-                                  - 1.0 - np.square(uz0) ) / 2.0 ) )+', 0.0,\n'
         if ' a0 =' in data[i]:
             data[i] = '  a0 = '+str(a0)+',\n'
         if 'phase =' in data[i]:
@@ -46,26 +51,55 @@ def newifile(oname='single-part-1',field_solve='yee',t_final=600.0,dt=0.95,
     with open(oname+'.txt','w') as f:
         for line in data:
             f.write(line)
+
+    # Calculate the courant limit given the above parameters
+    # This is done by running OSIRIS with a large timestep and getting the max(dt) value
+    if os.path.isfile('osiris-2D.e'):
+        os_exec = './osiris-2D.e'
+    else:
+        os_exec = '/usr/local/osiris/osiris-2D.e'
+    output = subprocess.run( [os_exec,"-t",oname+'.txt'], stderr=subprocess.DEVNULL, stdout=subprocess.PIPE )
+    courant = float( re.search( r"max\(dt\).*([0-9]+\.[0-9]*)", output.stdout.decode("utf-8") ).group(1) )
+
+    # Generate final input deck with new time step
+    for i in range(len(data)):
+        if 'dt ' in data[i]:
+            data[i] = '  dt     =   '+str(dt*courant)+',\n'
+        if 'dtdx1' in data[i]:
+            data[i] = '  dtdx1 = '+str(dt*courant/dx1)+', ! dt/dx1\n'
+        if 'ufl(1:3)' in data[i]:
+            # Give correct initial velocity in x2 since this is the momentum at -dt/2
+            # With this momentum, the true initial velocity in x2 will average to 0
+            data[i] = '  ufl(1:3) = '+str(uz0)+', '+str( dt*courant*a0/2.0 - 
+                np.sqrt( ( np.sqrt( np.square( a0*dt*courant*uz0 )
+                                  + np.square( 1.0 + np.square(uz0) ) )
+                                  - 1.0 - np.square(uz0) ) / 2.0 ) )+', 0.0,\n'
+
+    with open(oname+'.txt','w') as f:
+        for line in data:
+            f.write(line)
     
     print('New file '+oname+'.txt is written.')
     if run_osiris:
         print('Running OSIRIS in directory '+oname+'...')
-        osiris.runosiris_2d(rundir=oname,inputfile=oname+'.txt',print_out='yes',combine='no',np=4)
+        osiris.runosiris_2d(rundir=oname,inputfile=oname+'.txt',print_out='yes',combine='no',np=nproc)
 
-def single_particle_widget(run_osiris=True):
+def single_particle_widget(run_osiris=True,nproc=4):
     style = {'description_width': '350px'}
     layout = Layout(width='55%')
 
     a = widgets.Text(value='single-part-1', description='New output file:',style=style,layout=layout)
     b = widgets.Dropdown(options=['yee', 'fei'],value='yee', description='Field solver:',style=style,layout=layout)
-    c = widgets.BoundedFloatText(value=600.0, min=40.0, max=1e9, description='t_final:',style=style,layout=layout)
-    d = widgets.BoundedFloatText(value=0.95, min=0.0, max=1.0, description='dt/t_courant:',style=style,layout=layout)
-    e = widgets.Dropdown(options=['standard', 'vay', 'cond_vay', 'cary', 'fullrot', 'euler'],value='standard',description='Pusher:',style=style,layout=layout)
-    f = widgets.FloatText(value=0.0, description='uz0:',style=style,layout=layout)
-    g = widgets.BoundedFloatText(value=1.0, min=0, max=1e3, description='a0:',style=style,layout=layout)
-    h = widgets.BoundedFloatText(value=0.0, min=-180, max=180, description='phi0 (degrees):',style=style,layout=layout)
+    c = widgets.BoundedFloatText(value=0.2, min=0.00001, max=3.0, description='dx1:',style=style,layout=layout)
+    d = widgets.BoundedFloatText(value=20.0, min=0.00001, max=300.0, description='dx2:',style=style,layout=layout)
+    e = widgets.BoundedFloatText(value=0.95, min=0.0, max=0.999, description='dt/t_courant:',style=style,layout=layout)
+    f = widgets.BoundedFloatText(value=600.0, min=40.0, max=1e9, description='t_final:',style=style,layout=layout)
+    g = widgets.Dropdown(options=['standard', 'vay', 'cond_vay', 'cary', 'fullrot', 'euler'],value='standard',description='Pusher:',style=style,layout=layout)
+    h = widgets.FloatText(value=0.0, description='uz0:',style=style,layout=layout)
+    i = widgets.BoundedFloatText(value=1.0, min=0, max=1e3, description='a0:',style=style,layout=layout)
+    j = widgets.BoundedFloatText(value=0.0, min=-180, max=180, description='phi0 (degrees):',style=style,layout=layout)
 
-    im = interact_calc(newifile, oname=a,field_solve=b,t_final=c,dt=d,pusher=e,uz0=f,a0=g,phi0=h,run_osiris=fixed(run_osiris));
+    im = interact_calc(newifile, oname=a,field_solve=b,dx1=c,dx2=d,dt=e,t_final=f,pusher=g,uz0=h,a0=i,phi0=j,nproc=fixed(nproc),run_osiris=fixed(run_osiris));
     im.widget.manual_button.layout.width='250px'
     return a
 
@@ -119,12 +153,18 @@ def grab_data(dirname):
     x1 = x1-x1[0]
     x2 = x2-x2[0]
 
+    with open(dirname+'.txt') as osdata:
+        data = osdata.readlines()
+    for i in range(len(data)):
+        if 'xmax(1:2)' in data[i]:
+            L_x2 = float(data[i].split(",")[-2])
+
     # Correct for periodicity jump in x2
     for i in np.arange(len(x2)-1):
-        if x2[i+1]-x2[i]>1.2:
-            x2[i+1:] -= 2.4
-        elif x2[i+1]-x2[i]<-1.2:
-            x2[i+1:] += 2.4
+        if x2[i+1]-x2[i]>L_x2:
+            x2[i+1:] -= 2*L_x2
+        elif x2[i+1]-x2[i]<-L_x2:
+            x2[i+1:] += 2*L_x2
 
     return [t,x2,x1,p2,p1,ene,i_max]
 
