@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 def newifile(oname='single-part-1',field_solve='yee',dx1=0.2,dx2=0.2,dt=0.95,
             t_final=600.0,pusher='standard',uz0=0.0,a0=1.0,phi0=0.0,nproc=4,run_osiris=True):
     
-    if field_solve == 'fei':
+    if field_solve == 'fei' or field_solve == 'xu':
         fname = 'single-part-fei.txt'
     else:
         fname = 'single-part-std.txt'
@@ -54,6 +54,8 @@ def newifile(oname='single-part-1',field_solve='yee',dx1=0.2,dx2=0.2,dt=0.95,
             data[i] = '  a0 = '+str(a0)+',\n'
         if 'phase =' in data[i]:
             data[i] = '  phase = '+str(phi0)+',\n'
+        if ' type' in data[i] and field_solve == 'xu':
+            data[i] = '  type = "'+field_solve+'",\n'
 
     with open(oname+'.txt','w') as f:
         for line in data:
@@ -96,10 +98,10 @@ def single_particle_widget(run_osiris=True,nproc=4):
     layout = Layout(width='55%')
 
     a = widgets.Text(value='single-part-1', description='New output file:',style=style,layout=layout)
-    b = widgets.Dropdown(options=['yee', 'fei'],value='yee', description='Field solver:',style=style,layout=layout)
+    b = widgets.Dropdown(options=['yee', 'fei', 'xu'],value='yee', description='Field solver:',style=style,layout=layout)
     c = widgets.BoundedFloatText(value=0.2, min=0.00001, max=3.0, description='dx1:',style=style,layout=layout)
     d = widgets.BoundedFloatText(value=20.0, min=0.00001, max=300.0, description='dx2:',style=style,layout=layout)
-    e = widgets.BoundedFloatText(value=0.95, min=0.0, max=0.999, description='dt/t_courant:',style=style,layout=layout)
+    e = widgets.BoundedFloatText(value=0.999, min=0.0, max=0.999, description='dt/t_courant:',style=style,layout=layout)
     f = widgets.BoundedFloatText(value=600.0, min=40.0, max=1e9, description='t_final:',style=style,layout=layout)
     g = widgets.Dropdown(options=['standard', 'vay', 'cond_vay', 'cary', 'fullrot', 'euler'],value='standard',description='Pusher:',style=style,layout=layout)
     h = widgets.FloatText(value=0.0, description='uz0:',style=style,layout=layout)
@@ -175,8 +177,13 @@ def grab_data(dirname):
 
     return [t,x2,x1,p2,p1,ene,i_max]
 
-def plot_data(dirname,offset=None,theory=True,xlim_max=None,plot_z=False,save_fig=True):
-    # Get a0 and uz0 from input deck
+def plot_data(dirnames,offset=None,theory=True,xlim_max=None,plot_z=False,save_fig=True):
+
+    if type(dirnames) is not list:
+        dirnames = [dirnames]
+
+    # Get a0 and uz0 from first input deck
+    dirname = dirnames[0]
     with open(dirname+'.txt') as osdata:
         data = osdata.readlines()
     for i in range(len(data)):
@@ -190,71 +197,71 @@ def plot_data(dirname,offset=None,theory=True,xlim_max=None,plot_z=False,save_fi
     if offset is not None:
         off = offset
 
-    [t,x2,x1,p2,p1,ene,i_max] = grab_data(dirname)
-    if xlim_max==None:
-        tf = np.max(t)
-    else:
-        tf = xlim_max
-    ux0=0.0; uy0=0.0; t0=np.pi/2-off; z0=0.0;
-    [tt,xx,zz,pxx,pzz,gg] = haines(a0,ux0,uy0,uz0,t0,tf,z0)
+    fig,axes=plt.subplots(1,5,figsize=(14,6),dpi=300)
+    theory_ = False
 
-    if xlim_max==None:
-        xlim_max = tf
-        l = len(t)
-    else:
-        if xlim_max >= np.max(t):
+    for dirname in dirnames:
+
+        [t,x2,x1,p2,p1,ene,i_max] = grab_data(dirname)
+        if xlim_max==None:
+            xlim_max = np.max(t)
             l = len(t)
         else:
-            l = np.argmax(t>xlim_max)
+            if xlim_max >= np.max(t):
+                l = len(t)
+            else:
+                l = np.argmax(t>xlim_max)
 
-    # Don't plot values after the particle has left the box
-    if i_max > 0:
-        l = np.min([ l, i_max ])
+        # Don't plot values after the particle has left the box
+        if i_max > 0:
+            l = np.min([ l, i_max ])
 
-    plt.figure(figsize=(14,6),dpi=300)
+        if dirname == dirnames[-1]:
+            theory_ = theory
+        if theory:
+            ux0=0.0; uy0=0.0; t0=np.pi/2-off; z0=0.0;
+            [tt,xx,zz,pxx,pzz,gg] = haines(a0,ux0,uy0,uz0,t0,xlim_max,z0)
 
-    plt.subplot(151)
-    if plot_z:
-        plt.plot(t[:l],x1[:l],label='simulation')
-        if theory: plt.plot(tt,zz,'--',label='theory')
-        plt.ylabel('$z$ $[c/\omega_0]$')
-    else:
-        plt.plot(t[:l],t[:l]-x1[:l],label='simulation')
-        if theory: plt.plot(tt,tt-zz,'--',label='theory')
-        plt.ylabel('$\\xi$ $[c/\omega_0]$')
-    plt.xlabel('$t$ $[\omega_0^{-1}]$')
-    plt.xlim([0,xlim_max])
-    plt.legend()
+        if plot_z:
+            axes[0].plot(t[:l],x1[:l],label=dirname)
+            if theory_: axes[0].plot(tt,zz,'--',label='theory')
+            axes[0].set_ylabel('$z$ $[c/\omega_0]$')
+        else:
+            axes[0].plot(t[:l],t[:l]-x1[:l],label=dirname)
+            if theory_: axes[0].plot(tt,tt-zz,'--',label='theory')
+            axes[0].set_ylabel('$\\xi$ $[c/\omega_0]$')
+        axes[0].set_xlabel('$t$ $[\omega_0^{-1}]$')
+        axes[0].set_xlim([0,xlim_max])
+        axes[0].legend()
 
-    plt.subplot(152)
-    plt.plot(t[:l],x2[:l])
-    if theory: plt.plot(tt,xx,'--')
-    plt.xlabel('$t$ $[\omega_0^{-1}]$')
-    plt.ylabel('$x$ $[c/\omega_0]$')
-    plt.xlim([0,xlim_max])
+        axes[1].plot(t[:l],x2[:l])
+        if theory_: axes[1].plot(tt,xx,'--')
+        axes[1].set_xlabel('$t$ $[\omega_0^{-1}]$')
+        axes[1].set_ylabel('$x$ $[c/\omega_0]$')
+        axes[1].set_xlim([0,xlim_max])
 
-    plt.subplot(153)
-    plt.plot(t[:l],p1[:l])
-    if theory: plt.plot(tt,pzz,'--')
-    plt.xlabel('$t$ $[\omega_0^{-1}]$')
-    plt.ylabel('$p_z$ $[m_ec]$')
-    plt.xlim([0,xlim_max])
+        axes[2].plot(t[:l],p1[:l])
+        if theory_: axes[2].plot(tt,pzz,'--')
+        axes[2].set_xlabel('$t$ $[\omega_0^{-1}]$')
+        axes[2].set_ylabel('$p_z$ $[m_ec]$')
+        axes[2].set_xlim([0,xlim_max])
 
-    plt.subplot(154)
-    plt.plot(t[:l],p2[:l])
-    if theory: plt.plot(tt,pxx,'--')
-    plt.xlabel('$t$ $[\omega_0^{-1}]$')
-    plt.ylabel('$p_x$ $[m_ec]$')
-    plt.xlim([0,xlim_max])
+        axes[3].plot(t[:l],p2[:l])
+        if theory_: axes[3].plot(tt,pxx,'--')
+        axes[3].set_xlabel('$t$ $[\omega_0^{-1}]$')
+        axes[3].set_ylabel('$p_x$ $[m_ec]$')
+        axes[3].set_xlim([0,xlim_max])
 
-    plt.subplot(155)
-    plt.plot(t[:l],ene[:l]+1)
-    if theory: plt.plot(tt,gg,'--')
-    plt.xlabel('$t$ $[\omega_0^{-1}]$')
-    plt.ylabel('$\gamma$')
-    plt.xlim([0,xlim_max])
+        axes[4].plot(t[:l],ene[:l]+1)
+        if theory_: axes[4].plot(tt,gg,'--')
+        axes[4].set_xlabel('$t$ $[\omega_0^{-1}]$')
+        axes[4].set_ylabel('$\gamma$')
+        axes[4].set_xlim([0,xlim_max])
 
     plt.tight_layout()
     if save_fig:
-        plt.savefig(dirname+'/'+dirname+'.png',dpi=300)
+        if len(dirnames) > 1:
+            plt.savefig(dirnames[0]+'-comparison.png',dpi=300)
+        else:
+            plt.savefig(dirnames[0]+'/'+dirnames[0]+'.png',dpi=300)
     plt.show()
