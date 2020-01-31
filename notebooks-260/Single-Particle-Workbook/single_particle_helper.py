@@ -34,7 +34,8 @@ def newifile(oname='single-part-1',field_solve='yee',dx1=0.2,dx2=0.2,dt=0.95,
         if 'nx_p' in data[i]:
             np_1 = np.around(200.0/dx1).astype(int)
             # Make even and divisible by nproc for correct particle loading
-            np_1 = np_1 + np.lcm(2,nproc) - np_1 % np.lcm(2,nproc)
+            divisor = np.lcm(2,nproc)
+            np_1 = int( divisor * np.ceil( np_1 / divisor ) )
             dx1 = 200.0 / np_1
             data[i] = '  nx_p(1:2) =  {:d}, 12,\n'.format( np_1 )
         if 'xmin' in data[i]:
