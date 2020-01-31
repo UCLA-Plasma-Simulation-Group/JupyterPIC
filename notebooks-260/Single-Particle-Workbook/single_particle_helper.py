@@ -32,15 +32,19 @@ def newifile(oname='single-part-1',field_solve='yee',dx1=0.2,dx2=0.2,dt=0.95,
         if 'node_number' in data[i]:
             data[i] = '  node_number(1:2) =  {:d}, 1,\n'.format(nproc)
         if 'nx_p' in data[i]:
-            data[i] = '  nx_p(1:2) =  {:d}, 12,\n'.format(np.around(200.0/dx1).astype(int))
+            np_1 = np.around(200.0/dx1).astype(int)
+            # Make even and divisible by nproc for correct particle loading
+            np_1 = np_1 + np.lcm(2,nproc) - np_1 % np.lcm(2,nproc)
+            dx1 = 200.0 / np_1
+            data[i] = '  nx_p(1:2) =  {:d}, 12,\n'.format( np_1 )
         if 'xmin' in data[i]:
             data[i] = '  xmin(1:2) = -100.0, -{:f},\n'.format(6.0*dx2)
         if 'xmax' in data[i]:
             data[i] = '  xmax(1:2) =  100.0,  {:f},\n'.format(6.0*dx2)
-        if ' x(1:6,1)' in data[i]:
-            data[i] = '  x(1:6,1)  = -1.0, 0.0, {:f}, {:f}, {:f},\n'.format(dx1/2,dx1,dx1*2)
-        if ' x(1:6,2)' in data[i]:
-            data[i] = '  x(1:6,2)  = -1.0, 0.0, {:f}, {:f}, {:f},\n'.format(dx2/2,dx2,dx2*2)
+        if ' x(1:5,1)' in data[i]:
+            data[i] = '  x(1:5,1)  = -1.0, 0.0, {:f}, {:f}, {:f},\n'.format(dx1/2,dx1,dx1*2)
+        if ' x(1:5,2)' in data[i]:
+            data[i] = '  x(1:5,2)  = -1.0, 0.0, {:f}, {:f}, {:f},\n'.format(dx2/2,dx2,dx2*2)
         if 'tmax =' in data[i]:
             data[i] = '  tmax = '+str(t_final)+',\n'
         if 'push_type' in data[i]:
