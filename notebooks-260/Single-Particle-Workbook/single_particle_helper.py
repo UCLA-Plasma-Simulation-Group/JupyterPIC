@@ -8,10 +8,12 @@ import numpy as np
 import h5py
 import matplotlib.pyplot as plt
     
-def newifile(oname='single-part-1',field_solve='yee',dx1=0.2,dx2=0.2,dt=0.95,
-            t_final=600.0,pusher='standard',uz0=0.0,a0=1.0,phi0=0.0,nproc=4,run_osiris=True):
+def newifile(oname='single-part-1',field_solve='yee',dx1=0.2,dx2=0.2,
+            dt_abs='Ratio (dt/t_courant)',dt=0.95,
+            t_final=600.0,pusher='standard',uz0=0.0,a0=1.0,phi0=0.0,
+            run_osiris=True,nproc=4,momentum_corr=True):
     
-    if field_solve == 'fei' or field_solve == 'xu':
+    if field_solve in ['fei','xu','yee-corr']:
         fname = 'single-part-fei.txt'
     else:
         fname = 'single-part-std.txt'
@@ -54,35 +56,46 @@ def newifile(oname='single-part-1',field_solve='yee',dx1=0.2,dx2=0.2,dt=0.95,
             data[i] = '  a0 = '+str(a0)+',\n'
         if 'phase =' in data[i]:
             data[i] = '  phase = '+str(phi0)+',\n'
-        if ' type' in data[i] and field_solve == 'xu':
+        if ' type' in data[i] and field_solve in ['xu','yee-corr']:
             data[i] = '  type = "'+field_solve+'",\n'
 
-    with open(oname+'.txt','w') as f:
-        for line in data:
-            f.write(line)
+    if dt_abs == 'Ratio (dt/t_courant)':
 
-    # Calculate the courant limit given the above parameters
-    # This is done by running OSIRIS with a large timestep and getting the max(dt) value
-    if os.path.isfile('osiris-2D.e'):
-        os_exec = './osiris-2D.e'
+        with open(oname+'.txt','w') as f:
+            for line in data:
+                f.write(line)
+
+        # Calculate the courant limit given the above parameters
+        # This is done by running OSIRIS with a large timestep and getting the max(dt) value
+        if os.path.isfile('osiris-2D.e'):
+            os_exec = './osiris-2D.e'
+        else:
+            os_exec = '/usr/local/osiris/osiris-2D.e'
+        output = subprocess.run( [os_exec,"-t",oname+'.txt'], stderr=subprocess.DEVNULL, stdout=subprocess.PIPE )
+        courant = float( re.search( r"max\(dt\).*([0-9]+\..*)\n", output.stdout.decode("utf-8") ).group(1) )
+
+        dt_code = dt * courant
+
     else:
-        os_exec = '/usr/local/osiris/osiris-2D.e'
-    output = subprocess.run( [os_exec,"-t",oname+'.txt'], stderr=subprocess.DEVNULL, stdout=subprocess.PIPE )
-    courant = float( re.search( r"max\(dt\).*([0-9]+\..*)\n", output.stdout.decode("utf-8") ).group(1) )
+
+        dt_code = dt
+
+    # Get proper initial conditions for the momentum (half time step back)
+    # With this momentum, the true initial velocity in x1/x2 will average to 0
+    if momentum_corr:
+        ux0=0.0; uy0=0.0; t0=np.pi/2-phi0*np.pi/180.; z0=0.0;
+        [u1_half,u2_half] = haines_initial(a0,ux0,uy0,uz0,t0,dt_code,z0)
 
     # Generate final input deck with new time step
     for i in range(len(data)):
         if 'dt ' in data[i]:
-            data[i] = '  dt     =   '+str(dt*courant)+',\n'
+            data[i] = '  dt     =   '+str(dt_code)+',\n'
         if 'dtdx1' in data[i]:
-            data[i] = '  dtdx1 = '+str(dt*courant/dx1)+', ! dt/dx1\n'
-        if 'ufl(1:3)' in data[i]:
-            # Give correct initial velocity in x2 since this is the momentum at -dt/2
-            # With this momentum, the true initial velocity in x2 will average to 0
-            data[i] = '  ufl(1:3) = '+str(uz0)+', '+str( dt*courant*a0/2.0 - 
-                np.sqrt( ( np.sqrt( np.square( a0*dt*courant*uz0 )
-                                  + np.square( 1.0 + np.square(uz0) ) )
-                                  - 1.0 - np.square(uz0) ) / 2.0 ) )+', 0.0,\n'
+            data[i] = '  dtdx1 = '+str(dt_code/dx1)+', ! dt/dx1\n'
+        if 'ufl(1:3)' in data[i] and momentum_corr:
+            data[i] = '  ufl(1:3) = '+str(u1_half)+', '+str( u2_half )+', 0.0,\n'
+        if 'u10' in data[i]:
+            data[i] = '  ! desired u10 = '+str(uz0)+',\n'
 
     with open(oname+'.txt','w') as f:
         for line in data:
@@ -93,22 +106,28 @@ def newifile(oname='single-part-1',field_solve='yee',dx1=0.2,dx2=0.2,dt=0.95,
         print('Running OSIRIS in directory '+oname+'...')
         osiris.runosiris_2d(rundir=oname,inputfile=oname+'.txt',print_out='yes',combine='no',np=nproc)
 
-def single_particle_widget(run_osiris=True,nproc=4):
+def single_particle_widget(run_osiris=True,nproc=4,momentum_corr=True):
     style = {'description_width': '350px'}
     layout = Layout(width='55%')
 
     a = widgets.Text(value='single-part-1', description='New output file:',style=style,layout=layout)
-    b = widgets.Dropdown(options=['yee', 'fei', 'xu'],value='yee', description='Field solver:',style=style,layout=layout)
+    b = widgets.Dropdown(options=['yee', 'fei', 'xu', 'yee-corr'],value='yee', description='Field solver:',style=style,layout=layout)
     c = widgets.BoundedFloatText(value=0.2, min=0.00001, max=3.0, description='dx1:',style=style,layout=layout)
     d = widgets.BoundedFloatText(value=20.0, min=0.00001, max=300.0, description='dx2:',style=style,layout=layout)
-    e = widgets.BoundedFloatText(value=0.999, min=0.0, max=0.999, description='dt/t_courant:',style=style,layout=layout)
-    f = widgets.BoundedFloatText(value=600.0, min=40.0, max=1e9, description='t_final:',style=style,layout=layout)
-    g = widgets.Dropdown(options=['standard', 'vay', 'cond_vay', 'cary', 'fullrot', 'euler'],value='standard',description='Pusher:',style=style,layout=layout)
-    h = widgets.FloatText(value=0.0, description='uz0:',style=style,layout=layout)
-    i = widgets.BoundedFloatText(value=1.0, min=0, max=1e3, description='a0:',style=style,layout=layout)
-    j = widgets.BoundedFloatText(value=0.0, min=-180, max=180, description='phi0 (degrees):',style=style,layout=layout)
+    e = widgets.Dropdown(options=['Ratio (dt/t_courant)', 'Absolute value'], value='Ratio (dt/t_courant)', description='dt specification',style=style,layout=layout)
+    f = widgets.BoundedFloatText(value=0.999, min=0.0, max=0.999, description='dt:',style=style,layout=layout)
+    g = widgets.BoundedFloatText(value=600.0, min=40.0, max=1e9, description='t_final:',style=style,layout=layout)
+    h = widgets.Dropdown(options=['standard', 'vay', 'cond_vay', 'cary', 'fullrot', 'euler', 'petri'],value='standard',description='Pusher:',style=style,layout=layout)
+    i = widgets.FloatText(value=0.0, description='uz0:',style=style,layout=layout)
+    j = widgets.BoundedFloatText(value=1.0, min=0, max=1e9, description='a0:',style=style,layout=layout)
+    k = widgets.BoundedFloatText(value=0.0, min=-180, max=180, description='phi0 (degrees):',style=style,layout=layout)
 
-    im = interact_calc(newifile, oname=a,field_solve=b,dx1=c,dx2=d,dt=e,t_final=f,pusher=g,uz0=h,a0=i,phi0=j,nproc=fixed(nproc),run_osiris=fixed(run_osiris));
+    def handle_dropdown_change(change):
+        f.max = 0.999 if change.new == 'Ratio (dt/t_courant)' else 1e9
+    e.observe(handle_dropdown_change, names='value')
+
+    im = interact_calc(newifile, oname=a,field_solve=b,dx1=c,dx2=d,dt_abs=e,dt=f,t_final=g,pusher=h,uz0=i,a0=j,phi0=k,
+        run_osiris=fixed(run_osiris),nproc=fixed(nproc),momentum_corr=fixed(momentum_corr));
     im.widget.manual_button.layout.width='250px'
     return a
 
@@ -147,6 +166,26 @@ def haines(a0,ux0,uy0,uz0,t0,tf,z0):
                             1 + np.square(g0*by0) ) - 0.5*g0*(1-bz0)
     g = np.sqrt(1+np.square(px)+np.square(pz))
     return [t,x,z,px,pz,g]
+
+def haines_initial(a0,ux0,uy0,uz0,t0,dt,z0):
+    g0 = np.sqrt( 1. + np.square(ux0) + np.square(uy0) + np.square(uz0) )
+    bx0=ux0/g0; by0=uy0/g0; bz0=uz0/g0;
+    phi0 = t0 - z0
+
+    # Solve for the value of s for half time step back
+    def t_haines(s):
+        return (1./(2*g0*(1-bz0))*( 0.5*np.square(a0)*s + np.square(a0)/(4*g0*(1-bz0))*
+                        ( np.sin(2*g0*(1-bz0)*s+2*phi0) - np.sin(2*phi0) ) + 
+                        2*a0*(g0*bx0 - a0*np.cos(phi0))/(g0*(1-bz0))*( np.sin(g0*(1-bz0)*s+phi0) - np.sin(phi0) ) +
+                        np.square(g0*bx0 - a0*np.cos(phi0))*s + s + np.square(g0*by0)*s ) - 0.5*g0*(1-bz0)*s + 
+                        g0*(1-bz0)*s - (-dt/2) )
+    s = optimize.root_scalar(t_haines,x0=-dt/2,x1=0).root
+
+    # Get initial momentum a half time step back
+    px = a0*( np.cos(g0*(1-bz0)*s + phi0) - np.cos(phi0) ) + g0*bx0
+    pz = 1./(2*g0*(1-bz0))*( np.square( -a0*(np.cos(g0*(1-bz0)*s + phi0) - np.cos(phi0)) - g0*bx0 ) + 
+                            1 + np.square(g0*by0) ) - 0.5*g0*(1-bz0)
+    return [pz,px]
 
 def grab_data(dirname):
     f=h5py.File(dirname+'/MS/TRACKS/electron-tracks.h5','r')
@@ -187,8 +226,8 @@ def plot_data(dirnames,offset=None,theory=True,xlim_max=None,plot_z=False,save_f
     with open(dirname+'.txt') as osdata:
         data = osdata.readlines()
     for i in range(len(data)):
-        if 'ufl(1:3)' in data[i]:
-            uz0 = float(data[i].split(" ")[-3][:-1])
+        if 'u10' in data[i]:
+            uz0 = float(data[i].split(" ")[-1][:-2])
         if ' a0 =' in data[i]:
             a0 = float(data[i].split(" ")[-1][:-2])
         if 'phase = ' in data[i]:
@@ -232,7 +271,7 @@ def plot_data(dirnames,offset=None,theory=True,xlim_max=None,plot_z=False,save_f
             axes[0].set_ylabel('$\\xi$ $[c/\omega_0]$')
         axes[0].set_xlabel('$t$ $[\omega_0^{-1}]$')
         axes[0].set_xlim([0,xlim_max])
-        axes[0].legend()
+        axes[0].legend(loc='upper right')
 
         axes[1].plot(t[:l],x2[:l])
         if theory_: axes[1].plot(tt,xx,'--')
