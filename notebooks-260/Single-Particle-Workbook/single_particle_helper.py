@@ -151,15 +151,30 @@ def haines(a0,ux0,uy0,uz0,t0,tf,z0):
                         2*a0*(g0*bx0 - a0*np.cos(phi0))/(g0*(1-bz0))*( np.sin(g0*(1-bz0)*s+phi0) - np.sin(phi0) ) +
                         np.square(g0*bx0 - a0*np.cos(phi0))*s + s + np.square(g0*by0)*s ) - 0.5*g0*(1-bz0)*s + 
                         g0*(1-bz0)*s - tf)
-    sf = optimize.root_scalar(t_haines,x0=0,x1=tf).root
-    
-    s=np.linspace(0,sf,1000)
-    x = a0/(g0*(1-bz0)) * ( np.sin( g0*(1-bz0)*s + phi0 ) - np.sin(phi0) ) - a0*s*np.cos(phi0) + g0*bx0*s
-    z = 1./(2*g0*(1-bz0))*( 0.5*np.square(a0)*s + np.square(a0)/(4*g0*(1-bz0))*
-                        ( np.sin(2*g0*(1-bz0)*s+2*phi0) - np.sin(2*phi0) ) + 
-                        2*a0*(g0*bx0 - a0*np.cos(phi0))/(g0*(1-bz0))*( np.sin(g0*(1-bz0)*s+phi0) - np.sin(phi0) ) +
-                        np.square(g0*bx0 - a0*np.cos(phi0))*s + s + np.square(g0*by0)*s ) - 0.5*g0*(1-bz0)*s
-    t = z + g0*(1-bz0)*s
+
+    # Calculate the final s value that corresponds to the final t value
+    # There can be error in this, so we calculate it in a while loop to make sure it's right
+    tf_calc = 0.0
+    count = 0
+    max_iter = 10
+    while not np.isclose(tf_calc,tf,rtol=1e-4,atol=1e-4) and count < max_iter:
+        # Start guess at 0, then increase from there for large a0 values
+        sf = optimize.root_scalar(t_haines,x0=tf*count/100,x1=tf).root
+
+        s=np.linspace(0,sf,1000)
+        x = a0/(g0*(1-bz0)) * ( np.sin( g0*(1-bz0)*s + phi0 ) - np.sin(phi0) ) - a0*s*np.cos(phi0) + g0*bx0*s
+        z = 1./(2*g0*(1-bz0))*( 0.5*np.square(a0)*s + np.square(a0)/(4*g0*(1-bz0))*
+                            ( np.sin(2*g0*(1-bz0)*s+2*phi0) - np.sin(2*phi0) ) + 
+                            2*a0*(g0*bx0 - a0*np.cos(phi0))/(g0*(1-bz0))*( np.sin(g0*(1-bz0)*s+phi0) - np.sin(phi0) ) +
+                            np.square(g0*bx0 - a0*np.cos(phi0))*s + s + np.square(g0*by0)*s ) - 0.5*g0*(1-bz0)*s
+        t = z + g0*(1-bz0)*s
+        tf_calc = t[-1]
+        count += 1
+        
+    if count == max_iter:
+        print("Could not calculate the correct t_final.  Aborting...")
+        print("Desired t_final = ",tf,", calculated t_final = ",tf_calc)
+        return
 
     px = a0*( np.cos(g0*(1-bz0)*s + phi0) - np.cos(phi0) ) + g0*bx0
     pz = 1./(2*g0*(1-bz0))*( np.square( -a0*(np.cos(g0*(1-bz0)*s + phi0) - np.cos(phi0)) - g0*bx0 ) + 
@@ -179,7 +194,28 @@ def haines_initial(a0,ux0,uy0,uz0,t0,dt,z0):
                         2*a0*(g0*bx0 - a0*np.cos(phi0))/(g0*(1-bz0))*( np.sin(g0*(1-bz0)*s+phi0) - np.sin(phi0) ) +
                         np.square(g0*bx0 - a0*np.cos(phi0))*s + s + np.square(g0*by0)*s ) - 0.5*g0*(1-bz0)*s + 
                         g0*(1-bz0)*s - (-dt/2) )
-    s = optimize.root_scalar(t_haines,x0=-dt/2,x1=0).root
+
+    # Calculate the initial s value that corresponds to -dt/2
+    # There can be error in this, so we calculate it in a while loop to make sure it's right
+    t = 0.0
+    count = 0
+    max_iter = 10
+    while not np.isclose(t,-dt/2,rtol=1e-4,atol=1e-4) and count < max_iter:
+        # Start second guess at 0, then decrease from there for large a0 values
+        s = optimize.root_scalar(t_haines,x0=-dt/2,x1=-dt/2*count/100).root
+
+        x = a0/(g0*(1-bz0)) * ( np.sin( g0*(1-bz0)*s + phi0 ) - np.sin(phi0) ) - a0*s*np.cos(phi0) + g0*bx0*s
+        z = 1./(2*g0*(1-bz0))*( 0.5*np.square(a0)*s + np.square(a0)/(4*g0*(1-bz0))*
+                            ( np.sin(2*g0*(1-bz0)*s+2*phi0) - np.sin(2*phi0) ) + 
+                            2*a0*(g0*bx0 - a0*np.cos(phi0))/(g0*(1-bz0))*( np.sin(g0*(1-bz0)*s+phi0) - np.sin(phi0) ) +
+                            np.square(g0*bx0 - a0*np.cos(phi0))*s + s + np.square(g0*by0)*s ) - 0.5*g0*(1-bz0)*s
+        t = z + g0*(1-bz0)*s
+        count += 1
+        
+    if count == max_iter:
+        print("Could not calculate the correct t_initial.  Aborting...")
+        print("Desired t_initial = ",-dt/2,", calculated t_initial = ",t)
+        return
 
     # Get initial momentum a half time step back
     px = a0*( np.cos(g0*(1-bz0)*s + phi0) - np.cos(phi0) ) + g0*bx0
