@@ -8,7 +8,7 @@ import numpy as np
 import h5py
 import matplotlib.pyplot as plt
     
-def newifile(oname='single-part-1',field_solve='yee',dx1=0.2,dx2=0.2,
+def newifile(oname='single-part-1',field_solve='yee',dx1=0.2,dx2=20.0,
             dt_abs='Ratio (dt/t_courant)',dt=0.95,
             t_final=600.0,pusher='standard',uz0=0.0,a0=1.0,phi0=0.0,
             run_osiris=True,nproc=4,momentum_corr=True):
@@ -96,6 +96,15 @@ def newifile(oname='single-part-1',field_solve='yee',dx1=0.2,dx2=0.2,
             data[i] = '  ufl(1:3) = '+str(u1_half)+', '+str( u2_half )+', 0.0,\n'
         if 'u10' in data[i]:
             data[i] = '  ! desired u10 = '+str(uz0)+',\n'
+        if 'ndump ' in data[i]:
+            total_dumps = 10 # Aim to dump data 10 times during the simulation
+            at_least_dump = 100 # Dump at least every 100 time steps
+            data[i] = ('  ndump  =   ' + 
+                str( np.floor(t_final/dt_code/total_dumps).astype(int) )+',\n')
+        if 'niter_tracks' in data[i]:
+            total_points = 10000
+            data[i] = ('  niter_tracks = ' + 
+                str( np.ceil(t_final/dt_code/total_points).astype(int) )+',\n')
 
     with open(oname+'.txt','w') as f:
         for line in data:
