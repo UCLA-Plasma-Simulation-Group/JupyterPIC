@@ -311,8 +311,8 @@ def plot_data(dirnames,offset=None,theory=True,xlim_max=None,plot_z=False,save_f
             if theory_: axes[0].plot(tt,zz,'--',label='theory')
             axes[0].set_ylabel('$z$ $[c/\omega_0]$')
         else:
-            axes[0].plot(t[:l],t[:l]-x1[:l],label=dirname)
-            if theory_: axes[0].plot(tt,tt-zz,'--',label='theory')
+            axes[0].plot(t[:l],x1[:l]-t[:l],label=dirname)
+            if theory_: axes[0].plot(tt,zz-tt,'--',label='theory')
             axes[0].set_ylabel('$\\xi$ $[c/\omega_0]$')
         axes[0].set_xlabel('$t$ $[\omega_0^{-1}]$')
         axes[0].set_xlim([0,xlim_max])
