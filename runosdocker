@@ -1,1 +1,1 @@
- docker run -it -v $PWD:/home/jovyan --rm -p 8888:8888 picksc/jupyterpic:011720
+ docker run -it -v $PWD:/home/jovyan --rm -p 8888:8888 picksc/jupyterpic:031820
