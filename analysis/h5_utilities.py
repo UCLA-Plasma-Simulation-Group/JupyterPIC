@@ -25,6 +25,7 @@ def plotme(hdf_data, data = None, **kwargs):
                         hdf_data.axes[1].axis_max]
         plot_object = imshow(data_to_use, extent=extent_stuff, aspect='auto',origin='lower',**kwargs)
         cb=colorbar(plot_object) # original cmap='Rainbow'
+        return plot_object,cb
 #         cb.set_label("%s \n %s"% ( hdf_data.data_attributes['LONG_NAME'], hdf_data.data_attributes['UNITS']) )
 #         xlabel("%s        %s" % (hdf_data.axes[0].attributes['LONG_NAME'][0], (hdf_data.axes[0].attributes['UNITS'])[0] ))
 #         ylabel("%s        %s" % (hdf_data.axes[1].attributes['LONG_NAME'][0], (hdf_data.axes[1].attributes['UNITS'][0] )))
