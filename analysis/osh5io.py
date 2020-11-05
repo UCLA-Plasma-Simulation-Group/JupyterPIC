@@ -243,7 +243,7 @@ def write_h5(data, filename=None, path=None, dataset_name=None, overwrite=True, 
             while os.path.isfile(fname[:-3]+'.copy'+str(c)+'.h5'):
                 c += 1
             fname = fname[:-3]+'.copy'+str(c)+'.h5'
-    h5file = h5py.File(fname)
+    h5file = h5py.File(fname,'w')
 
     # now put the data in a group called this...
     h5dataset = h5file.create_dataset(current_name_attr, data_object.shape, data=data_object.view(np.ndarray))
@@ -346,7 +346,7 @@ def write_h5_openpmd(data, filename=None, path=None, dataset_name=None, overwrit
             while os.path.isfile(fname[:-3]+'.copy'+str(c)+'.h5'):
                 c += 1
             fname = fname[:-3]+'.copy'+str(c)+'.h5'
-    h5file = h5py.File(fname)
+    h5file = h5py.File(fname,'w')
 
     # now put the data in a group called this...
  #   h5dataset = h5file.create_dataset(current_name_attr, data_object.shape, data=data_object.view(np.ndarray))

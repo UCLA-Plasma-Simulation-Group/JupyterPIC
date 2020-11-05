@@ -383,10 +383,10 @@ def write_hdf(data, filename, dataset_name = None, write_data = True):
 
 
     if(filename != None):
-        file = h5py.File(filename)
+        file = h5py.File(filename,'w')
         data_object.filename = filename
     elif data_object.filename != None:
-        file = h5py.File(filename)
+        file = h5py.File(filename,'w')
     else:
         raise Exception("You did not specify a filename!!!")
 

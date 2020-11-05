@@ -108,5 +108,19 @@ RUN chmod 777 Single-Particle-Workbook
 RUN chmod 777 PWFA
 
 WORKDIR ..
+COPY NERS-574 NERS-574
+RUN chmod 777 NERS-574
+WORKDIR NERS-574
+RUN chmod 777 faraday-rotation
+RUN chmod 777 light-wave-dispersion
+RUN chmod 777 light-wave-vacuum-into-plasma
+RUN chmod 777 r-and-l-mode-dispersion
+RUN chmod 777 velocities
+RUN chmod 777 x-and-o-mode-dispersion
+RUN chmod 777 x-mode-propagation
+RUN chmod 777 LWFA-Workbook-1-Tajima-Dawson
+RUN chmod 777 LWFA-Basic-Notebook
+
+WORKDIR ..
 
 USER $NB_USER 
