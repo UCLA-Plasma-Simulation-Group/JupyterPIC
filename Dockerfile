@@ -7,7 +7,7 @@ MAINTAINER Benjamin J. Winjum <bwinjum@ucla.edu>
 USER root
 
 # This is to solve an issue with permissions when running under Windows
-RUN conda install -c anaconda jupyter_client=5.3.1
+#RUN conda install -c anaconda jupyter_client=5.3.1
 
 #
 # OSIRIS
