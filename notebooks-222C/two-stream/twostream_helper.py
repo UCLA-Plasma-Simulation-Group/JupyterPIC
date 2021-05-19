@@ -281,27 +281,21 @@ def compare_sim_with_theory(output_directory, modemin=1, modemax=5, v0=1, init_a
     plt.show()
 
 
-def twostream_deck_maker(iname='twostream.txt', oname='case1.txt', vdx=3.0,
+def twostream_deck_maker(iname='twostream.txt', oname='case1.txt', n1=1, vx0=-3.0, vdx=3.0, n2n1=1.0, 
              tend=200, indx=8):
 
     with open(iname) as osdata:
         data = osdata.readlines()
         
-#     BEAM_ELECTRONS = int(rden*262144)
+    STREAM2_ELECTRONS = int(n2n1*262144)
 
     for i in range(len(data)):
         if 'VX0 =' in data[i]:
-            data[i] = ' VX0 = '+str(vdx)+',\n'
+            data[i] = ' VX0 = '+str(vx0)+',\n'
         if 'VDX =' in data[i]:
-            data[i] = ' VDX = -'+str(vdx)+',\n'
-#         if 'VTX' in data[i]:
-#             data[i] = ' VTX = '+str(vth0)+',\n'
-            
-#         if 'VTDX' in data[i]:
-#             data[i] = ' VTDX = '+str(vthb)+'\n'
-            
-#         if 'NPXB' in data[i]:
-#             data[i] = 'NPXB = '+str(BEAM_ELECTRONS)+'\n'
+            data[i] = ' VDX = '+str(vdx)+',\n'
+        if 'NPXB' in data[i]:
+            data[i] = 'NPXB = '+str(STREAM2_ELECTRONS)+'\n'
         if 'TEND' in data[i]:
             data[i] = ' TEND = '+str(tend)+',\n'
         if 'INDX' in data[i]:
@@ -317,13 +311,7 @@ def twostream_deck_maker(iname='twostream.txt', oname='case1.txt', vdx=3.0,
     osiris.run_upic_es(rundir=dirname,inputfile=oname)
     outdirname=oname.split(".")[0]
     print(outdirname)
-    # e_history=energy_history(dirname=outdirname)
-    # taxis=np.arange(len(e_history))*0.2
-    # plt.plot(taxis,e_history)
-    # plt.title('Energy Deviation vs Time (in %)')
-    # plt.xlabel('Time ($\omega_p^{-1}$)')   
-    # plt.show()
- #
+
     phasespace_movie(output_directory=dirname)
     
     print('Done')
@@ -334,14 +322,25 @@ def twostream_widget():
 
     a = ipywidgets.Text(value='2stream.txt', description='Template Input File:',style=style,layout=layout)
     b = ipywidgets.Text(value='case1.txt', description='New Output File:',style=style,layout=layout)
-    c = ipywidgets.BoundedFloatText(value=5, min=0.0, max=10.0, description='Electron Drift Velocity:',style=style,layout=layout)
-    #d = ipywidgets.BoundedFloatText(value=0.01,min=0.01,max=1,step=0.01,description='Density Ratio (n_b/n_0):',style=style,layout=layout)
-    #e = ipywidgets.FloatText(value=1.0,description='VTH (of the plasma):',style=style,layout=layout)
-    #f = ipywidgets.BoundedFloatText(value=0.1,min=0,max=1,step=0.1,description='VTH (of the beam):',style=style,layout=layout)
+    c = ipywidgets.BoundedFloatText(value=5, min=-30.0, max=30.0, description='Stream #1 Velocity (set first!):',style=style,layout=layout)
+    d = ipywidgets.BoundedFloatText(value=-5, min=-30.0, max=30.0, description='Stream #2 Velocity:',style=style,layout=layout)
+    e = ipywidgets.BoundedFloatText(value=1, min=0.0001, max=10.0, description='Density Ratio (n2/n1):',style=style,layout=layout)
+    f = ipywidgets.BoundedFloatText(value=1, min=1, max=1, description='Stream #1 Density is fixed:',style=style,layout=layout)
     g = ipywidgets.FloatText(value=100.0,description='TEND or the Total Simulation Time:',style=style,layout=layout)
     h = ipywidgets.IntText(value=8,description='Box Length (In powers of 2!):',style=style,layout=layout)
 
-#     im = interact_calc(twostream_deck_maker, iname=a, oname=b, vdx=c, rden=d, vth0 = e, vthb = f, tend=g);
-    im = interact_calc(twostream_deck_maker, iname=a, oname=b, vdx=c, tend=g, indx=h);
+    im = interact_calc(twostream_deck_maker, iname=a, oname=b, n1=f, vx0=c, vdx=d, n2n1=e, tend=g, indx=h);
     
+    def c_handle_slider_change(change):
+        d.value = -1/e.value*change.new
+    c.observe(c_handle_slider_change, names='value')
+
+    def d_handle_slider_change(change):
+        e.value = -1/change.new*c.value
+    d.observe(d_handle_slider_change, names='value')
+
+    def e_handle_slider_change(change):
+        d.value = -1/change.new*c.value
+    e.observe(e_handle_slider_change, names='value')
+
     im.widget.manual_button.layout.width='300px'
