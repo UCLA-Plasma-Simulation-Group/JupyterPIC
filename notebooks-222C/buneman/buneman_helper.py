@@ -348,7 +348,7 @@ def buneman_deck_maker(iname='buneman.txt', oname='case1.txt', vx0=3.0, rmass=10
     print(outdirname)
 
     phasespace_movie(output_directory=dirname)
-    buneman_plot_t_vs_k(output_directory=dirname, v0=vx0, mass_ratio=1/rmass)
+    plot_t_vs_k(output_directory=dirname, v0=vx0, mass_ratio=1/rmass)
     
     print('Done')
 
