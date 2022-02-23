@@ -6,3 +6,6 @@
 .local/share/jupyter/nbsignatures.db
 .local/share/jupyter/runtime/notebook_cookie_secret
 *.pyc
+*.h5
+runosdocker
+runosdocker 2
