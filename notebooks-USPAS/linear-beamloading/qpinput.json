@@ -1,0 +1,291 @@
+{
+    "simulation": {
+        "nodes": [
+            1,
+            1
+        ],
+        "indx": 7,
+        "indy": 7,
+        "indz": 9,
+        "box": {
+            "x": [
+                -6.4,
+                6.4
+            ],
+            "y": [
+                -6.4,
+                6.4
+            ],
+            "z": [
+                -3.0,
+                7.0
+            ]
+        },
+        "boundary": "conducting",
+        "n0": 4e+16,
+        "time": 11.0,
+        "dt": 10,
+        "nbeams": 2,
+        "nspecies": 1,
+        "dump_restart": false,
+        "ndump_restart": 1,
+        "read_restart": false,
+        "restart_timestep": 1,
+        "iter": 1,
+        "verbose": 0
+    },
+    "beam": [
+        {
+            "evolution": true,
+            "profile": 0,
+            "np": [
+                128,
+                128,
+                256
+            ],
+            "npmax": 40000000,
+            "q": -1.0,
+            "m": 1.0,
+            "gamma": 20000.0,
+            "peak_density": 0.001,
+            "quiet_start": true,
+            "center": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "sigma": [
+                0.5,
+                0.5,
+                0.4
+            ],
+            "sigma_v": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "centroid_x": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "centroid_y": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "diag": [
+                {
+                    "name": [
+                        "charge"
+                    ],
+                    "ndump": 0
+                },
+                {
+                    "name": [
+                        "charge"
+                    ],
+                    "ndump": 1,
+                    "slice": [
+                        [
+                            "xz",
+                            65
+                        ],
+                        [
+                            "yz",
+                            65
+                        ],
+                        [
+                            "xy",
+                            96
+                        ]
+                    ]
+                },
+                {
+                    "name": [
+                        "raw"
+                    ],
+                    "ndump": 1,
+                    "sample": 10
+                }
+            ]
+        },
+        {
+            "evolution": true,
+            "profile": 1,
+            "np": [
+                128,
+                128,
+                256
+            ],
+            "npmax": 40000000,
+            "q": 1.0,
+            "m": 1.0,
+            "gamma": 20000.0,
+            "peak_density": 0.00055,
+            "piecewise_fz": [
+                0.0,
+                1.0,
+                0.0,
+                0.0
+            ],
+            "piecewise_z": [
+                8.689900000000002,
+                8.690000000000001,
+                9.440000000000001,
+                9.440100000000001
+            ],
+            "quiet_start": true,
+            "center": [
+                0.0,
+                0.0,
+                5.69
+            ],
+            "sigma": [
+                0.5,
+                0.5
+            ],
+            "sigma_v": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "centroid_x": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "centroid_y": [
+                0.0,
+                0.0,
+                0.0
+            ],
+            "diag": [
+                {
+                    "name": [
+                        "charge"
+                    ],
+                    "ndump": 0
+                },
+                {
+                    "name": [
+                        "charge"
+                    ],
+                    "ndump": 1,
+                    "slice": [
+                        [
+                            "xz",
+                            65
+                        ],
+                        [
+                            "yz",
+                            65
+                        ],
+                        [
+                            "xy",
+                            96
+                        ]
+                    ]
+                },
+                {
+                    "name": [
+                        "raw"
+                    ],
+                    "ndump": 1,
+                    "sample": 10
+                }
+            ]
+        }
+    ],
+    "species": [
+        {
+            "profile": 0,
+            "ppc": [
+                2,
+                2
+            ],
+            "q": -1.0,
+            "m": 1.0,
+            "density": 1.0,
+            "longitudinal_profile": "uniform",
+            "piecewise_density": [
+                1.0,
+                1.5,
+                2.5
+            ],
+            "piecewise_s": [
+                0.0,
+                100.0,
+                200.0
+            ],
+            "diag": [
+                {
+                    "name": [
+                        "charge",
+                        "jx",
+                        "jy",
+                        "jz"
+                    ],
+                    "ndump": 0
+                },
+                {
+                    "name": [
+                        "charge"
+                    ],
+                    "ndump": 1,
+                    "slice": [
+                        [
+                            "xz",
+                            65
+                        ],
+                        [
+                            "yz",
+                            65
+                        ],
+                        [
+                            "xy",
+                            96
+                        ]
+                    ]
+                }
+            ]
+        }
+    ],
+    "field": {
+        "diag": [
+            {
+                "name": [
+                    "ex",
+                    "ez"
+                ],
+                "ndump": 0
+            },
+            {
+                "name": [
+                    "ex",
+                    "ey",
+                    "ez",
+                    "bx",
+                    "by",
+                    "bz",
+                    "psi"
+                ],
+                "ndump": 1,
+                "slice": [
+                    [
+                        "xz",
+                        65
+                    ],
+                    [
+                        "yz",
+                        65
+                    ],
+                    [
+                        "xy",
+                        96
+                    ]
+                ]
+            }
+        ]
+    }
+}

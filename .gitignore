@@ -1,5 +1,4 @@
 
-*.json
 *.sqlite
 .local/share/jupyter/notebook_secret
 .ipython/profile_default/startup/README

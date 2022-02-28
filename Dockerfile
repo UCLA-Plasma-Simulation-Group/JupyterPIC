@@ -6,6 +6,9 @@ MAINTAINER Benjamin J. Winjum <bwinjum@ucla.edu>
 
 USER root
 
+# This is to solve an issue with permissions when running under Windows
+#RUN conda install -c anaconda jupyter_client=5.3.1
+
 #
 # OSIRIS
 #
@@ -23,6 +26,7 @@ RUN apt-get update && \
     && rm -rf /var/lib/apt/lists/*
 
 ENV H5_ROOT /usr/lib/x86_64-linux-gnu/hdf5/openmpi/lib
+ENV OMPI_MCA_btl_vader_single_copy_mechanism none
 
 RUN mkdir /usr/local/osiris
 RUN mkdir /usr/local/beps
@@ -87,12 +91,35 @@ RUN chmod 777 iaw-fluid-theory
 RUN chmod 777 interactive-theory
 RUN chmod 777 quickpic_pwfa
 RUN chmod 777 weibel
+RUN chmod 777 RPA
+RUN chmod 777 SBS
+RUN chmod 777 TPD
+RUN chmod 777 forslund-SRS
+RUN chmod 777 grid-instability
+RUN chmod 777 single-particle
+RUN chmod 777 Leap-Frog
 
 WORKDIR ..
 COPY notebooks-260 notebooks-260
 RUN chmod 777 notebooks-260
 WORKDIR notebooks-260
 RUN chmod 777 LWFA-Workbook-1-Tajima-Dawson
+RUN chmod 777 Single-Particle-Workbook
+RUN chmod 777 PWFA
+
+WORKDIR ..
+COPY NERS-574 NERS-574
+RUN chmod 777 NERS-574
+WORKDIR NERS-574
+RUN chmod 777 faraday-rotation
+RUN chmod 777 light-wave-dispersion
+RUN chmod 777 light-wave-vacuum-into-plasma
+RUN chmod 777 r-and-l-mode-dispersion
+RUN chmod 777 velocities
+RUN chmod 777 x-and-o-mode-dispersion
+RUN chmod 777 x-mode-propagation
+RUN chmod 777 LWFA-Workbook-1-Tajima-Dawson
+RUN chmod 777 LWFA-Basic-Notebook
 
 WORKDIR ..
 
