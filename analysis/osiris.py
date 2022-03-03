@@ -357,17 +357,15 @@ def field(rundir='',dataset='e1',time=0,space=-1,
     xlim=[-1,-1],ylim=[-1,-1],zlim=[-1,-1],
     plotdata=[], **kwargs):
 
-    spacedim = dataset[-1]
-
     if(space != -1):
-        PATH = gen_path(rundir, int(spacedim))
+        plot_or = 1
+        PATH = gen_path(rundir, plot_or)
         hdf5_data = read_hdf(PATH)
-        plt.figure(figsize=(6, 3.2))
+        plt.figure(figsize=(8,5))
         #plotme(hdf5_data.data[:,space], **kwargs)
         plotme(hdf5_data,hdf5_data.data[space,:])
-        plt.title('Temporal evolution of $E_' + spacedim + '$ at cell ' + str(space),size=16)
-        plt.xlabel('t [$1/\omega_p$]',size=14)
-        plt.ylabel('$E_'+spacedim+'$',size=14)
+        plt.title('temporal evolution of e' + str(plot_or) + ' at cell ' + str(space))
+        plt.xlabel('t')
         plt.show()
         return
 
@@ -388,9 +386,9 @@ def field(rundir='',dataset='e1',time=0,space=-1,
     fhere = h5py.File(os.path.join(odir,files[i]), 'r')
 
     plt.figure(figsize=(6, 3.2))
-    plt.title('$E_'+spacedim+'$ at t = '+str(fhere.attrs['TIME']),size=16)
-    plt.xlabel('$x_1$ [$c/\omega_p$]',size=14)
-    plt.ylabel('$E_'+spacedim+'$',size=14)
+    plt.title(dataset+' at t = '+str(fhere.attrs['TIME']))
+    plt.xlabel('$x_1 [c/\omega_p]$')
+    plt.ylabel(dataset)
 
     xaxismin = fhere['AXIS']['AXIS1'][0]
     xaxismax = fhere['AXIS']['AXIS1'][1]
@@ -932,22 +930,17 @@ def plot_wk(rundir, TITLE='', vth=0.1, b0_mag=0.0, plot_or=1, show_theory=False,
     kvals_xm = np.sqrt(kvals_xm)
 
     # create figure
-    fig,ax = plt.subplots(1,1,figsize=(8,5))
-    xxx,yyy = plotme(hdf5_data, **kwargs)
-    plt.title(TITLE + ' $\omega$-k space for the $E_' + str(plot_or) + '$ field',size=16)
+    plt.figure(figsize=(8,5))
+    plotme(hdf5_data, **kwargs)
+    plt.title(TITLE + ' w-k space' + ' e' + str(plot_or))
     if (debye==True):
-        plt.xlabel('k  [$\lambda_D$]',size=14)
+        plt.xlabel('k  [$\lambda_D$]')
     else:
-        plt.xlabel('k  [$\omega_{pe}$/c]',size=14)
-    plt.ylabel('$\omega$  [$\omega_{pe}$]',size=14)
-    #plt.colorbar(label='FFT[E1]')
-    #cbar = fig.colorbar(xxx)
-    yyy.set_label('Log[ |FFT[$E_' +str_(plot_or)+'$]| ]',size=14)
+        plt.xlabel('k  [$\omega_{pe}$/c]')
+    plt.ylabel('$\omega$  [$\omega_{pe}$]')
     plt.xlim(klim[0],klim[1])
     plt.ylim(wlim[0],wlim[1])
     if (show_theory==True):
-        plt.title(TITLE + ' $\omega$-k space for the $E_' + str(plot_or) + '$ field' +
-            '\n with overlaid theory curve',size=14)
         if (b0_mag!=0):
             # for i in range(1,10):
             #     plt.plot(kvals, i*w_cvals, 'w--', label='')
