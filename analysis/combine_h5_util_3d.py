@@ -33,7 +33,7 @@ h5_output.data=numpy.zeros((total_time,nx3,nx2,nx1))
 h5_output.axes=[data_basic_axis(0,h5_data.axes[0].axis_min,h5_data.axes[0].axis_max,nx1),
 data_basic_axis(1,h5_data.axes[1].axis_min,h5_data.axes[1].axis_max,nx2),
 data_basic_axis(2,h5_data.axes[2].axis_min,h5_data.axes[2].axis_max,nx3),
-data_basic_axis(3,0.0,(time_step*total_time-1),total_time)]
+data_basic_axis(3,0.0,time_step*(total_time-1),total_time)]
 h5_output.run_attributes['TIME']=0.0
 # h5_output.run_attributes['UNITS']=h5_data.run_attributes['UNITS']
 h5_output.axes[0].attributes['LONG_NAME']=h5_data.axes[0].attributes['LONG_NAME']

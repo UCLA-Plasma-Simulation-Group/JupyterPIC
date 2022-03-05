@@ -297,7 +297,108 @@ def srs_movie(rundir):
         
         
         den_plot = plt.subplot(223)
+        
         osh5vis.osplot(eden,title='Electron Density')
+       
+        ex_plot = plt.subplot(222)
+        
+        osh5vis.osplot(ex,title='Wake E-field ',ylabel='$E_1 [m_e c^2/e]$')
+        
+        ey_plot = plt.subplot(221)
+        
+        
+        osh5vis.osplot(ey,title='Laser Electric Field')
+        
+        
+        
+#2345
+    my_path=os.getcwd()
+    working_dir=my_path+'/'+rundir
+    phase_space_dir=working_dir+'/MS/PHA/p1x1/electrons/'
+    files=sorted(os.listdir(phase_space_dir))
+    #print(files[1])
+    start=files[1].find('p1x1-electrons')+16
+    end=files[1].find('.')
+    #print(files[1][start:end])
+    file_interval=int(files[1][start:end])
+    file_max=(len(files)-1)*file_interval
+
+    interact(something,rundir=fixed(rundir),file_no=widgets.IntSlider(min=0,max=file_max,step=file_interval,value=0), continuous_update=False)
+    #something(rundir=rundir,file_no=20)
+    
+
+def scs_movie(rundir):
+#2345
+    import os
+
+
+    def something(rundir,file_no):
+
+        my_path=os.getcwd()
+        #print(my_path)
+        working_dir=my_path+'/'+rundir
+        #print(working_dir)
+        efield_dir=working_dir+'/MS/FLD/e1/'
+        laser_dir = working_dir+'/MS/FLD/e2/'
+        eden_dir = working_dir + '/MS/DENSITY/electrons/charge/'
+        iden_dir = working_dir + '/MS/DENSITY/ions/charge/'
+        phase_space_dir=working_dir+'/MS/PHA/p1x1/ions/'
+        p1x1_dir=working_dir+'/MS/PHA/p1x1/electrons/'
+
+        efield_prefix='e1-'
+        laser_prefix='e2-'
+        phase_prefix='p1x1-ions-'
+        p1x1_prefix='p1x1-electrons-'
+        eden_prefix='charge-electrons-'
+        iden_prefix='charge-ions-'
+        fig = plt.figure(figsize=(12,16) )
+
+        # filename1=phase_space_dir+phase_prefix+repr(file_no).zfill(6)+'.h5'
+        filename2=eden_dir+eden_prefix+repr(file_no).zfill(6)+'.h5'
+        filename3=efield_dir+efield_prefix+repr(file_no).zfill(6)+'.h5'
+        filename4=laser_dir+laser_prefix+repr(file_no).zfill(6)+'.h5'
+        filename5=p1x1_dir+p1x1_prefix+repr(file_no).zfill(6)+'.h5'
+        # filename6=iden_dir+iden_prefix+repr(file_no).zfill(6)+'.h5'
+
+        #print(filename1)
+        #print(filename2)
+
+        phase_space=np.abs(osh5io.read_h5(filename5))
+        # print(repr(phase_space))
+        eden=osh5io.read_h5(filename2)
+        ex = osh5io.read_h5(filename3)
+        ey = osh5io.read_h5(filename4)
+        # p1x1=np.abs(osh5io.read_h5(filename5))
+        # iden = osh5io.read_h5(filename6)
+
+        phase_plot=plt.subplot(224 )
+        #print(repr(phase_space.axes[0].min))
+        #print(repr(phase_space.axes[1].min))
+        title=phase_space.data_attrs['LONG_NAME']
+        time=phase_space.run_attrs['TIME'][0]
+
+        fig.suptitle('Time = '+repr(time)+'$\omega_p^{-1}$',fontsize=24)
+        ext_stuff=[phase_space.axes[1].min,phase_space.axes[1].max,phase_space.axes[0].min,phase_space.axes[0].max]
+        data_max=max(np.abs(np.amax(phase_space)),100)
+        #print(repr(data_max))
+        phase_contour=plt.contourf(np.abs(phase_space+0.000000001),
+                    levels=[0.000001*data_max,0.00001*data_max,0.0001*data_max,0.001*data_max,0.005*data_max,0.01*data_max,0.02*data_max,0.05*data_max],
+                    extent=ext_stuff,cmap='Spectral',vmin=1e-6*data_max,vmax=1.5*data_max,
+                    norm=colors.LogNorm(vmin=0.000001*data_max,vmax=1.5*data_max))
+        phase_plot.set_title('Ion P1X1 Phase Space')
+        phase_plot.set_xlabel('Position [$c / \omega_{p}$]')
+        phase_plot.set_ylabel('Proper Velocity $\gamma v_1$ [ c ]')
+        # second_x = plt.twinx()
+        # second_x.plot(ex.axes[0],ex,'g',linestyle='-.')
+        
+        #plt.colorbar()
+        #osh5vis.oscontour(phase_space,levels=[10**-5,10**-3,10**-1,1,10,100],colors='black',linestyles='dashed',vmin=1e-5,vmax=1000)
+        # plt.contour(np.abs(phase_space+0.000001),levels=[0.0001,0.001,0.01,0.05,0.1,0.2,0.5,1],extent=ext_stuff,colors='black',linestyles='dashed')
+        plt.colorbar(phase_contour)
+        
+        
+        den_plot = plt.subplot(223)
+        osh5vis.osplot(np.log(np.sum(np.abs(phase_space),axis=1)+0.001),title='f(v)')
         
        
         ex_plot = plt.subplot(222)
