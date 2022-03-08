@@ -1,4 +1,4 @@
-FROM jupyter/scipy-notebook
+FROM jupyter/scipy-notebook:dc9744740e12
 
 MAINTAINER Benjamin J. Winjum <bwinjum@ucla.edu>
 #With grateful acknowledgements to the Jupyter Project <jupyter@googlegroups.com> for Jupyter
