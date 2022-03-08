@@ -1,4 +1,3 @@
-
 *.sqlite
 .local/share/jupyter/notebook_secret
 .ipython/profile_default/startup/README
@@ -6,5 +5,4 @@
 .local/share/jupyter/runtime/notebook_cookie_secret
 *.pyc
 *.h5
-runosdocker
 runosdocker 2
