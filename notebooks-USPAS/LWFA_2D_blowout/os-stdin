@@ -1,12 +1,13 @@
-
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
-!		This 2D input file serves the purpose of modelling the PHY694 project
 !
-!    This window contains the whole laser. The resolution is 30 cells/beam waist transversely 15 cells/ lambda longitudinally)
-!         
-!                 c/wp=53um
-!   The laser has a FWHM = 1 ps
+!     This window contains the whole laser. The resolution is 30 cells/beam waist transversely and 15 cells/ lambda longitudinally)
+!          
+!     c/wp=53um
+!     The laser has a FWHM = 1 ps
+!
+!     on: April 2022
+!		
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -112,7 +113,7 @@ spe_bound
 
 diag_species
 {
-	ndump_fac=1,
+    ndump_fac=1,
 	
     reports="charge",
         
