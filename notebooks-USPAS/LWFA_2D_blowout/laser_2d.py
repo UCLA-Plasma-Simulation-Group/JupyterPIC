@@ -24,25 +24,22 @@ def newifile(iname='os-stdin', oname='output.txt',
         data = osdata.readlines()
 
     for i in range(len(data)):
-       
-        if 'a0 =' in data[i] and 'omega0' not in data[i]:
-            data[i] = 'a0 = '+str(a0)+',\n'
-        if 'omega0 =' in data[i]:
-            data[i] = 'omega0 = '+str(omega0)+',\n'
-        if 'lon_flat =' in data[i]:
-            data[i] = 'lon_flat = '+str(t_flat)+',\n'
-        if 'lon_rise =' in data[i]:
-            data[i] = 'lon_rise = '+str(t_rise)+',\n'
-        if 'lon_fall =' in data[i]:
-            data[i] = 'lon_fall = '+str(t_fall)+',\n'
-        if 'w0 =' in data[i]:
-            data[i] = 'w0 = '+str(2*np.sqrt(a0))+',\n'    
-        if 'ndump =' in data[i]:
-            data[i] = 'ndump = '+str(ndump)+',\n'
-        # This line is for moving window only
-      
-        if 'tmax =' in data[i]:
-            data[i] = 'tmax ='+str(tmax)+'\n'
+        if 'ndump=' in data[i]:
+            data[i] = '    ndump = '+str(ndump)+',\n'
+        if 'tmax=' in data[i]:
+            data[i] = '    tmax ='+str(tmax)+'\n'    
+        if 'a0=' in data[i] and 'omega0' not in data[i]:
+            data[i] = '    a0= '+str(a0)+',\n'
+        if 'omega0=' in data[i]:
+            data[i] = '    omega0 = '+str(omega0)+',\n'
+        if 'lon_flat=' in data[i]:
+            data[i] = '    lon_flat = '+str(t_flat)+',\n'
+        if 'lon_rise=' in data[i]:
+            data[i] = '    lon_rise = '+str(t_rise)+',\n'
+        if 'lon_fall=' in data[i]:
+            data[i] = '    lon_fall = '+str(t_fall)+',\n'
+        if 'per_w0=' in data[i]:
+            data[i] = '    per_w0 = '+str(2*np.sqrt(a0))+',\n'    
 
     with open(oname,'w') as f:
         for line in data:
