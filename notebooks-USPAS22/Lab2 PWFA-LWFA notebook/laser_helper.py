@@ -96,7 +96,7 @@ def moving_widget(regime):
     
     w0 = widgets.BoundedFloatText(value=w0, min=0.0, max=10.0, description='spot size W0:',style=style,layout=layout)
     #xmaxw = widgets.FloatText(value=24, description='xmax:', style=style, layout=layout)
-    ndumpw = widgets.IntText(value=3,min = 3, max = 10, description='ndump:', style=style, layout=layout)
+    ndumpw = widgets.IntText(value=916, description='ndump:', style=style, layout=layout)
     #ppc = widgets.IntText(value=2, min = 1, max = 3, description='Particles per cell:', style=style, layout=layout)
     tmaxw = widgets.FloatText(value=40, description='tmax:', style=style, layout=layout)
     #nx_pw = widgets.IntText(value=2400, description="Number of cells:", style=style, layout=layout)
