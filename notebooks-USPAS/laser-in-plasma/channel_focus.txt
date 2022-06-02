@@ -23,7 +23,7 @@ node_conf
 !----------spatial grid----------
 grid 
 {
- nx_p(1:2) = 200, 120,        ! (100um / 0.8um) * 32 = 4000, (100 um / 0.8um) * 4 =  500                 
+ nx_p(1:2) = 200, 160,        ! (100um / 0.8um) * 32 = 4000, (100 um / 0.8um) * 4 =  500                 
  coordinates = "cartesian",
 }
 
@@ -47,8 +47,8 @@ restart
 ! the motion of the simulation box)
 space 
 {
-  xmin(1:2) =   0.0d0,  -15d0,     ! x1max-x1min = 100um / 0.8um = 125, x1 = x
-  xmax(1:2) =   20.0d0,   15d0,     ! x2max-x2min = 100um / 0.8um = 125, x2 = y
+  xmin(1:2) =   0.0d0,   -20d0,     ! x1max-x1min = 100um / 0.8um = 125, x1 = x
+  xmax(1:2) =   20.0d0,   20d0,     ! x2max-x2min = 100um / 0.8um = 125, x2 = y
   if_move= .true., .false.,             ! Moving window in x
 }
 

@@ -170,18 +170,16 @@ def plot_data(dirname = 'laser_focus_1', Num = 0):
         I_laser = a0**2
         
     else:
-        Ey_data = h5py.File('./' + dirname + '/MS/FLD/e2/e2-%.6d.h5'% Num, 'r')
-        Ez_data = h5py.File('./' + dirname + '/MS/FLD/e3/e3-%.6d.h5'% Num, 'r')
+        Ey_data = h5py.File('./' + dirname + '/MS/FLD/e2/e2-%.6d.h5'% Num, 'r')   
         
         Ey = - Ey_data['e2'][()]*E0
-        Ez = - Ez_data['e3'][()]*E0
-
-        xmin = Ez_data['AXIS']['AXIS1'][()][0]
-        xmax = Ez_data['AXIS']['AXIS1'][()][1]
-        ymin = Ez_data['AXIS']['AXIS2'][()][0]
-        ymax = Ez_data['AXIS']['AXIS2'][()][1]
-        x = np.linspace(xmin, xmax, Ez.shape[1])*x0
-        y = np.linspace(ymin, ymax, Ez.shape[0])*y0
+        xmin = Ey_data['AXIS']['AXIS1'][()][0]
+        xmax = Ey_data['AXIS']['AXIS1'][()][1]
+        ymin = Ey_data['AXIS']['AXIS2'][()][0]
+        ymax = Ey_data['AXIS']['AXIS2'][()][1]
+        x = np.linspace(xmin, xmax, Ey.shape[1])*x0
+        y = np.linspace(ymin, ymax, Ey.shape[0])*y0
+        
         I_laser = Ey**2
         
     i_laser = np.ma.masked_array(I_laser, abs(I_laser) < 1e16);
