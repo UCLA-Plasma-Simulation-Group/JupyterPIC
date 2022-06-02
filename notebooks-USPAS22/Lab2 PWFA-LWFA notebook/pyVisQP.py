@@ -173,7 +173,7 @@ def makeplot(fileNameList,scaleList = [1],LineoutDir = None,Show_theory = None,D
             if(Show_theory == 'focus'):
                 # plot the 1/2 slope line (theoretical focusing force)
                 focusing_force_theory = -1/2 * x
-                ax2.plot(focusing_force_theory, x, 'r--',label='F = -1/2 r') 
+                ax2.plot(np.flip(focusing_force_theory), x, 'r--',label='F = -1/2 r') 
                 ax2.legend()
          
             ax2.set_xlim(lineoutAxisRange)
