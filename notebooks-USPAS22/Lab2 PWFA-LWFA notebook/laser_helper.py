@@ -63,7 +63,8 @@ def newifile(iname='os-stdin', oname='output.txt',
     print(dirname)
     print('Running OSIRIS in directory '+dirname+'...')
     osiris.runosiris_2d(rundir=dirname,inputfile=oname, print_out='yes',combine='no',np=nproc)
-    print('The spot size W0 is adjusted to the matched spot size', str(2*np.sqrt(a0)))
+    if str(oname[:-3])=='nonlinear':
+        print('The spot size W0 is adjusted to the matched spot size', str(2*np.sqrt(a0)))
     
     print('Done')
  
@@ -155,21 +156,8 @@ def makeplot(file_id,path,field):
         colors = ax.pcolormesh(xi,r,field,vmin=-field.max(),vmax=field.max(),cmap="RdBu_r")
     
         cbar = fig.colorbar(colors,ax=ax,pad = 0.15)
-        if id == 0:
-            name = 'Lonitudinal E'
-        if id == 1:
-            name = 'Transverse E'
-        if id == 2:
-            name = 'Transverse E'
-        if id == 3:
-            name = 'Longitudinal B'
-        if id == 4:
-            name = 'Transverse B'
-        if id == 5:
-            name = 'Transverse B'
-        if id == 6:
-            name = 'Psi'    
-        cbar.set_label(name +' Field ($m_e c\omega_p / e$)')
+        name = ['Lonitudinal E', 'Transverse E', 'Transverse E','Longitudinal B','Transverse B','Transverse B','Psi' ]
+        cbar.set_label(name[id] +' Field ($m_e c\omega_p / e$)')
         ax.hlines(r[rindex],xi[0],xi[-1],'k','--') 
         ax2 = ax.twinx()
         ax2.plot(xi,field[rindex],'g',alpha = 0.7)
@@ -177,7 +165,7 @@ def makeplot(file_id,path,field):
        
         ax.set_xlabel("$\\xi$ ($c/\omega_p$)")
         ax.set_ylabel('r ($c/\omega_p$)')
-        ax.set_title(name+' Field')
+        ax.set_title(name[id]+' Field')
   
     if field == 'density':
         interact(den_plot,x_position=FloatSlider(min=-5,max=5,step=0.05,continuous_update=False))
