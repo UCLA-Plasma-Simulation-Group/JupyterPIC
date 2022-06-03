@@ -10,3 +10,5 @@ course website: https://uspas.fnal.gov/programs/2022/onlinemsu/courses/plasma-ac
 - Lab3 Trapping
 - Lab4 Laser evolution in plasma
 - Lab5 Beamloading
+
+To run the notebooks on the JupyterHub, go to https://jupyter.picksc.org/
