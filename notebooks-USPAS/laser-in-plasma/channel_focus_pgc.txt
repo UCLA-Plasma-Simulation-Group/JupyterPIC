@@ -1,0 +1,146 @@
+! LWFA basic, using Hercules laser parameters
+! Only background plasma 
+! written on: June-12-2018 by Yong Ma yongm@umich.edu
+! ---------------------------------------------------
+! Units normalised to laser units
+! t0 to To, 2.6685 fs
+! x0 to lambda0, 0.8 um
+
+simulation
+{
+n0 = 4.4124355e19,             
+algorithm = "pgc",
+}
+
+!----------the node configuration for this simulation----------
+node_conf 
+{
+  node_number(1:2) = 2, 2, 
+  if_periodic(1:2) = .false., .false., 
+}
+
+
+!----------spatial grid----------
+grid 
+{
+ nx_p(1:2) = 200, 120,        ! (100um / 0.8um) * 32 = 4000, (100 um / 0.8um) * 4 =  500                 
+ coordinates = "cartesian",
+}
+
+
+!----------time step and global data dump timestep number----------
+time_step 
+{
+  dt =  0.090909,             ! dt = 0.995 * sqrt[1/(c^2/dx^2 + c^2/dy^2)] / T0 = 0.031
+  ndump = 44,               ! 6044 iterations * 0.031 * T0 = 500 fs. The time step for output is 500 fs
+}
+
+!----------restart information----------
+restart 
+{
+  ndump_fac = 0,
+  if_restart = .false.,
+}
+
+!----------spatial limits of the simulations----------
+!(note that this includes information about
+! the motion of the simulation box)
+space 
+{
+  xmin(1:2) =   0.0d0,  -15.0d0,     ! x1max-x1min = 100um / 0.8um = 125, x1 = x
+  xmax(1:2) =   20.0d0,   15.0d0,     ! x2max-x2min = 100um / 0.8um = 125, x2 = y
+  if_move= .true., .false.,             ! Moving window in x
+}
+
+!----------time limits ----------
+time 
+{
+  tmin = 0.0d0, tmax  = 80,           ! total simulation time is 20 ps, so tmax = 20 ps / T0 = 20ps / 2.6685fs = 7495
+}
+
+el_mag_fld
+{
+}
+
+!----------boundary conditions for em-fields ----------
+emf_bound 
+{
+    type(1:2,1) = "open", "open",     
+    type(1:2,2) = "open", "open",  
+}
+
+!----------diagnostic for electromagnetic fields---------- 
+diag_emf 
+{
+  ndump_fac = 1,                      ! write diagnostics information every 1 * 100 fs. 
+  reports   = "a_mod", "e1","e2","e3","b1","b2","b3",             ! Output Ex,Ey,Ez and Bz
+}
+
+pgc
+{
+  omega = 6.283,
+  
+  lon_start = 16.,
+  lon_rise = 2.,
+  lon_fall = 2.,
+  lon_type = "polynomial",
+
+  w0 = 3.75,
+  per_focus = 20.,
+  per_center = 0.,
+
+  a0 = 0.05,
+  free_stream = .false.,
+}
+
+!----------number of particle species----------
+particles 
+{  
+  num_species    = 1,                 ! Backgroud plasma
+}
+
+!---------background plasma species------------
+species
+{
+    name           = "plasma",        ! Background plasma, 
+    num_par_max    = 8000000,
+    rqm            = -1.000,          ! Means 'electron'
+    num_par_x(1:2) = 1, 1,            ! 10 particles per cell, 5 by 2 spatially
+    push_type="standard",
+    ! add_tag        = .true.,
+}
+
+udist
+{
+    uth(1:3)       = 0.0000, 0.0000, 0.0000,        ! No thermal distribution, frozen
+    ufl(1:3)       = 0.0000, 0.0000, 0.0000,        ! No fluid momentum
+}
+
+profile
+{
+    density = 0.395,                         ! Plasma density is 1e18 cm^-3, so density = 1e18 / 4.4124355e19 = 0.0227
+
+    profile_type(1:2) = "math func" , ,                
+
+    math_func_expr = "1.0*(x1>20.0)*(x1<30.0)*((x1-20.0)/10.0)*(1.0+0.0*(x2*x2)/14.0625) + (x1>=30)*1.0*(1.0+0.0*(x2*x2)/14.0625)", 
+
+}
+
+spe_bound
+{
+    type(1:2,1) = "open", "open",
+    type(1:2,2) = "open", "open",
+}
+
+diag_species 
+{
+  
+  ndump_fac = 1,
+  reports = "charge",                  
+
+  ndump_fac_raw = 1,
+  raw_math_expr = "p1 > 5.0",         
+ !raw_gamma_limit = 10.,
+}
+
+! --------------------- end of osiris input file ---------------
