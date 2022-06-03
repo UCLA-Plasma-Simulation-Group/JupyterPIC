@@ -1,3 +1,7 @@
+# This is a modified version of the eTrack code developed by the SBU-PAG group.
+# It tracks a single particle inside the wakefield in the co-moving frame.
+# by Jiayang Yan on June 2022
+
 import h5py as h5
 import numpy as np
 import math
