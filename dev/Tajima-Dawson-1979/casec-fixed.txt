@@ -131,7 +131,7 @@ antenna
 {
 a0 = 1.0,
 t_rise = 0.0,
-t_flat = 3.14159,
+t_flat = 6.283,
 t_fall = 0.0,
 omega0 = 4.31,
 pol = 0.0d0,

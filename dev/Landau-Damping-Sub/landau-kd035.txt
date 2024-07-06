@@ -65,7 +65,7 @@
  VDZI = 0.000, 
  NPLOT = 0, 
  NTW = 1, 
- NTP = 20, 
+ NTP = 5, 
  NTA = 0, 
  NTV = 0, 
  NTS = 0, 
@@ -73,7 +73,7 @@
 
  &pinput2_jf
  DRIVER_SELECT = 1, 
- AMP = 0.009, 
+ AMP = 0.01, 
  WAVEW = 1.18, 
  RISE = 0., 
  WAVEMODE = 13, 
@@ -84,7 +84,7 @@
  TIMEFALL = 0.5, 
  YRISE_FALL = 1000.0, 
  FVXMAX = 12., 
- NPHXX = 20, 
+ NPHXX = 5, 
  NTFIELD = 5, 
  NPHBX = 150, 
  /

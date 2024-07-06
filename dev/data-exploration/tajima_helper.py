@@ -421,3 +421,43 @@ def k_plot2(rundir):
     plt.xlim(klim[0],20)
     plt.ylim(tlim[0],tlim[1])  
     plt.show() 
+    
+def ml_deckmaker(iname='ml-template.txt', oname='job1.txt', lon_flat=10.0, energy=10.0):
+    # print(lon_flat)
+    a0=np.sqrt(energy/lon_flat[0])
+    
+    with open(iname) as osdata:
+        data = osdata.readlines()
+#    
+# read
+    for i in range(len(data)):
+        if 'xmax' in data[i]:
+            xmax=float(re.findall("\d+\.\d+",data[i])[0])
+            print(xmax)
+    
+    if ((lon_flat[0] < 2.1) or (lon_flat[0] > xmax-5)):
+        return 0.0
+    else:
+        for i in range(len(data)):
+            if 'lon_flat =' in data[i]:
+                data[i] = 'lon_flat = '+str(lon_flat[0])+', \n'
+            if 'a0 =' in data[i]:
+                data[i] = 'a0 ='+str(a0)+', \n'
+        
+        with open(oname,'w') as f:
+            for line in data:
+                f.write(line)
+        
+        print('New file'+oname+' is written.')
+        dirname = oname.strip('.txt')
+        print('Running OSIRIS in directory '+dirname+' ...\n')
+        osiris.runosiris(rundir=dirname,inputfile=oname,print_out='yes')
+
+        print('done')
+
+        PATH = os.getcwd() + '/' + dirname +'/'+'e1.h5'
+        wake=read_hdf(PATH)
+        
+        return(np.sum(np.abs(wake.data)))
+
+            

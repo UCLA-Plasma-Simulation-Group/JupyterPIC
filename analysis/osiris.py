@@ -1364,7 +1364,72 @@ def plot_tk_landau_theory(rundir, field, modeno=22,tlim=100, theory1=0.01, theor
 #    plt.ylim(0,tlim)
     plt.show()
 
+def plot_tk_plot(rundir, field, modeno=22,tlim=100):
 
+
+
+
+    title_font = {'fontname':'Arial', 'size':'20', 'color':'black', 'weight':'normal',
+              'verticalalignment':'bottom'}
+    axis_font = {'fontname':'Arial', 'size':'34'}
+    # initialize values
+    PATH = os.getcwd() + '/' + rundir +'/'+ field + '.h5'
+    hdf5_data = read_hdf(PATH)
+
+#    hdf5_data = FFT_hdf5(hdf5_data)         # FFT the data (x-t -> w-k)
+    k_data=np.fft.fft(hdf5_data.data,axis=1)
+    hdf5_data.data=np.abs(k_data)
+
+    nx=hdf5_data.data.shape[1]
+    nt=hdf5_data.data.shape[0]
+    taxis=np.linspace(0,hdf5_data.axes[1].axis_max,nt)
+    deltak=2.0*3.1415926/nx
+
+
+#    N = 100
+#    dx = float(klim)/N
+#    kvals = np.arange(0, klim+.01, dx)
+#    wvals = kvals * c_s
+#    N=100
+#    dt = float(tlim)/N
+#    tvals=np.arange(0,tlim,dt)
+#    kvals=np.zeros(N)
+#    for i in range(0,N):
+#        kvals[i]=np.sqrt(2)
+
+
+    # create figure
+    plt.figure(figsize=(8,6))
+
+    SMALL_SIZE = 20
+    MEDIUM_SIZE = 24
+    BIGGER_SIZE = 32
+    plt.rc('font', size=SMALL_SIZE)          # controls default text sizes
+    plt.rc('axes', titlesize=SMALL_SIZE)     # fontsize of the axes title
+    plt.rc('axes', labelsize=MEDIUM_SIZE)    # fontsize of the x and y labels
+    plt.rc('xtick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
+    plt.rc('ytick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
+    plt.rc('legend', fontsize=SMALL_SIZE)    # legend fontsize
+    plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
+
+    # plt.subplot(nplots,1,imode)
+    landau_theory1=np.zeros(nt)
+    landau_theory2=np.zeros(nt)
+    # growth_rate=tstream_root_minus_i(deltak*imode,v0,1.0)
+    for it in range(0,nt):
+        landau_theory1[it]=init_amplitude*np.exp(-theory1*taxis[it])
+        landau_theory2[it]=init_amplitude*np.exp(-theory2*taxis[it])
+
+#plt.figure(figsize=(12,8))
+    plt.semilogy(taxis,hdf5_data.data[:,modeno],label='PIC simulation, mode ='+repr(modeno))
+
+    plt.ylabel('mode'+repr(modeno))
+    plt.xlabel('Time [$1/ \omega_{p}$]')
+    plt.legend()
+    plt.xlim(0,tlim)
+
+    
+    
 def plot_tk_2stream_theory(rundir, field, modemin=1,modemax=5,tlim=100,v0=1,init_amplitude=1e-5):
 
 

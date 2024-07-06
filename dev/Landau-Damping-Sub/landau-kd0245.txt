@@ -73,7 +73,7 @@
 
  &pinput2_jf
  DRIVER_SELECT = 1, 
- AMP = 0.003, 
+ AMP = 0.001, 
  WAVEW = 1.059, 
  RISE = 0., 
  WAVEMODE = 10, 
