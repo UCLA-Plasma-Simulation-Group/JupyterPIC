@@ -1,4 +1,4 @@
-FROM jupyter/scipy-notebook:dc9744740e12
+FROM jupyter/scipy-notebook
 
 MAINTAINER Benjamin J. Winjum <bwinjum@ucla.edu>
 #With grateful acknowledgements to the Jupyter Project <jupyter@googlegroups.com> for Jupyter
@@ -12,20 +12,44 @@ USER root
 #
 # OSIRIS
 #
+
 RUN apt-get update && \
     apt-get install -yq --no-install-recommends \
-    openssh-client \
-    libopenmpi-dev \
-    libhdf5-openmpi-dev \
     gfortran \
     openmpi-bin \
     openmpi-common \
     openmpi-doc \
-    gcc-4.8 \
-    && apt-get clean \
+    gcc \
+    openssh-client \
+    libopenmpi-dev \
+    libhdf5-openmpi-dev \
     && rm -rf /var/lib/apt/lists/*
+# RUN apt-get install -y python
+# RUN apt-get install -y python-is-python3
 
-ENV H5_ROOT /usr/lib/x86_64-linux-gnu/hdf5/openmpi/lib
+# ************************************************************************
+# ************************************************************************
+# Install json-Fortran for QuickPIC
+RUN pip install FoBiS.py
+RUN conda install --channel conda-forge json-fortran
+# ************************************************************************
+# ************************************************************************
+
+# *************************************************************************
+# Configure + Build HDF5 (with MPI support)
+#
+# WORKDIR /root
+# RUN wget https://support.hdfgroup.org/ftp/HDF5/current/src/hdf5-1.10.5.tar
+# RUN tar xvf hdf5-1.10.5.tar
+# WORKDIR /root/hdf5-1.10.5
+# RUN ./configure --enable-fortran --enable-parallel --enable-shared --prefix=/osiris_libs/hdf5 CC=mpicc FC=mpif90 F90=mpif90
+# RUN make
+# RUN make install
+# **************************************************************************
+
+
+# ENV H5_ROOT /usr/lib/x86_64-linux-gnu/hdf5/openmpi/lib
+ENV H5_ROOT /usr/lib/aarch64-linux-gnu/hdf5/openmpi/
 ENV OMPI_MCA_btl_vader_single_copy_mechanism none
 
 RUN mkdir /usr/local/osiris
@@ -108,18 +132,18 @@ RUN chmod 777 Single-Particle-Workbook
 RUN chmod 777 PWFA
 
 WORKDIR ..
-COPY NERS-574 NERS-574
-RUN chmod 777 NERS-574
-WORKDIR NERS-574
-RUN chmod 777 faraday-rotation
-RUN chmod 777 light-wave-dispersion
-RUN chmod 777 light-wave-vacuum-into-plasma
-RUN chmod 777 r-and-l-mode-dispersion
-RUN chmod 777 velocities
-RUN chmod 777 x-and-o-mode-dispersion
-RUN chmod 777 x-mode-propagation
-RUN chmod 777 LWFA-Workbook-1-Tajima-Dawson
-RUN chmod 777 LWFA-Basic-Notebook
+# COPY NERS-574 NERS-574
+# RUN chmod 777 NERS-574
+# WORKDIR NERS-574
+# RUN chmod 777 faraday-rotation
+# RUN chmod 777 light-wave-dispersion
+# RUN chmod 777 light-wave-vacuum-into-plasma
+# RUN chmod 777 r-and-l-mode-dispersion
+# RUN chmod 777 velocities
+# RUN chmod 777 x-and-o-mode-dispersion
+# RUN chmod 777 x-mode-propagation
+# RUN chmod 777 LWFA-Workbook-1-Tajima-Dawson
+# RUN chmod 777 LWFA-Basic-Notebook
 
 WORKDIR ..
 
