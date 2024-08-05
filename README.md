@@ -10,5 +10,5 @@ The labs are split into five folders:
 * Lab5 Beamloading
 
 To run the notebooks on a JupyterHub:
-* [click to clone and run on a JupyterHub](https://summerworkshop.picksc.org/hub/user-redirect/git-pull?repo=https%3A%2F%2Fgithub.com%2FUCLA-Plasma-Simulation-Group%2FJupyterPIC&urlpath=lab%2Ftree%2FJupyterPIC%2F&branch=uspass22)
+* [click to clone and run on a JupyterHub](https://summerworkshop.picksc.org/hub/user-redirect/git-pull?repo=https%3A%2F%2Fgithub.com%2FUCLA-Plasma-Simulation-Group%2FJupyterPIC&urlpath=lab%2Ftree%2FJupyterPIC%2F&branch=uspas22)
 * go to https://summerworkshop.picksc.org/ and clone this branch of the repo
