@@ -1,4 +1,5 @@
-FROM jupyter/scipy-notebook
+# FROM jupyter/scipy-notebook
+FROM quay.io/jupyter/scipy-notebook@sha256:3b8d0f5253e3acb5395bee6638bf51762b84e159f59b27c46d0b9cd27fac2306
 
 MAINTAINER Benjamin J. Winjum <bwinjum@ucla.edu>
 #With grateful acknowledgements to the Jupyter Project <jupyter@googlegroups.com> for Jupyter
@@ -148,3 +149,5 @@ WORKDIR ..
 WORKDIR ..
 
 USER $NB_USER 
+# RUN pip install nbgitpuller==1.2.1 jupyter-resource-usage "matplotlib<3.9.0"
+RUN pip install nbgitpuller==1.2.1 jupyter-resource-usage matplotlib==3.2.0

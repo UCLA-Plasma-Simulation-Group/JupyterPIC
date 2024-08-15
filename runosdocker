@@ -1,1 +1,1 @@
-docker run -it -v $PWD:/home/jovyan --rm -p 8888:8888 picksc/jupyterpic-arm64
+docker run -it -v $PWD:/home/jovyan --rm -p 8888:8888 tsung1029/jupyterpic-arm64
