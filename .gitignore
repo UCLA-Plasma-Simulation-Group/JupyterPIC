@@ -7,3 +7,4 @@
 *.h5
 runosdocker 2
 .local/share/jupyter/runtime/jupyter_cookie_secret
+*.jupyterlab-workspace
