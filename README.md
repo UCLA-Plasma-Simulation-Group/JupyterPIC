@@ -21,6 +21,8 @@ We welcome contributions and ideas:  please email us at picksc.org@gmail.com
 * Clone this repository
 * Navigate into the JupyterPIC directory
 * Execute `./runosdocker`
+    * In Windows you can RIGHT CLICK the "runosdocker.ps1" file and choose to "Run with PowerShell" and it does the same thing
+      
 * This will output several lines of text to your terminal, including a web URL
 * Paste the web URL into a web browser to start the Jupyter environment
 * Within Jupyter, open the *.ipynb files inside any of the "notebooks" directories 
