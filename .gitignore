@@ -1,9 +1,19 @@
+# Jupyter
+.ipynb_checkpoints/
 *.sqlite
-.local/share/jupyter/notebook_secret
-.ipython/profile_default/startup/README
-.local/share/jupyter/nbsignatures.db
-.local/share/jupyter/runtime/notebook_cookie_secret
+.local/
+.ipython/
+
+# Python
 *.pyc
+__pycache__/
+
+# Simulation output
 *.h5
-runosdocker 2
+
+# OS
 .DS_Store
+Thumbs.db
+
+# Docker / misc
+runosdocker 2
